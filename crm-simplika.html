@@ -306,7 +306,7 @@ const GOOGLE_CLIENT_ID = "1042126503836-e2lr4107so7ahijs06k1gju36605tf2m.apps.go
 
 let session = { email: localStorage.getItem('simplikaAccountEmail') || "" };
 let clients = [];
-let googleToken = null; // token OAuth en mémoire (jamais stocké), valable le temps de la session
+// (le jeton Google n'est plus gardé dans une variable globale — voir saveGoogleToken/getValidGoogleToken)
 let simulationMode = false;
 
 async function callBackend(payload){
@@ -368,6 +368,7 @@ async function verifierAbonnement(){
       cardsEl.style.display = 'none';
       unlockApp();
       await loadClients();
+      await chargerSessionsGoogleEnCache();
     } else {
       statusBox.className = 'status-banner denied';
       statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — aucun abonnement actif. Choisis une formule pour débloquer le CRM.';
@@ -594,7 +595,25 @@ document.getElementById('btnDeleteClient').addEventListener('click', async ()=>{
   }catch(e){ alert(e.message); }
 });
 
-/* ---------- Agenda Google (OAuth2, lecture seule) ---------- */
+/* ---------- Agenda Google (OAuth2, lecture seule) ----------
+   Le jeton est gardé en sessionStorage (propre à cet onglet, jamais transmis à un
+   serveur, effacé à la fermeture de l'onglet) pour éviter de redemander la connexion
+   à chaque rafraîchissement de page. Il expire naturellement au bout d'environ 1h,
+   comme le fait Google de toute façon — pas de prolongation artificielle. */
+function saveGoogleToken(kind, accessToken, expiresInSeconds){
+  const expiresAt = Date.now() + (expiresInSeconds || 3600) * 1000 - 60000; // marge de sécurité de 60s
+  sessionStorage.setItem('simplikaGoogleToken_'+kind, JSON.stringify({ token: accessToken, expiresAt }));
+}
+function getValidGoogleToken(kind){
+  try{
+    const raw = sessionStorage.getItem('simplikaGoogleToken_'+kind);
+    if(!raw) return null;
+    const { token, expiresAt } = JSON.parse(raw);
+    if(Date.now() >= expiresAt){ sessionStorage.removeItem('simplikaGoogleToken_'+kind); return null; }
+    return token;
+  }catch(e){ return null; }
+}
+
 document.getElementById('btnConnectAgenda').addEventListener('click', ()=>{
   if(!window.google || GOOGLE_CLIENT_ID.indexOf("COLLER_ICI") === 0){
     alert("La connexion à l'agenda n'est pas encore configurée (identifiant Google manquant).");
@@ -605,20 +624,20 @@ document.getElementById('btnConnectAgenda').addEventListener('click', ()=>{
     scope: 'https://www.googleapis.com/auth/calendar.readonly',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
-      googleToken = resp.access_token;
-      await afficherAgenda();
+      saveGoogleToken('calendar', resp.access_token, resp.expires_in);
+      await afficherAgenda(resp.access_token);
     }
   });
   tokenClient.requestAccessToken();
 });
 
-async function afficherAgenda(){
+async function afficherAgenda(token){
   const panel = document.getElementById('agendaPanel');
   panel.innerHTML = '<p class="hint">Chargement des événements...</p>';
   try{
     const timeMin = new Date().toISOString();
     const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin='+encodeURIComponent(timeMin)+'&maxResults=10&orderBy=startTime&singleEvents=true';
-    const resp = await fetch(url, { headers: { Authorization: 'Bearer '+googleToken } });
+    const resp = await fetch(url, { headers: { Authorization: 'Bearer '+token } });
     const data = await resp.json();
     const events = data.items || [];
     if(events.length === 0){ panel.innerHTML = '<div class="empty-note">Aucun événement à venir.</div>'; return; }
@@ -643,23 +662,23 @@ document.getElementById('btnConnectMail').addEventListener('click', ()=>{
     scope: 'https://www.googleapis.com/auth/gmail.readonly',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
-      googleToken = resp.access_token;
-      await afficherMail();
+      saveGoogleToken('gmail', resp.access_token, resp.expires_in);
+      await afficherMail(resp.access_token);
     }
   });
   tokenClient.requestAccessToken();
 });
 
-async function afficherMail(){
+async function afficherMail(token){
   const panel = document.getElementById('mailPanel');
   panel.innerHTML = '<p class="hint">Chargement des messages...</p>';
   try{
-    const listResp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=8', { headers:{ Authorization:'Bearer '+googleToken } });
+    const listResp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=8', { headers:{ Authorization:'Bearer '+token } });
     const listData = await listResp.json();
     const ids = (listData.messages || []).map(m=> m.id);
     if(ids.length === 0){ panel.innerHTML = '<div class="empty-note">Aucun message récent.</div>'; return; }
     const messages = await Promise.all(ids.map(id=>
-      fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'?format=metadata&metadataHeaders=Subject&metadataHeaders=From', { headers:{ Authorization:'Bearer '+googleToken } }).then(r=>r.json())
+      fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'?format=metadata&metadataHeaders=Subject&metadataHeaders=From', { headers:{ Authorization:'Bearer '+token } }).then(r=>r.json())
     ));
     panel.innerHTML = messages.map(m=>{
       const headers = (m.payload && m.payload.headers) || [];
@@ -670,6 +689,15 @@ async function afficherMail(){
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger la boîte mail pour le moment.</div>';
   }
+}
+
+// Si un jeton valide (non expiré) est encore en mémoire de session, on affiche directement
+// l'agenda/le mail sans redemander la connexion — appelé une fois le CRM débloqué.
+async function chargerSessionsGoogleEnCache(){
+  const calToken = getValidGoogleToken('calendar');
+  if(calToken) await afficherAgenda(calToken);
+  const mailToken = getValidGoogleToken('gmail');
+  if(mailToken) await afficherMail(mailToken);
 }
 
 /* ---------- Chargement initial ---------- */
