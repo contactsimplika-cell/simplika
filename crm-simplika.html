@@ -111,6 +111,30 @@
   .mail-item .snippet{font-size:12.5px; color:var(--ink-soft); margin-top:3px;}
 
   footer{padding:30px 0; text-align:center; font-size:13px; color:var(--ink-soft);}
+
+  /* TABLEAU DE BORD — mosaïque */
+  .mosaic{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:760px){ .mosaic{grid-template-columns:1fr;} }
+  .tile{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:20px; display:flex; flex-direction:column;}
+  .tile.wide{grid-column:1 / -1;}
+  .tile-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .tile-head h3{font-size:16px;}
+  .tile-head a{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); text-decoration:none;}
+  .tile-empty{color:var(--ink-soft); font-size:13.5px; padding:14px 0;}
+  .tile-mini-list{display:flex; flex-direction:column; gap:8px;}
+  .mini-client{display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid var(--line); border-radius:5px; padding:9px 12px; font-size:13px;}
+  .mini-client .nom{font-weight:600;}
+  .mini-client .co{color:var(--ink-soft); font-size:12px;}
+  .mini-event, .mini-mail{background:#fff; border:1px solid var(--line); border-radius:5px; padding:9px 12px; font-size:13px; margin-bottom:6px;}
+  .mini-event .when{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent);}
+  .mini-mail .from{font-weight:600; font-size:12.5px;}
+  .stat-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .stat-box{flex:1; min-width:100px; background:#fff; border:1px solid var(--line); border-radius:6px; padding:14px; text-align:center;}
+  .stat-box .n{font-family:'Newsreader',serif; font-size:28px; color:var(--accent);}
+  .stat-box .lbl{font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; font-family:'IBM Plex Mono',monospace; margin-top:2px;}
+
+  /* FICHE DÉCOUVERTE */
+  .sync-note{background:var(--accent-soft); color:var(--accent); border-radius:5px; padding:10px 14px; font-size:13px; margin-bottom:16px;}
 </style>
 </head>
 <body>
@@ -181,14 +205,38 @@
   <div id="crmApp" class="gatedContent locked">
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="clients">Clients &amp; services</button>
+      <button class="tab-btn active" data-tab="dashboard">Tableau de bord</button>
+      <button class="tab-btn" data-tab="clients">Clients &amp; services</button>
       <button class="tab-btn" data-tab="suivi">Suivi commercial</button>
+      <button class="tab-btn" data-tab="decouverte">Fiche découverte</button>
       <button class="tab-btn" data-tab="agenda">Agenda</button>
       <button class="tab-btn" data-tab="mail">Boîte mail</button>
     </div>
 
+    <!-- TABLEAU DE BORD -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div class="mosaic">
+        <div class="tile wide">
+          <div class="tile-head"><h3>Suivi commercial en un coup d'œil</h3></div>
+          <div class="stat-row" id="dashStats"></div>
+        </div>
+        <div class="tile">
+          <div class="tile-head"><h3>Derniers clients enregistrés</h3><a href="#" data-goto="clients">Voir tout →</a></div>
+          <div id="dashClients"></div>
+        </div>
+        <div class="tile">
+          <div class="tile-head"><h3>Agenda</h3><a href="#" data-goto="agenda">Voir tout →</a></div>
+          <div id="dashAgenda"></div>
+        </div>
+        <div class="tile wide">
+          <div class="tile-head"><h3>Boîte mail</h3><a href="#" data-goto="mail">Voir tout →</a></div>
+          <div id="dashMail"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- CLIENTS -->
-    <div class="tab-panel active" id="tab-clients">
+    <div class="tab-panel" id="tab-clients">
       <div class="panel">
         <h3>Ajouter un client</h3>
         <div class="field-row">
@@ -219,6 +267,37 @@
     <div class="tab-panel" id="tab-suivi">
       <p class="hint" style="margin-bottom:16px;">Clique sur une fiche pour changer son étape, définir la prochaine action, ou ajouter une note.</p>
       <div class="kanban" id="kanbanBoard"></div>
+    </div>
+
+    <!-- FICHE DÉCOUVERTE -->
+    <div class="tab-panel" id="tab-decouverte">
+      <div class="panel">
+        <h3>Fiche découverte</h3>
+        <div class="sync-note">Cette fiche et la fiche client sont une seule et même donnée : la modifier ici met aussi à jour le client correspondant, et inversement.</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Client concerné</label>
+            <select id="d-client-select"><option value="">— Nouveau contact —</option></select>
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Nom du contact</label><input id="d-nom" type="text" placeholder="Jean Dupont"></div>
+          <div class="field"><label>Entreprise</label><input id="d-entreprise" type="text" placeholder="Dupont Rénovation"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Email</label><input id="d-email" type="email" placeholder="jean@dupont-renovation.fr"></div>
+          <div class="field"><label>Téléphone</label><input id="d-telephone" type="text" placeholder="06 00 00 00 00"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Besoin exprimé</label><textarea id="d-besoin" placeholder="Ce que le contact recherche, tel qu'il l'a formulé..."></textarea></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Produits / services d'intérêt</label><input id="d-produits" type="text" placeholder="Ex : isolation combles, calcul IK..."></div>
+          <div class="field"><label>Budget estimé</label><input id="d-budget" type="text" placeholder="Ex : 3 000 - 5 000 €"></div>
+        </div>
+        <button class="btn" id="btnSaveDecouverte" style="margin-top:16px;">Enregistrer la fiche découverte</button>
+        <p class="hint" id="decouverteMsg" style="display:none;"></p>
+      </div>
     </div>
 
     <!-- AGENDA -->
@@ -282,6 +361,14 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Notes / historique</label><textarea id="m-notes" placeholder="Compte-rendu du dernier échange..."></textarea></div>
+    </div>
+    <div class="sync-note" style="margin-top:4px;">Fiche découverte (synchronisée avec l'onglet dédié)</div>
+    <div class="field-row">
+      <div class="field"><label>Besoin exprimé</label><textarea id="m-decouverte-besoin" placeholder="Ce que le contact recherche..."></textarea></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Produits / services d'intérêt</label><input id="m-decouverte-produits" type="text" placeholder="Ex : isolation combles..."></div>
+      <div class="field"><label>Budget estimé</label><input id="m-decouverte-budget" type="text" placeholder="Ex : 3 000 - 5 000 €"></div>
     </div>
     <div class="actions">
       <button class="btn danger" id="btnDeleteClient">Supprimer</button>
@@ -421,9 +508,12 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   document.getElementById('simulationBanner').style.justifyContent = 'space-between';
   document.getElementById('simulationBanner').style.alignItems = 'center';
   unlockApp();
-  renderClients(); renderKanban();
+  renderClients(); renderKanban(); renderSelecteurDecouverte();
   document.getElementById('agendaPanel').innerHTML = EVENTS_DEMO.map(ev=> '<div class="event-item"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
   document.getElementById('mailPanel').innerHTML = MAIL_DEMO.map(m=> '<div class="mail-item"><div class="from">'+m.from+'</div><div class="subject">'+m.subject+'</div><div class="snippet">'+m.snippet+'</div></div>').join('');
+  renderDashboard();
+  document.getElementById('dashAgenda').innerHTML = EVENTS_DEMO.slice(0,3).map(ev=> '<div class="mini-event"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
+  document.getElementById('dashMail').innerHTML = MAIL_DEMO.slice(0,3).map(m=> '<div class="mini-mail"><div class="from">'+m.from+'</div><div>'+m.subject+'</div></div>').join('');
 });
 document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -431,20 +521,24 @@ document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>
 });
 
 /* ---------- Onglets ---------- */
+function activerOnglet(nom){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="'+nom+'"]').classList.add('active');
+  document.getElementById('tab-'+nom).classList.add('active');
+}
 document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-  });
+  btn.addEventListener('click', ()=> activerOnglet(btn.dataset.tab));
+});
+document.querySelectorAll('[data-goto]').forEach(link=>{
+  link.addEventListener('click', (e)=>{ e.preventDefault(); activerOnglet(link.dataset.goto); });
 });
 
 /* ---------- Clients : chargement, ajout, affichage ---------- */
 async function loadClients(){
   try{
     const res = await callBackend({ action:"crm_list_clients", compte: session.email });
-    if(res.ok){ clients = res.clients || []; renderClients(); renderKanban(); }
+    if(res.ok){ clients = res.clients || []; renderClients(); renderKanban(); renderDashboard(); renderSelecteurDecouverte(); }
   }catch(e){ console.error(e); }
 }
 
@@ -525,6 +619,99 @@ function renderKanban(){
   board.querySelectorAll('.kanban-card').forEach(card=> card.addEventListener('click', ()=> openModal(card.dataset.id)));
 }
 
+/* ---------- Tableau de bord (mosaïque) ---------- */
+function renderDashboard(){
+  const etapes = ["Prospect","Contacté","Proposition envoyée","Client actif","Perdu"];
+  document.getElementById('dashStats').innerHTML = etapes.map(etape=>{
+    const n = clients.filter(c=> c.etape === etape).length;
+    return '<div class="stat-box"><div class="n">'+n+'</div><div class="lbl">'+etape+'</div></div>';
+  }).join('');
+
+  const dernierClients = [...clients].sort((a,b)=> new Date(b.dateCreation||0) - new Date(a.dateCreation||0)).slice(0,5);
+  const elC = document.getElementById('dashClients');
+  elC.innerHTML = dernierClients.length ? dernierClients.map(c=>
+    '<div class="mini-client"><div><div class="nom">'+(c.nom||c.entreprise||'Sans nom')+'</div><div class="co">'+(c.entreprise||'')+'</div></div><span class="badge etape">'+c.etape+'</span></div>'
+  ).join('') : '<div class="tile-empty">Aucun client pour le moment.</div>';
+
+  // Agenda / mail : si un jeton valide est déjà en cache, on affiche un mini-aperçu ; sinon message.
+  const calToken = typeof getValidGoogleToken === 'function' ? getValidGoogleToken('calendar') : null;
+  const mailToken = typeof getValidGoogleToken === 'function' ? getValidGoogleToken('gmail') : null;
+  document.getElementById('dashAgenda').innerHTML = calToken
+    ? '<div class="tile-empty">Voir l\'onglet Agenda pour le détail.</div>'
+    : '<div class="tile-empty">Agenda non connecté — rends-toi sur l\'onglet Agenda.</div>';
+  document.getElementById('dashMail').innerHTML = mailToken
+    ? '<div class="tile-empty">Voir l\'onglet Boîte mail pour le détail.</div>'
+    : '<div class="tile-empty">Boîte mail non connectée — rends-toi sur l\'onglet Boîte mail.</div>';
+}
+
+/* ---------- Fiche découverte (synchronisée avec la fiche client) ---------- */
+function renderSelecteurDecouverte(){
+  const sel = document.getElementById('d-client-select');
+  const valeurActuelle = sel.value;
+  sel.innerHTML = '<option value="">— Nouveau contact —</option>' +
+    clients.map(c=> '<option value="'+c.id+'">'+(c.nom||c.entreprise||'Sans nom')+(c.entreprise && c.nom ? ' — '+c.entreprise : '')+'</option>').join('');
+  if(clients.some(c=> c.id === valeurActuelle)) sel.value = valeurActuelle;
+}
+
+function remplirFicheDecouverte(client){
+  document.getElementById('d-nom').value = client ? (client.nom||'') : '';
+  document.getElementById('d-entreprise').value = client ? (client.entreprise||'') : '';
+  document.getElementById('d-email').value = client ? (client.email||'') : '';
+  document.getElementById('d-telephone').value = client ? (client.telephone||'') : '';
+  document.getElementById('d-besoin').value = client ? (client.decouverteBesoin||'') : '';
+  document.getElementById('d-produits').value = client ? (client.decouverteProduits||'') : '';
+  document.getElementById('d-budget').value = client ? (client.decouverteBudget||'') : '';
+}
+
+document.getElementById('d-client-select').addEventListener('change', function(){
+  const client = clients.find(c=> c.id === this.value);
+  remplirFicheDecouverte(client || null);
+});
+
+document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=>{
+  const selectedId = document.getElementById('d-client-select').value;
+  const existant = clients.find(c=> c.id === selectedId);
+  const client = {
+    id: selectedId || undefined,
+    nom: document.getElementById('d-nom').value.trim(),
+    entreprise: document.getElementById('d-entreprise').value.trim(),
+    email: document.getElementById('d-email').value.trim(),
+    telephone: document.getElementById('d-telephone').value.trim(),
+    services: existant ? existant.services : ['Découverte commerciale'],
+    etape: existant ? existant.etape : 'Prospect',
+    prochaineAction: existant ? existant.prochaineAction : '',
+    dateProchaineAction: existant ? existant.dateProchaineAction : null,
+    notes: existant ? existant.notes : '',
+    decouverteBesoin: document.getElementById('d-besoin').value.trim(),
+    decouverteProduits: document.getElementById('d-produits').value.trim(),
+    decouverteBudget: document.getElementById('d-budget').value.trim()
+  };
+  if(!client.nom && !client.entreprise){ alert("Renseigne au moins un nom ou une entreprise."); return; }
+
+  const msg = document.getElementById('decouverteMsg');
+  const btn = document.getElementById('btnSaveDecouverte');
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+
+  if(simulationMode){
+    if(existant){ Object.assign(existant, client); }
+    else { client.id = 'demo-'+Date.now(); client.dateCreation = new Date().toISOString(); clients.push(client); }
+    renderClients(); renderKanban(); renderDashboard(); renderSelecteurDecouverte();
+    document.getElementById('d-client-select').value = client.id;
+    msg.textContent = "Fiche enregistrée (démonstration) — le client correspondant est à jour."; msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = "Enregistrer la fiche découverte";
+    return;
+  }
+
+  try{
+    const res = await callBackend({ action:"crm_save_client", compte: session.email, client });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    await loadClients();
+    document.getElementById('d-client-select').value = res.id;
+    msg.textContent = "Fiche enregistrée — la fiche client correspondante est à jour."; msg.style.display = 'block';
+  }catch(e){ alert(e.message); }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer la fiche découverte"; }
+});
+
 /* ---------- Modale d'édition ---------- */
 let editingId = null;
 function openModal(id){
@@ -539,6 +726,9 @@ function openModal(id){
   document.getElementById('m-action').value = c.prochaineAction || '';
   document.getElementById('m-date-action').value = c.dateProchaineAction ? c.dateProchaineAction.slice(0,10) : '';
   document.getElementById('m-notes').value = c.notes || '';
+  document.getElementById('m-decouverte-besoin').value = c.decouverteBesoin || '';
+  document.getElementById('m-decouverte-produits').value = c.decouverteProduits || '';
+  document.getElementById('m-decouverte-budget').value = c.decouverteBudget || '';
   document.querySelectorAll('#m-services input').forEach(i=> i.checked = (c.services||[]).includes(i.value));
   document.getElementById('clientModalBg').classList.add('show');
 }
@@ -555,14 +745,17 @@ document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
     etape: document.getElementById('m-etape').value,
     prochaineAction: document.getElementById('m-action').value.trim(),
     dateProchaineAction: document.getElementById('m-date-action').value || null,
-    notes: document.getElementById('m-notes').value.trim()
+    notes: document.getElementById('m-notes').value.trim(),
+    decouverteBesoin: document.getElementById('m-decouverte-besoin').value.trim(),
+    decouverteProduits: document.getElementById('m-decouverte-produits').value.trim(),
+    decouverteBudget: document.getElementById('m-decouverte-budget').value.trim()
   };
 
   if(simulationMode){
     const idx = clients.findIndex(c=> c.id === editingId);
     if(idx>-1) clients[idx] = client;
     document.getElementById('clientModalBg').classList.remove('show');
-    renderClients(); renderKanban();
+    renderClients(); renderKanban(); renderDashboard(); renderSelecteurDecouverte();
     return;
   }
 
@@ -646,6 +839,12 @@ async function afficherAgenda(token){
       const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
       return '<div class="event-item"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>';
     }).join('');
+    const dashEl = document.getElementById('dashAgenda');
+    if(dashEl) dashEl.innerHTML = events.slice(0,3).map(ev=>{
+      const start = ev.start.dateTime || ev.start.date;
+      const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
+      return '<div class="mini-event"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>';
+    }).join('');
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger l\'agenda pour le moment.</div>';
   }
@@ -685,6 +884,13 @@ async function afficherMail(token){
       const from = (headers.find(h=>h.name==='From')||{}).value || '';
       const subject = (headers.find(h=>h.name==='Subject')||{}).value || '(Sans objet)';
       return '<div class="mail-item"><div class="from">'+from+'</div><div class="subject">'+subject+'</div><div class="snippet">'+(m.snippet||'')+'</div></div>';
+    }).join('');
+    const dashEl = document.getElementById('dashMail');
+    if(dashEl) dashEl.innerHTML = messages.slice(0,3).map(m=>{
+      const headers = (m.payload && m.payload.headers) || [];
+      const from = (headers.find(h=>h.name==='From')||{}).value || '';
+      const subject = (headers.find(h=>h.name==='Subject')||{}).value || '(Sans objet)';
+      return '<div class="mini-mail"><div class="from">'+from+'</div><div>'+subject+'</div></div>';
     }).join('');
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger la boîte mail pour le moment.</div>';
