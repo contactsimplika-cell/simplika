@@ -316,22 +316,41 @@ async function callBackend(payload){
   return resp.json();
 }
 
-let session = { email: localStorage.getItem('simplikaAccountEmail') || "" };
+let session = {
+  email: localStorage.getItem('simplikaAccountEmail') || "",
+  token: localStorage.getItem('simplikaSessionToken') || ""
+};
 
 function lockTool(){ document.querySelectorAll('.gatedContent').forEach(el=>el.classList.add('locked')); }
 function unlockTool(){ document.querySelectorAll('.gatedContent').forEach(el=>el.classList.remove('locked')); }
+
+function sauvegarderSession(){
+  localStorage.setItem('simplikaAccountEmail', session.email);
+  localStorage.setItem('simplikaSessionToken', session.token);
+}
+function effacerSession(){
+  session = { email: "", token: "" };
+  localStorage.removeItem('simplikaAccountEmail');
+  localStorage.removeItem('simplikaSessionToken');
+}
 
 async function verifierAbonnement(){
   const statusEl = document.getElementById('planStatus');
   const noAccessBox = document.getElementById('noAccessBox');
   statusEl.style.display = 'block';
   try{
-    const res = await callBackend({ action:"check_and_consume_audit", email: session.email });
+    const res = await callBackend({ action:"check_and_consume_audit", email: session.email, token: session.token });
     if(res.ok){
       statusEl.className = 'status-banner';
       statusEl.innerHTML = '<span>Connecté : <strong>'+session.email+'</strong> — abonnement CRM actif, audit débloqué.</span>';
       noAccessBox.style.display = 'none';
       unlockTool();
+    } else if(res.reason === 'no_session'){
+      // Jeton absent/expiré : on redemande une vraie connexion plutôt que d'afficher "aucun abonnement".
+      effacerSession();
+      document.getElementById('authForm').style.display = 'block';
+      statusEl.style.display = 'none';
+      lockTool();
     } else {
       statusEl.className = 'status-banner denied';
       statusEl.innerHTML = '<span>Connecté : <strong>'+session.email+'</strong> — aucun abonnement actif.</span>';
@@ -363,8 +382,8 @@ document.getElementById('btnAuth').addEventListener('click', async ()=>{
       btn.disabled = false; btn.textContent = "Me connecter";
       return;
     }
-    session = { email };
-    localStorage.setItem('simplikaAccountEmail', email);
+    session = { email, token: res.token };
+    sauvegarderSession();
     document.getElementById('authForm').style.display = 'none';
     await verifierAbonnement();
   }catch(e){
@@ -374,12 +393,27 @@ document.getElementById('btnAuth').addEventListener('click', async ()=>{
   }
 });
 
-window.addEventListener('DOMContentLoaded', ()=>{
+// Au chargement : si un email + jeton sont mémorisés, on tente une reconnexion silencieuse
+// (sans redemander le mot de passe) via verify_session, qui fait aussi tourner le jeton.
+window.addEventListener('DOMContentLoaded', async ()=>{
   lockTool();
-  if(session.email){
+  if(session.email && session.token){
     document.getElementById('authEmail').value = session.email;
     document.getElementById('authForm').style.display = 'none';
-    verifierAbonnement();
+    try{
+      const res = await callBackend({ action:"verify_session", email: session.email, token: session.token });
+      if(res.ok){
+        session.token = res.token;
+        sauvegarderSession();
+        await verifierAbonnement();
+      } else {
+        effacerSession();
+        document.getElementById('authForm').style.display = 'block';
+      }
+    }catch(e){
+      // Erreur réseau ponctuelle : on laisse le formulaire de connexion visible plutôt que de bloquer.
+      document.getElementById('authForm').style.display = 'block';
+    }
   }
 });
 
