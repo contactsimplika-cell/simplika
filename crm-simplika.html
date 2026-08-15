@@ -40,6 +40,7 @@
   .btn:disabled{opacity:.5; cursor:not-allowed; transform:none;}
   .btn.outline{background:transparent; color:var(--ink); border:1px solid var(--line);}
   .btn.outline:hover{background:var(--card); color:var(--ink); transform:none;}
+  .btn-small{padding:8px 14px; font-size:13px;}
   .btn.danger{background:var(--warn-soft); color:var(--warn);}
   .btn.danger:hover{background:var(--warn); color:#fff;}
   .hint{font-size:12.5px; color:var(--ink-soft); margin-top:8px;}
@@ -135,6 +136,16 @@
 
   /* FICHE DÉCOUVERTE */
   .sync-note{background:var(--accent-soft); color:var(--accent); border-radius:5px; padding:10px 14px; font-size:13px; margin-bottom:16px;}
+
+  /* LIGNES DE DEVIS (dans la fiche découverte) */
+  table.devis-table{width:100%; border-collapse:collapse; margin-top:8px;}
+  table.devis-table th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); padding:6px 8px; border-bottom:1px solid var(--line);}
+  table.devis-table td{padding:6px 8px; border-bottom:1px solid var(--line);}
+  table.devis-table input{width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 8px; font-family:'Inter',sans-serif; font-size:13.5px;}
+  table.devis-table input.num{font-family:'IBM Plex Mono',monospace; text-align:right;}
+  .devis-total-row{display:flex; justify-content:flex-end; gap:24px; margin-top:12px; padding-top:12px; border-top:2px solid var(--ink);}
+  .devis-total-row .lbl{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; color:var(--ink-soft); align-self:center;}
+  .devis-total-row .val{font-family:'Newsreader',serif; font-size:22px; color:var(--accent);}
 </style>
 </head>
 <body>
@@ -297,6 +308,21 @@
         </div>
         <button class="btn" id="btnSaveDecouverte" style="margin-top:16px;">Enregistrer la fiche découverte</button>
         <p class="hint" id="decouverteMsg" style="display:none;"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Lignes de devis</h3>
+        <p class="hint" style="margin-bottom:14px;">Ajoute les prestations discutées lors du rendez-vous — le total se calcule automatiquement. Sauvegardées avec la fiche découverte.</p>
+        <div class="field-row" style="margin-bottom:14px;">
+          <div class="field"><label>Émis par (nom / entreprise, apparaît sur le devis)</label><input id="d-emis-par" type="text" placeholder="Ex : Simplika, ou le nom de votre entreprise"></div>
+        </div>
+        <table class="devis-table">
+          <thead><tr><th style="width:50%;">Désignation</th><th style="width:15%;">Quantité</th><th style="width:17%;">Prix unitaire HT</th><th style="width:17%;">Total HT</th><th></th></tr></thead>
+          <tbody id="devisLignesBody"></tbody>
+        </table>
+        <button class="btn outline btn-small" id="btnAddLigneDevis" style="margin-top:12px;">+ Ajouter une ligne</button>
+        <div class="devis-total-row"><span class="lbl">Total HT</span><span class="val" id="devisTotalHT">0,00 €</span></div>
+        <button class="btn" id="btnGenererDevis" style="margin-top:18px;">Télécharger le devis (Word)</button>
       </div>
     </div>
 
@@ -653,6 +679,8 @@ function renderSelecteurDecouverte(){
   if(clients.some(c=> c.id === valeurActuelle)) sel.value = valeurActuelle;
 }
 
+let lignesDevis = [];
+
 function remplirFicheDecouverte(client){
   document.getElementById('d-nom').value = client ? (client.nom||'') : '';
   document.getElementById('d-entreprise').value = client ? (client.entreprise||'') : '';
@@ -661,7 +689,44 @@ function remplirFicheDecouverte(client){
   document.getElementById('d-besoin').value = client ? (client.decouverteBesoin||'') : '';
   document.getElementById('d-produits').value = client ? (client.decouverteProduits||'') : '';
   document.getElementById('d-budget').value = client ? (client.decouverteBudget||'') : '';
+  lignesDevis = (client && client.lignesDevis && client.lignesDevis.length) ? client.lignesDevis.map(l=>({...l})) : [{designation:'', quantite:1, prixUnitaire:0}];
+  renderLignesDevis();
 }
+
+function renderLignesDevis(){
+  const body = document.getElementById('devisLignesBody');
+  body.innerHTML = lignesDevis.map((l,i)=> `
+    <tr>
+      <td><input type="text" value="${(l.designation||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="designation" placeholder="Ex : Isolation combles 40m²"></td>
+      <td><input type="number" class="num" min="0" step="1" value="${l.quantite||1}" data-i="${i}" data-f="quantite"></td>
+      <td><input type="number" class="num" min="0" step="0.01" value="${l.prixUnitaire||0}" data-i="${i}" data-f="prixUnitaire"></td>
+      <td class="num" style="font-family:'IBM Plex Mono',monospace; text-align:right;">${((l.quantite||0)*(l.prixUnitaire||0)).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+      <td><button type="button" data-del="${i}" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button></td>
+    </tr>`).join('');
+
+  body.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const i = +e.target.dataset.i, f = e.target.dataset.f;
+      lignesDevis[i][f] = f === 'designation' ? e.target.value : parseFloat(e.target.value) || 0;
+      renderLignesDevis();
+    });
+  });
+  body.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      lignesDevis.splice(+e.target.dataset.del, 1);
+      if(lignesDevis.length===0) lignesDevis.push({designation:'', quantite:1, prixUnitaire:0});
+      renderLignesDevis();
+    });
+  });
+
+  const total = lignesDevis.reduce((s,l)=> s + (l.quantite||0)*(l.prixUnitaire||0), 0);
+  document.getElementById('devisTotalHT').textContent = total.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+}
+
+document.getElementById('btnAddLigneDevis').addEventListener('click', ()=>{
+  lignesDevis.push({designation:'', quantite:1, prixUnitaire:0});
+  renderLignesDevis();
+});
 
 document.getElementById('d-client-select').addEventListener('change', function(){
   const client = clients.find(c=> c.id === this.value);
@@ -684,7 +749,8 @@ document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=
     notes: existant ? existant.notes : '',
     decouverteBesoin: document.getElementById('d-besoin').value.trim(),
     decouverteProduits: document.getElementById('d-produits').value.trim(),
-    decouverteBudget: document.getElementById('d-budget').value.trim()
+    decouverteBudget: document.getElementById('d-budget').value.trim(),
+    lignesDevis: lignesDevis.filter(l=> l.designation.trim() !== '')
   };
   if(!client.nom && !client.entreprise){ alert("Renseigne au moins un nom ou une entreprise."); return; }
 
@@ -710,6 +776,66 @@ document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=
     msg.textContent = "Fiche enregistrée — la fiche client correspondante est à jour."; msg.style.display = 'block';
   }catch(e){ alert(e.message); }
   finally{ btn.disabled = false; btn.textContent = "Enregistrer la fiche découverte"; }
+});
+
+/* ---------- Génération du devis (document Word, technique compatible MSO/VML) ---------- */
+function downloadWordDoc(html, filename){
+  const source = '<!DOCTYPE html><html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Devis</title></head><body>' + html + '</body></html>';
+  const blob = new Blob(['\ufeff', source], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
+  const nom = document.getElementById('d-nom').value.trim();
+  const entreprise = document.getElementById('d-entreprise').value.trim();
+  const email = document.getElementById('d-email').value.trim();
+  const telephone = document.getElementById('d-telephone').value.trim();
+  const emisPar = document.getElementById('d-emis-par').value.trim() || 'Simplika';
+  const lignesValides = lignesDevis.filter(l=> l.designation.trim() !== '');
+
+  if(lignesValides.length === 0){ alert("Ajoute au moins une ligne de devis avant de générer le document."); return; }
+  if(!nom && !entreprise){ alert("Renseigne le nom ou l'entreprise du client avant de générer le devis."); return; }
+
+  const total = lignesValides.reduce((s,l)=> s + (l.quantite||0)*(l.prixUnitaire||0), 0);
+  const dateStr = new Date().toLocaleDateString('fr-FR');
+
+  const lignesHtml = lignesValides.map(l=> `
+    <tr>
+      <td style="padding:8px; border:1px solid #ccc;">${l.designation}</td>
+      <td style="padding:8px; border:1px solid #ccc; text-align:center;">${l.quantite}</td>
+      <td style="padding:8px; border:1px solid #ccc; text-align:right;">${(l.prixUnitaire||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+      <td style="padding:8px; border:1px solid #ccc; text-align:right;">${((l.quantite||0)*(l.prixUnitaire||0)).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+    </tr>`).join('');
+
+  const html = `
+    <div style="font-family:Calibri, Arial, sans-serif; font-size:12.5px; color:#20303A;">
+      <table width="100%" style="margin-bottom:20px;"><tr>
+        <td style="vertical-align:top;"><div style="font-size:20px; font-weight:800;">${emisPar}</div><div style="font-size:12px; color:#555;">Devis établi le ${dateStr}</div></td>
+        <td style="vertical-align:top; text-align:right;">
+          <strong>Destinataire</strong><br>${nom}${entreprise ? ' — '+entreprise : ''}<br>${email||''}${telephone ? (email?' · ':'')+telephone : ''}
+        </td>
+      </tr></table>
+      <table width="100%" style="border-collapse:collapse;">
+        <tr style="background:#EEF0EC;">
+          <th style="padding:8px; border:1px solid #ccc; text-align:left;">Désignation</th>
+          <th style="padding:8px; border:1px solid #ccc;">Quantité</th>
+          <th style="padding:8px; border:1px solid #ccc;">Prix unitaire HT</th>
+          <th style="padding:8px; border:1px solid #ccc;">Total HT</th>
+        </tr>
+        ${lignesHtml}
+      </table>
+      <table width="100%" style="margin-top:12px;"><tr>
+        <td></td>
+        <td style="text-align:right; padding:8px; font-size:15px; font-weight:800;">Total HT : ${total.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+      </tr></table>
+      <p style="margin-top:24px; font-size:11px; color:#777;">Devis établi via le CRM Simplika. TVA non applicable, art. 293 B du CGI (à adapter selon votre régime).</p>
+    </div>`;
+
+  downloadWordDoc(html, 'Devis - ' + (entreprise||nom) + ' - ' + dateStr.replace(/\//g,'-') + '.doc');
 });
 
 /* ---------- Modale d'édition ---------- */
