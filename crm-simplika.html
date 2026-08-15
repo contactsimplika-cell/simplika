@@ -114,6 +114,27 @@
 
   footer{padding:30px 0; text-align:center; font-size:13px; color:var(--ink-soft);}
 
+  /* ASSISTANT IA — bouton flottant + panneau de discussion */
+  #aiHelpBtn{position:fixed; bottom:24px; right:24px; z-index:200; background:var(--ink); color:var(--paper); border:none; border-radius:50px; padding:13px 20px 13px 16px; display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; font-size:14px; font-weight:500; cursor:pointer; box-shadow:0 4px 16px rgba(23,36,46,0.25); transition:transform .15s;}
+  #aiHelpBtn:hover{background:var(--accent); transform:translateY(-2px);}
+  #aiHelpBtn .ic{font-size:18px;}
+  #aiPanel{position:fixed; bottom:24px; right:24px; z-index:201; width:380px; max-width:calc(100vw - 32px); height:520px; max-height:calc(100vh - 48px); background:#fff; border-radius:12px; box-shadow:0 12px 40px rgba(23,36,46,0.3); display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line);}
+  #aiPanel.show{display:flex;}
+  #aiPanelHead{background:var(--ink); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;}
+  #aiPanelHead .title{font-family:'Newsreader',serif; font-size:16px;}
+  #aiPanelHead .title small{display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#9fb3b0; text-transform:uppercase; letter-spacing:.06em; margin-top:1px;}
+  #aiPanelClose{background:none; border:none; color:#fff; font-size:18px; cursor:pointer; padding:2px 6px;}
+  #aiMessages{flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:10px; background:var(--card);}
+  .ai-msg{max-width:85%; padding:9px 13px; border-radius:10px; font-size:13.5px; line-height:1.45; white-space:pre-wrap;}
+  .ai-msg.user{align-self:flex-end; background:var(--ink); color:#fff; border-bottom-right-radius:3px;}
+  .ai-msg.assistant{align-self:flex-start; background:#fff; border:1px solid var(--line); border-bottom-left-radius:3px;}
+  .ai-msg.assistant.err{background:var(--warn-soft); color:var(--warn); border-color:#e3c9c2;}
+  #aiInputRow{display:flex; gap:8px; padding:12px; border-top:1px solid var(--line); background:#fff;}
+  #aiInput{flex:1; border:1px solid var(--line); border-radius:20px; padding:9px 14px; font-family:'Inter',sans-serif; font-size:13.5px; resize:none;}
+  #aiSendBtn{background:var(--ink); color:#fff; border:none; border-radius:50%; width:36px; height:36px; flex-shrink:0; cursor:pointer; font-size:15px;}
+  #aiSendBtn:hover{background:var(--accent);}
+  #aiSendBtn:disabled{opacity:.5; cursor:not-allowed;}
+
   /* TABLEAU DE BORD — mosaïque */
   .mosaic{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   @media (max-width:760px){ .mosaic{grid-template-columns:1fr;} }
@@ -2221,6 +2242,94 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       document.getElementById('authForm').style.display = 'block';
     }
   }
+});
+</script>
+
+<!-- ASSISTANT IA -->
+<button id="aiHelpBtn"><span class="ic">💬</span> Aide</button>
+<div id="aiPanel">
+  <div id="aiPanelHead">
+    <div class="title">Assistant Simplika<small>Navigation &amp; aide technique</small></div>
+    <button id="aiPanelClose">✕</button>
+  </div>
+  <div id="aiMessages">
+    <div class="ai-msg assistant">Bonjour ! Je peux t'aider à naviguer dans le CRM ou à réaliser une tâche précise (générer un devis, importer un catalogue fournisseur, configurer tes questions de découverte...). Qu'est-ce que je peux faire pour toi ?</div>
+  </div>
+  <div id="aiInputRow">
+    <textarea id="aiInput" rows="1" placeholder="Pose ta question..."></textarea>
+    <button id="aiSendBtn">→</button>
+  </div>
+</div>
+
+<script>
+let aiHistorique = [];
+
+document.getElementById('aiHelpBtn').addEventListener('click', ()=>{
+  document.getElementById('aiPanel').classList.add('show');
+  document.getElementById('aiHelpBtn').style.display = 'none';
+  document.getElementById('aiInput').focus();
+});
+document.getElementById('aiPanelClose').addEventListener('click', ()=>{
+  document.getElementById('aiPanel').classList.remove('show');
+  document.getElementById('aiHelpBtn').style.display = 'flex';
+});
+
+function ajouterMessageAi(role, texte, erreur){
+  const zone = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role + (erreur ? ' err' : '');
+  div.textContent = texte;
+  zone.appendChild(div);
+  zone.scrollTop = zone.scrollHeight;
+}
+
+async function envoyerQuestionAi(){
+  const input = document.getElementById('aiInput');
+  const question = input.value.trim();
+  if(!question) return;
+  const btn = document.getElementById('aiSendBtn');
+
+  ajouterMessageAi('user', question);
+  input.value = '';
+  btn.disabled = true;
+
+  if(simulationMode || !session.email || !session.token){
+    ajouterMessageAi('assistant', "L'assistant est disponible une fois connecté avec un compte actif (pas en mode démonstration).", true);
+    btn.disabled = false;
+    return;
+  }
+
+  const zone = document.getElementById('aiMessages');
+  const attente = document.createElement('div');
+  attente.className = 'ai-msg assistant';
+  attente.textContent = '...';
+  attente.id = 'ai-attente';
+  zone.appendChild(attente);
+  zone.scrollTop = zone.scrollHeight;
+
+  try{
+    const res = await callBackend({ action:"ai_assistant", email: session.email, token: session.token, question, historique: aiHistorique });
+    document.getElementById('ai-attente').remove();
+    if(!res.ok){
+      ajouterMessageAi('assistant', res.error || "Erreur de l'assistant.", true);
+      btn.disabled = false;
+      return;
+    }
+    ajouterMessageAi('assistant', res.reponse);
+    aiHistorique.push({ role:'user', content: question });
+    aiHistorique.push({ role:'assistant', content: res.reponse });
+  }catch(e){
+    const att = document.getElementById('ai-attente');
+    if(att) att.remove();
+    ajouterMessageAi('assistant', e.message, true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('aiSendBtn').addEventListener('click', envoyerQuestionAi);
+document.getElementById('aiInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); envoyerQuestionAi(); }
 });
 </script>
 </body>
