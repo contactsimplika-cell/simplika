@@ -744,6 +744,14 @@ const MAIL_DEMO = [
   { from: 'Marc Petit <marc@petit-isolation.fr>', subject: 'Suite à notre échange', snippet: 'C\'était un plaisir d\'échanger avec vous, hâte de voir le chiffrage...' },
   { from: 'Stripe <notifications@stripe.com>', subject: 'Paiement reçu', snippet: 'Un nouveau paiement a été confirmé sur votre compte...' }
 ];
+const MOUVEMENTS_STOCK_DEMO = [
+  { id:'demo-mv-1', date:new Date(Date.now()-14*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:200, type:'entree', clientId:'', clientNom:'', notes:'Import fichier (expert-comptable / grand livre)' },
+  { id:'demo-mv-2', date:new Date(Date.now()-10*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:45, type:'sortie', clientId:'demo-1', clientNom:'Julien Marchand', notes:'Chantier Marchand Toiture' },
+  { id:'demo-mv-3', date:new Date(Date.now()-9*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:80, type:'entree', clientId:'', clientNom:'', notes:'Réception fournisseur' },
+  { id:'demo-mv-4', date:new Date(Date.now()-5*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:12, type:'sortie', clientId:'demo-2', clientNom:'Sophie Renard', notes:'' },
+  { id:'demo-mv-5', date:new Date(Date.now()-3*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:150, type:'entree', clientId:'', clientNom:'', notes:'Import fichier (expert-comptable / grand livre)' },
+  { id:'demo-mv-6', date:new Date(Date.now()-1*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:60, type:'sortie', clientId:'demo-3', clientNom:'Marc Petit', notes:'Chantier Petit Isolation' }
+];
 
 document.getElementById('btnSimulation').addEventListener('click', ()=>{
   simulationMode = true;
@@ -759,6 +767,9 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   renderDashboard();
   document.getElementById('dashAgenda').innerHTML = EVENTS_DEMO.slice(0,3).map(ev=> '<div class="mini-event"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
   document.getElementById('dashMail').innerHTML = MAIL_DEMO.slice(0,3).map(m=> '<div class="mini-mail"><div class="from">'+m.from+'</div><div>'+m.subject+'</div></div>').join('');
+  mouvementsStock = MOUVEMENTS_STOCK_DEMO.map(m=> ({...m}));
+  remplirSelectClientMouvement();
+  renderEtatStocks(); renderMouvementsList();
 });
 document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -1848,6 +1859,11 @@ function renderMouvementsList(){
     </div>`).join('');
   el.querySelectorAll('button[data-id]').forEach(btn=> btn.addEventListener('click', async ()=>{
     if(!confirm("Supprimer ce mouvement ?")) return;
+    if(simulationMode){
+      mouvementsStock = mouvementsStock.filter(m=> m.id !== btn.dataset.id);
+      renderEtatStocks(); renderMouvementsList();
+      return;
+    }
     try{
       const res = await callBackend({ action:"stock_delete_mouvement", email: session.email, token: session.token, id: btn.dataset.id });
       if(!res.ok){ alert(res.error || "Suppression impossible."); return; }
@@ -1862,7 +1878,6 @@ document.getElementById('btnAddMouvement').addEventListener('click', async ()=>{
   const msg = document.getElementById('mouvementMsg');
   msg.style.display = 'none';
   if(!produit || !quantite){ msg.textContent = "Produit et quantité requis."; msg.style.display = 'block'; return; }
-  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display = 'block'; return; }
 
   const clientSel = document.getElementById('mv-client');
   const clientOpt = clientSel.options[clientSel.selectedIndex];
@@ -1876,14 +1891,26 @@ document.getElementById('btnAddMouvement').addEventListener('click', async ()=>{
     notes: document.getElementById('mv-notes').value.trim()
   };
 
+  function resetFormMouvement(){
+    document.getElementById('mv-produit').value = '';
+    document.getElementById('mv-quantite').value = '';
+    document.getElementById('mv-notes').value = '';
+  }
+
+  if(simulationMode){
+    mouvementsStock.push({ id:'demo-mv-'+Date.now(), ...mouvement });
+    resetFormMouvement();
+    renderEtatStocks(); renderMouvementsList();
+    msg.textContent = "Mouvement enregistré (démonstration)."; msg.style.display = 'block';
+    return;
+  }
+
   const btn = document.getElementById('btnAddMouvement');
   btn.disabled = true; btn.textContent = "Enregistrement...";
   try{
     const res = await callBackend({ action:"stock_add_mouvement", email: session.email, token: session.token, mouvement });
     if(!res.ok){ msg.textContent = res.error || "Enregistrement impossible."; msg.style.display = 'block'; return; }
-    document.getElementById('mv-produit').value = '';
-    document.getElementById('mv-quantite').value = '';
-    document.getElementById('mv-notes').value = '';
+    resetFormMouvement();
     await chargerMouvements();
     msg.textContent = "Mouvement enregistré."; msg.style.display = 'block';
   }catch(e){ msg.textContent = e.message; msg.style.display = 'block'; }
@@ -1978,6 +2005,16 @@ async function confirmerImportStock(){
 
   const msg = document.getElementById('stockImportMsg');
   const btn = document.getElementById('btnConfirmerImport');
+
+  if(simulationMode){
+    mouvements.forEach(m=> mouvementsStock.push({ id:'demo-mv-'+Date.now()+Math.random(), ...m }));
+    msg.textContent = mouvements.length + " ligne(s) importée(s) (démonstration)."; msg.style.display = 'block';
+    document.getElementById('stockImportApercu').style.display = 'none';
+    document.getElementById('stock-import-fichier').value = '';
+    renderEtatStocks(); renderMouvementsList();
+    return;
+  }
+
   btn.disabled = true; btn.textContent = "Import en cours...";
   try{
     const res = await callBackend({ action:"stock_import_batch", email: session.email, token: session.token, mouvements });
