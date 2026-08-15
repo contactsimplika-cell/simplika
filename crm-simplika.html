@@ -146,6 +146,22 @@
   .devis-total-row{display:flex; justify-content:flex-end; gap:24px; margin-top:12px; padding-top:12px; border-top:2px solid var(--ink);}
   .devis-total-row .lbl{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; color:var(--ink-soft); align-self:center;}
   .devis-total-row .val{font-family:'Newsreader',serif; font-size:22px; color:var(--accent);}
+
+  /* GÉNÉRATEUR DE QUESTIONS DE DÉCOUVERTE */
+  .question-group{border:1px solid var(--line); border-radius:6px; padding:16px; margin-bottom:14px; background:#fff;}
+  .question-group .qg-head{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+  .question-group .qg-options{margin-top:12px; padding-left:0;}
+  .qg-option-row{display:flex; gap:8px; margin-bottom:6px; align-items:center;}
+  .qg-option-row input{flex:1;}
+  .qg-del-btn{background:none; border:none; color:var(--warn); cursor:pointer; font-size:14px; flex-shrink:0;}
+  .qg-del-group{background:var(--warn-soft); color:var(--warn); border:none; border-radius:3px; padding:6px 12px; font-size:12.5px; cursor:pointer; margin-top:10px;}
+
+  /* Rendu des questions dans la fiche découverte du client */
+  .question-render{border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin-bottom:12px; background:#fff;}
+  .question-render .qr-titre{font-weight:600; font-size:14px; margin-bottom:8px;}
+  .question-render .qr-choix{display:flex; flex-wrap:wrap; gap:8px;}
+  .question-render label.qr-opt{display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; cursor:pointer;}
+  .question-render label.qr-opt input{margin:0;}
 </style>
 </head>
 <body>
@@ -222,6 +238,10 @@
       <button class="tab-btn" data-tab="decouverte">Fiche découverte</button>
       <button class="tab-btn" data-tab="agenda">Agenda</button>
       <button class="tab-btn" data-tab="mail">Boîte mail</button>
+      <button class="tab-btn" data-tab="prestations">Prestations &amp; tarifs</button>
+      <button class="tab-btn" data-tab="questions">Questions découverte</button>
+      <button class="tab-btn" data-tab="personnalisation">Personnalisation</button>
+      <button class="tab-btn" data-tab="support">Support (admin)</button>
     </div>
 
     <!-- TABLEAU DE BORD -->
@@ -306,18 +326,41 @@
           <div class="field"><label>Produits / services d'intérêt</label><input id="d-produits" type="text" placeholder="Ex : isolation combles, calcul IK..."></div>
           <div class="field"><label>Budget estimé</label><input id="d-budget" type="text" placeholder="Ex : 3 000 - 5 000 €"></div>
         </div>
+
+        <div id="questionsRenderZone" style="margin-top:18px;"></div>
+
         <button class="btn" id="btnSaveDecouverte" style="margin-top:16px;">Enregistrer la fiche découverte</button>
         <p class="hint" id="decouverteMsg" style="display:none;"></p>
       </div>
 
       <div class="panel">
+        <h3>Mes informations légales</h3>
+        <p class="hint" style="margin-bottom:14px;">Renseignées une fois, réutilisées automatiquement sur chaque devis généré.</p>
+        <div class="field-row">
+          <div class="field"><label>Nom / raison sociale</label><input id="li-nom" type="text" placeholder="Ex : Dupont Rénovation"></div>
+          <div class="field"><label>Forme juridique</label><input id="li-forme" type="text" placeholder="Ex : SASU, auto-entrepreneur..."></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>SIREN / SIRET</label><input id="li-siren" type="text" placeholder="123 456 789 00012"></div>
+          <div class="field"><label>RCS ou RM</label><input id="li-rcs" type="text" placeholder="Ex : RCS Paris 123 456 789"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Adresse</label><input id="li-adresse" type="text" placeholder="Adresse complète du siège"></div>
+          <div class="field"><label>N° TVA intracommunautaire</label><input id="li-tva" type="text" placeholder="Laisser vide si non applicable"></div>
+        </div>
+        <div class="consent-row" style="margin-top:14px;">
+          <input type="checkbox" id="li-franchise">
+          <label for="li-franchise">Franchise en base de TVA (TVA non applicable, art. 293 B du CGI)</label>
+        </div>
+        <button class="btn outline" id="btnSaveInfosLegales" style="margin-top:16px;">Enregistrer mes informations légales</button>
+        <p class="hint" id="infosLegalesMsg" style="display:none;"></p>
+      </div>
+
+      <div class="panel">
         <h3>Lignes de devis</h3>
         <p class="hint" style="margin-bottom:14px;">Ajoute les prestations discutées lors du rendez-vous — le total se calcule automatiquement. Sauvegardées avec la fiche découverte.</p>
-        <div class="field-row" style="margin-bottom:14px;">
-          <div class="field"><label>Émis par (nom / entreprise, apparaît sur le devis)</label><input id="d-emis-par" type="text" placeholder="Ex : Simplika, ou le nom de votre entreprise"></div>
-        </div>
         <table class="devis-table">
-          <thead><tr><th style="width:50%;">Désignation</th><th style="width:15%;">Quantité</th><th style="width:17%;">Prix unitaire HT</th><th style="width:17%;">Total HT</th><th></th></tr></thead>
+          <thead><tr><th style="width:38%;">Désignation</th><th style="width:12%;">Quantité</th><th style="width:15%;">Unité</th><th style="width:17%;">Prix unitaire HT</th><th style="width:15%;">Total HT</th><th></th></tr></thead>
           <tbody id="devisLignesBody"></tbody>
         </table>
         <button class="btn outline btn-small" id="btnAddLigneDevis" style="margin-top:12px;">+ Ajouter une ligne</button>
@@ -343,6 +386,98 @@
           <p>Connecte ta boîte mail Gmail pour voir tes messages récents ici. Lecture seule — Simplika ne peut ni envoyer, ni supprimer, ni modifier tes emails.</p>
           <button class="btn" id="btnConnectMail">Connecter ma boîte mail Gmail</button>
         </div>
+      </div>
+    </div>
+
+    <!-- PRESTATIONS & TARIFS -->
+    <div class="tab-panel" id="tab-prestations">
+      <div class="panel">
+        <h3>Prestations &amp; tarifs</h3>
+        <p class="hint" style="margin-bottom:14px;">Ton catalogue de prestations, avec leur unité et leur prix par défaut. Utilisé pour préremplir les lignes de devis dans la fiche découverte — adapté à ton métier (peu importe le corps d'état).</p>
+        <table class="devis-table">
+          <thead><tr><th style="width:35%;">Désignation</th><th style="width:20%;">Catégorie (facultatif)</th><th style="width:15%;">Unité</th><th style="width:20%;">Prix unitaire HT</th><th></th></tr></thead>
+          <tbody id="catalogueBody"></tbody>
+        </table>
+        <button class="btn outline btn-small" id="btnAddPrestation" style="margin-top:12px;">+ Ajouter une prestation</button>
+        <div style="margin-top:18px;">
+          <button class="btn" id="btnSaveCatalogue">Enregistrer le catalogue</button>
+          <p class="hint" id="catalogueMsg" style="display:none; margin-top:8px;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTIONS DÉCOUVERTE -->
+    <div class="tab-panel" id="tab-questions">
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Vous avez déjà un document de découverte ?</h3>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Si vous remplissez déjà une fiche papier, un PDF ou un fichier Excel lors de vos rendez-vous, envoyez-le-nous : on le transforme en questions et catalogue prêts à l'emploi dans cet onglet, comme on l'a fait pour d'autres métiers.</p>
+        <div class="field-row">
+          <div class="field" style="flex:2;">
+            <label>Votre document (PDF, Excel, Word, image...)</label>
+            <input id="doc-decouverte-fichier" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg">
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Précisions utiles (facultatif)</label><textarea id="doc-decouverte-notes" placeholder="Ex : c'est la fiche qu'on remplit avant chaque chantier, avec le tarif à droite..."></textarea></div>
+        </div>
+        <button class="btn" id="btnEnvoyerDocDecouverte" style="margin-top:14px;">Envoyer ce document à Simplika</button>
+        <p class="hint" id="docDecouverteMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Questions de découverte</h3>
+        <p class="hint" style="margin-bottom:8px;">Les questions que tu poses en rendez-vous, avec leurs réponses possibles. Elles apparaîtront automatiquement dans la fiche découverte de chaque client. Un plombier, un électricien ou un isolateur n'auront pas les mêmes — à toi de les définir.</p>
+        <div class="sync-note" style="margin-bottom:14px;">⚠️ Range tes questions dans le même ordre que tu les poses réellement lors d'un rendez-vous de découverte, du début à la fin. C'est cet ordre qui s'affichera sur la fiche — ça facilite grandement le remplissage en direct, sans avoir à chercher où en est le formulaire. Utilise les flèches ▲▼ pour réordonner.</div>
+        <div id="questionsBuilder"></div>
+        <button class="btn outline btn-small" id="btnAddQuestion" style="margin-top:8px;">+ Ajouter une question</button>
+        <div style="margin-top:18px;">
+          <button class="btn" id="btnSaveQuestions">Enregistrer les questions</button>
+          <p class="hint" id="questionsMsg" style="display:none; margin-top:8px;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONNALISATION (marque blanche) -->
+    <div class="tab-panel" id="tab-personnalisation">
+      <div class="panel">
+        <h3>Personnalisation</h3>
+        <p class="hint" style="margin-bottom:14px;">Adapte ce CRM aux couleurs de ton entreprise. S'applique uniquement pour toi (et tes futurs utilisateurs connectés sur ce même compte) — chaque compte a sa propre personnalisation.</p>
+        <div class="field-row">
+          <div class="field"><label>Nom affiché (remplace "Simplika" dans l'en-tête)</label><input id="br-nom" type="text" placeholder="Ex : Dupont Rénovation"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Couleur principale</label><input id="br-couleur1" type="color" value="#1f6f6b" style="height:44px; padding:4px;"></div>
+          <div class="field"><label>Couleur secondaire</label><input id="br-couleur2" type="color" value="#a6813c" style="height:44px; padding:4px;"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>URL du logo (facultatif)</label><input id="br-logo" type="text" placeholder="https://... — lien vers une image déjà hébergée"></div>
+        </div>
+        <p class="hint" style="margin-top:8px;">Pas d'hébergement d'image intégré pour l'instant : héberge ton logo ailleurs (ton site, Google Drive en partage public...) et colle le lien ici.</p>
+        <button class="btn" id="btnSaveBranding" style="margin-top:16px;">Enregistrer la personnalisation</button>
+        <p class="hint" id="brandingMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+    </div>
+
+    <!-- SUPPORT (ADMIN) -->
+    <div class="tab-panel" id="tab-support">
+      <div class="panel">
+        <h3>Accès support</h3>
+        <p class="hint" style="margin-bottom:14px;">Réservé à l'équipe Simplika, pour dépanner un client à distance en cas de bug. Vérification par email + mot de passe à chaque connexion.</p>
+        <div id="supportLogin">
+          <div class="field-row">
+            <div class="field"><label>Email admin</label><input id="sup-email" type="email" placeholder="contact.simplika@gmail.com"></div>
+            <div class="field"><label>Mot de passe</label><input id="sup-password" type="password"></div>
+            <button class="btn" id="btnSupportLogin">Se connecter en support</button>
+          </div>
+          <p class="hint" id="supportMsg" style="display:none; margin-top:8px;"></p>
+        </div>
+        <div id="supportComptesList" style="display:none; margin-top:18px;"></div>
+      </div>
+
+      <div class="panel" id="supportCompteDetail" style="display:none;">
+        <h3 id="supportCompteTitre">Compte client</h3>
+        <button class="btn outline btn-small" id="btnSupportRetour" style="margin-bottom:14px;">← Retour à la liste des comptes</button>
+        <div id="supportClientsList"></div>
       </div>
     </div>
 
@@ -417,7 +552,10 @@ const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzcAxyG35__we9Jo9oVX
 // À créer sur console.cloud.google.com (voir instructions fournies séparément).
 const GOOGLE_CLIENT_ID = "1042126503836-e2lr4107so7ahijs06k1gju36605tf2m.apps.googleusercontent.com";
 
-let session = { email: localStorage.getItem('simplikaAccountEmail') || "" };
+let session = {
+  email: localStorage.getItem('simplikaAccountEmail') || "",
+  token: localStorage.getItem('simplikaSessionToken') || ""
+};
 let clients = [];
 // (le jeton Google n'est plus gardé dans une variable globale — voir saveGoogleToken/getValidGoogleToken)
 let simulationMode = false;
@@ -432,6 +570,16 @@ async function callBackend(payload){
 
 function lockApp(){ document.querySelectorAll('.gatedContent').forEach(el=>el.classList.add('locked')); }
 function unlockApp(){ document.querySelectorAll('.gatedContent').forEach(el=>el.classList.remove('locked')); }
+
+function sauvegarderSession(){
+  localStorage.setItem('simplikaAccountEmail', session.email);
+  localStorage.setItem('simplikaSessionToken', session.token);
+}
+function effacerSession(){
+  session = { email: "", token: "" };
+  localStorage.removeItem('simplikaAccountEmail');
+  localStorage.removeItem('simplikaSessionToken');
+}
 
 /* ---------- Connexion / création de compte ---------- */
 document.getElementById('authConsent').addEventListener('change', function(){
@@ -457,8 +605,8 @@ document.getElementById('btnAuth').addEventListener('click', async ()=>{
       btn.disabled = false; btn.textContent = "Créer mon compte / me connecter";
       return;
     }
-    session = { email };
-    localStorage.setItem('simplikaAccountEmail', email);
+    session = { email, token: res.token };
+    sauvegarderSession();
     document.getElementById('authForm').style.display = 'none';
     await verifierAbonnement();
   }catch(e){
@@ -474,7 +622,7 @@ async function verifierAbonnement(){
   const cardsEl = document.getElementById('planCards');
   statusBox.style.display = 'block';
   try{
-    const res = await callBackend({ action:"check_and_consume_audit", email: session.email });
+    const res = await callBackend({ action:"check_and_consume_audit", email: session.email, token: session.token });
     if(res.ok){
       statusBox.className = 'status-banner';
       statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — abonnement actif.';
@@ -482,6 +630,12 @@ async function verifierAbonnement(){
       unlockApp();
       await loadClients();
       await chargerSessionsGoogleEnCache();
+      await chargerInfosLegales();
+    } else if(res.reason === 'no_session'){
+      effacerSession();
+      document.getElementById('authForm').style.display = 'block';
+      statusBox.style.display = 'none';
+      lockApp();
     } else {
       statusBox.className = 'status-banner denied';
       statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — aucun abonnement actif. Choisis une formule pour débloquer le CRM.';
@@ -563,7 +717,7 @@ document.querySelectorAll('[data-goto]').forEach(link=>{
 /* ---------- Clients : chargement, ajout, affichage ---------- */
 async function loadClients(){
   try{
-    const res = await callBackend({ action:"crm_list_clients", compte: session.email });
+    const res = await callBackend({ action:"crm_list_clients", compte: session.email, token: session.token });
     if(res.ok){ clients = res.clients || []; renderClients(); renderKanban(); renderDashboard(); renderSelecteurDecouverte(); }
   }catch(e){ console.error(e); }
 }
@@ -603,7 +757,7 @@ document.getElementById('btnAddClient').addEventListener('click', async ()=>{
   const btn = document.getElementById('btnAddClient');
   btn.disabled = true; btn.textContent = "Ajout...";
   try{
-    const res = await callBackend({ action:"crm_save_client", compte: session.email, client });
+    const res = await callBackend({ action:"crm_save_client", compte: session.email, token: session.token, client });
     if(!res.ok){ alert(res.error || "Ajout impossible."); return; }
     resetForm();
     await loadClients();
@@ -680,6 +834,8 @@ function renderSelecteurDecouverte(){
 }
 
 let lignesDevis = [];
+let catalogue = [];
+let questionsDecouverte = [];
 
 function remplirFicheDecouverte(client){
   document.getElementById('d-nom').value = client ? (client.nom||'') : '';
@@ -689,32 +845,80 @@ function remplirFicheDecouverte(client){
   document.getElementById('d-besoin').value = client ? (client.decouverteBesoin||'') : '';
   document.getElementById('d-produits').value = client ? (client.decouverteProduits||'') : '';
   document.getElementById('d-budget').value = client ? (client.decouverteBudget||'') : '';
-  lignesDevis = (client && client.lignesDevis && client.lignesDevis.length) ? client.lignesDevis.map(l=>({...l})) : [{designation:'', quantite:1, prixUnitaire:0}];
+  lignesDevis = (client && client.lignesDevis && client.lignesDevis.length) ? client.lignesDevis.map(l=>({unite:'Forfait', ...l})) : [{designation:'', quantite:1, unite:'Forfait', prixUnitaire:0}];
   renderLignesDevis();
+  renderQuestionsReponses(client ? client.reponsesDecouverte : null);
 }
+
+const UNITES_STANDARD = ['m²','ml','m³','Forfait','Autre'];
 
 function renderLignesDevis(){
   const body = document.getElementById('devisLignesBody');
-  body.innerHTML = lignesDevis.map((l,i)=> `
+  const catalogueDispo = catalogue && catalogue.length > 0;
+  body.innerHTML = lignesDevis.map((l,i)=> {
+    const uniteConnue = UNITES_STANDARD.includes(l.unite) ? l.unite : (l.unite ? 'Autre' : 'Forfait');
+    const uniteLibre = uniteConnue === 'Autre' ? (l.unite||'') : '';
+    const designationEstAuCatalogue = catalogueDispo && catalogue.some(p=> p.designation === l.designation);
+    return `
     <tr>
-      <td><input type="text" value="${(l.designation||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="designation" placeholder="Ex : Isolation combles 40m²"></td>
+      <td>
+        ${catalogueDispo ? `
+        <select data-i="${i}" data-f="designation-select" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 4px; font-size:13px; margin-bottom:4px;">
+          <option value="">— Personnalisé —</option>
+          ${catalogue.map(p=> `<option value="${p.designation.replace(/"/g,'&quot;')}" ${l.designation===p.designation?'selected':''}>${p.designation}</option>`).join('')}
+        </select>` : ''}
+        <input type="text" value="${(l.designation||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="designation" placeholder="Ex : Isolation combles" ${designationEstAuCatalogue?'style="display:none;"':''}>
+      </td>
       <td><input type="number" class="num" min="0" step="1" value="${l.quantite||1}" data-i="${i}" data-f="quantite"></td>
+      <td>
+        <select data-i="${i}" data-f="unite-select" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 4px; font-size:13px;">
+          ${UNITES_STANDARD.map(u=> `<option value="${u}" ${u===uniteConnue?'selected':''}>${u}</option>`).join('')}
+        </select>
+        ${uniteConnue==='Autre' ? `<input type="text" value="${uniteLibre.replace(/"/g,'&quot;')}" data-i="${i}" data-f="unite-libre" placeholder="Préciser..." style="margin-top:4px;">` : ''}
+      </td>
       <td><input type="number" class="num" min="0" step="0.01" value="${l.prixUnitaire||0}" data-i="${i}" data-f="prixUnitaire"></td>
       <td class="num" style="font-family:'IBM Plex Mono',monospace; text-align:right;">${((l.quantite||0)*(l.prixUnitaire||0)).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
       <td><button type="button" data-del="${i}" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
-  body.querySelectorAll('input').forEach(inp=>{
+  body.querySelectorAll('select[data-f="designation-select"]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const i = +e.target.dataset.i;
+      if(e.target.value === ''){
+        lignesDevis[i].designation = '';
+      } else {
+        const p = catalogue.find(p=> p.designation === e.target.value);
+        lignesDevis[i].designation = p.designation;
+        lignesDevis[i].unite = p.unite || 'Forfait';
+        lignesDevis[i].prixUnitaire = p.prixUnitaire || 0;
+      }
+      renderLignesDevis();
+    });
+  });
+  body.querySelectorAll('input[data-f]:not([data-f="unite-libre"])').forEach(inp=>{
     inp.addEventListener('input', e=>{
       const i = +e.target.dataset.i, f = e.target.dataset.f;
       lignesDevis[i][f] = f === 'designation' ? e.target.value : parseFloat(e.target.value) || 0;
       renderLignesDevis();
     });
   });
+  body.querySelectorAll('input[data-f="unite-libre"]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      lignesDevis[+e.target.dataset.i].unite = e.target.value;
+    });
+  });
+  body.querySelectorAll('select[data-f="unite-select"]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const i = +e.target.dataset.i;
+      lignesDevis[i].unite = e.target.value === 'Autre' ? '' : e.target.value;
+      renderLignesDevis();
+    });
+  });
   body.querySelectorAll('button[data-del]').forEach(btn=>{
     btn.addEventListener('click', e=>{
       lignesDevis.splice(+e.target.dataset.del, 1);
-      if(lignesDevis.length===0) lignesDevis.push({designation:'', quantite:1, prixUnitaire:0});
+      if(lignesDevis.length===0) lignesDevis.push({designation:'', quantite:1, unite:'Forfait', prixUnitaire:0});
       renderLignesDevis();
     });
   });
@@ -724,7 +928,7 @@ function renderLignesDevis(){
 }
 
 document.getElementById('btnAddLigneDevis').addEventListener('click', ()=>{
-  lignesDevis.push({designation:'', quantite:1, prixUnitaire:0});
+  lignesDevis.push({designation:'', quantite:1, unite:'Forfait', prixUnitaire:0});
   renderLignesDevis();
 });
 
@@ -750,7 +954,8 @@ document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=
     decouverteBesoin: document.getElementById('d-besoin').value.trim(),
     decouverteProduits: document.getElementById('d-produits').value.trim(),
     decouverteBudget: document.getElementById('d-budget').value.trim(),
-    lignesDevis: lignesDevis.filter(l=> l.designation.trim() !== '')
+    lignesDevis: lignesDevis.filter(l=> l.designation.trim() !== ''),
+    reponsesDecouverte: lireReponsesDecouverte()
   };
   if(!client.nom && !client.entreprise){ alert("Renseigne au moins un nom ou une entreprise."); return; }
 
@@ -769,7 +974,7 @@ document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=
   }
 
   try{
-    const res = await callBackend({ action:"crm_save_client", compte: session.email, client });
+    const res = await callBackend({ action:"crm_save_client", compte: session.email, token: session.token, client });
     if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
     await loadClients();
     document.getElementById('d-client-select').value = res.id;
@@ -777,6 +982,435 @@ document.getElementById('btnSaveDecouverte').addEventListener('click', async ()=
   }catch(e){ alert(e.message); }
   finally{ btn.disabled = false; btn.textContent = "Enregistrer la fiche découverte"; }
 });
+
+/* ---------- Mes informations légales (réutilisées automatiquement sur chaque devis) ---------- */
+/* ---------- Support admin (dépannage à distance des CRM clients) ---------- */
+document.getElementById('btnSupportLogin').addEventListener('click', async ()=>{
+  const email = document.getElementById('sup-email').value.trim();
+  const password = document.getElementById('sup-password').value;
+  const msg = document.getElementById('supportMsg');
+  msg.style.display = 'none';
+  if(!email || !password){ msg.textContent = "Email et mot de passe requis."; msg.style.display = 'block'; return; }
+
+  const btn = document.getElementById('btnSupportLogin');
+  btn.disabled = true; btn.textContent = "Vérification...";
+  try{
+    const res = await callBackend({ action:"admin_get_compte", adminEmail: email, adminPassword: password });
+    if(!res.ok){ msg.textContent = res.error || "Accès refusé."; msg.style.display = 'block'; return; }
+    adminCreds = { email, password };
+    document.getElementById('supportLogin').style.display = 'none';
+    renderListeComptesSupport(res.comptes || []);
+  }catch(e){ msg.textContent = e.message; msg.style.display = 'block'; }
+  finally{ btn.disabled = false; btn.textContent = "Se connecter en support"; }
+});
+
+function renderListeComptesSupport(comptes){
+  const el = document.getElementById('supportComptesList');
+  el.style.display = 'block';
+  if(comptes.length === 0){ el.innerHTML = '<div class="empty-note">Aucun compte pour le moment.</div>'; return; }
+  el.innerHTML = '<h4 style="font-size:15px; margin-bottom:10px;">Comptes clients (' + comptes.length + ')</h4>' +
+    comptes.map(c=> `
+      <div class="client-card" data-compte="${c.email.replace(/"/g,'&quot;')}">
+        <div class="top">
+          <div><h4>${c.email}</h4><div class="co">Créé le ${c.dateCreation ? new Date(c.dateCreation).toLocaleDateString('fr-FR') : '—'}</div></div>
+          <span class="badge etape">${c.plan}${c.dateFin ? ' — jusqu\'au '+new Date(c.dateFin).toLocaleDateString('fr-FR') : ''}</span>
+        </div>
+      </div>`).join('');
+  el.querySelectorAll('[data-compte]').forEach(card=> card.addEventListener('click', ()=> ouvrirCompteSupport(card.dataset.compte)));
+}
+
+let supportClients = [];
+async function ouvrirCompteSupport(compteCible){
+  try{
+    const res = await callBackend({ action:"admin_get_compte", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible });
+    if(!res.ok){ alert(res.error || "Impossible de charger ce compte."); return; }
+    adminTargetCompte = compteCible;
+    supportClients = res.clients || [];
+    document.getElementById('supportCompteTitre').textContent = 'Compte : ' + res.compte.email + ' (' + res.compte.plan + ')';
+    document.getElementById('supportCompteDetail').style.display = 'block';
+    document.getElementById('supportComptesList').style.display = 'none';
+    renderClientsSupport();
+  }catch(e){ alert(e.message); }
+}
+
+function renderClientsSupport(){
+  const el = document.getElementById('supportClientsList');
+  if(supportClients.length === 0){ el.innerHTML = '<div class="empty-note">Aucun client sur ce compte.</div>'; return; }
+  el.innerHTML = supportClients.map(c=> `
+    <div class="client-card" data-id="${c.id}">
+      <div class="top">
+        <div><h4>${c.nom || 'Sans nom'}</h4><div class="co">${c.entreprise || ''}${c.email ? ' · '+c.email : ''}</div></div>
+        <span class="badge etape">${c.etape}</span>
+      </div>
+      <div class="badges">${(c.services||[]).map(s=> '<span class="badge">'+s+'</span>').join('')}</div>
+    </div>`).join('');
+  el.querySelectorAll('.client-card').forEach(card=> card.addEventListener('click', ()=>{
+    adminMode = true;
+    openModal(card.dataset.id, supportClients);
+  }));
+}
+
+document.getElementById('btnSupportRetour').addEventListener('click', ()=>{
+  document.getElementById('supportCompteDetail').style.display = 'none';
+  document.getElementById('supportComptesList').style.display = 'block';
+});
+
+async function chargerInfosLegales(){
+  try{
+    const res = await callBackend({ action:"account_status", email: session.email, token: session.token });
+    if(!res.ok) return;
+    if(res.infosLegales) remplirInfosLegales(res.infosLegales);
+    if(res.branding){ remplirBranding(res.branding); appliquerBranding(res.branding); }
+    if(res.catalogue){ catalogue = res.catalogue; renderCatalogue(); }
+    if(res.questionsDecouverte){ questionsDecouverte = res.questionsDecouverte; renderQuestionsBuilder(); }
+  }catch(e){ /* silencieux */ }
+}
+
+function remplirInfosLegales(infos){
+  document.getElementById('li-nom').value = infos.nomEntreprise || '';
+  document.getElementById('li-forme').value = infos.formeJuridique || '';
+  document.getElementById('li-siren').value = infos.siren || '';
+  document.getElementById('li-rcs').value = infos.rcsOuRm || '';
+  document.getElementById('li-adresse').value = infos.adresse || '';
+  document.getElementById('li-tva').value = infos.tvaIntra || '';
+  document.getElementById('li-franchise').checked = !!infos.franchiseEnBase;
+}
+
+function lireInfosLegales(){
+  return {
+    nomEntreprise: document.getElementById('li-nom').value.trim(),
+    formeJuridique: document.getElementById('li-forme').value.trim(),
+    siren: document.getElementById('li-siren').value.trim(),
+    rcsOuRm: document.getElementById('li-rcs').value.trim(),
+    adresse: document.getElementById('li-adresse').value.trim(),
+    tvaIntra: document.getElementById('li-tva').value.trim(),
+    franchiseEnBase: document.getElementById('li-franchise').checked
+  };
+}
+
+document.getElementById('btnSaveInfosLegales').addEventListener('click', async ()=>{
+  const infosLegales = lireInfosLegales();
+  const msg = document.getElementById('infosLegalesMsg');
+  const btn = document.getElementById('btnSaveInfosLegales');
+
+  if(simulationMode){
+    msg.textContent = "Non disponible en mode démonstration."; msg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"save_infos_legales", email: session.email, token: session.token, infosLegales });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    msg.textContent = "Informations enregistrées — elles seront reprises sur chaque devis."; msg.style.display = 'block';
+  }catch(e){ alert(e.message); }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer mes informations légales"; }
+});
+
+/* ---------- Personnalisation (marque blanche) ---------- */
+function remplirBranding(b){
+  document.getElementById('br-nom').value = b.nomAffiche || '';
+  if(b.couleurPrincipale) document.getElementById('br-couleur1').value = b.couleurPrincipale;
+  if(b.couleurSecondaire) document.getElementById('br-couleur2').value = b.couleurSecondaire;
+  document.getElementById('br-logo').value = b.logoUrl || '';
+}
+
+function appliquerBranding(b){
+  if(b.couleurPrincipale) document.documentElement.style.setProperty('--accent', b.couleurPrincipale);
+  if(b.couleurSecondaire) document.documentElement.style.setProperty('--brass', b.couleurSecondaire);
+  if(b.nomAffiche){
+    const logoEl = document.querySelector('header .logo');
+    if(logoEl) logoEl.innerHTML = (b.logoUrl ? '<img src="'+b.logoUrl+'" alt="" style="height:24px; vertical-align:middle; margin-right:8px;">' : '') + b.nomAffiche + '<small>CRM</small>';
+  }
+}
+
+document.getElementById('btnSaveBranding').addEventListener('click', async ()=>{
+  const branding = {
+    nomAffiche: document.getElementById('br-nom').value.trim(),
+    couleurPrincipale: document.getElementById('br-couleur1').value,
+    couleurSecondaire: document.getElementById('br-couleur2').value,
+    logoUrl: document.getElementById('br-logo').value.trim()
+  };
+  const msg = document.getElementById('brandingMsg');
+  const btn = document.getElementById('btnSaveBranding');
+
+  appliquerBranding(branding); // effet immédiat, avant même la sauvegarde
+
+  if(simulationMode){
+    msg.textContent = "Aperçu appliqué (non disponible en mode démonstration)."; msg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"save_branding", email: session.email, token: session.token, branding });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    msg.textContent = "Personnalisation enregistrée."; msg.style.display = 'block';
+  }catch(e){ alert(e.message); }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer la personnalisation"; }
+});
+
+/* ---------- Prestations & tarifs (catalogue) ---------- */
+function renderCatalogue(){
+  const body = document.getElementById('catalogueBody');
+  if(catalogue.length === 0) catalogue = [{designation:'', categorie:'', unite:'Forfait', prixUnitaire:0}];
+  body.innerHTML = catalogue.map((p,i)=>{
+    const uniteConnue = UNITES_STANDARD.includes(p.unite) ? p.unite : (p.unite ? 'Autre' : 'Forfait');
+    const uniteLibre = uniteConnue === 'Autre' ? (p.unite||'') : '';
+    return `
+    <tr>
+      <td><input type="text" value="${(p.designation||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="designation" placeholder="Ex : Pose de prise électrique"></td>
+      <td><input type="text" value="${(p.categorie||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="categorie" placeholder="Ex : Électricité"></td>
+      <td>
+        <select data-i="${i}" data-f="unite-select" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 4px; font-size:13px;">
+          ${UNITES_STANDARD.map(u=> `<option value="${u}" ${u===uniteConnue?'selected':''}>${u}</option>`).join('')}
+        </select>
+        ${uniteConnue==='Autre' ? `<input type="text" value="${uniteLibre.replace(/"/g,'&quot;')}" data-i="${i}" data-f="unite-libre" placeholder="Préciser..." style="margin-top:4px;">` : ''}
+      </td>
+      <td><input type="number" class="num" min="0" step="0.01" value="${p.prixUnitaire||0}" data-i="${i}" data-f="prixUnitaire"></td>
+      <td><button type="button" data-del="${i}" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  body.querySelectorAll('input[data-f]:not([data-f="unite-libre"])').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const i = +e.target.dataset.i, f = e.target.dataset.f;
+      catalogue[i][f] = (f==='designation'||f==='categorie') ? e.target.value : parseFloat(e.target.value) || 0;
+    });
+  });
+  body.querySelectorAll('input[data-f="unite-libre"]').forEach(inp=>{
+    inp.addEventListener('input', e=> catalogue[+e.target.dataset.i].unite = e.target.value);
+  });
+  body.querySelectorAll('select[data-f="unite-select"]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const i = +e.target.dataset.i;
+      catalogue[i].unite = e.target.value === 'Autre' ? '' : e.target.value;
+      renderCatalogue();
+    });
+  });
+  body.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      catalogue.splice(+e.target.dataset.del, 1);
+      renderCatalogue();
+    });
+  });
+}
+
+document.getElementById('btnAddPrestation').addEventListener('click', ()=>{
+  catalogue.push({designation:'', categorie:'', unite:'Forfait', prixUnitaire:0});
+  renderCatalogue();
+});
+
+document.getElementById('btnSaveCatalogue').addEventListener('click', async ()=>{
+  const catalogueValide = catalogue.filter(p=> p.designation.trim() !== '');
+  const msg = document.getElementById('catalogueMsg');
+  const btn = document.getElementById('btnSaveCatalogue');
+
+  if(simulationMode){
+    msg.textContent = "Non disponible en mode démonstration."; msg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"save_catalogue", email: session.email, token: session.token, catalogue: catalogueValide });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    catalogue = catalogueValide;
+    msg.textContent = "Catalogue enregistré — disponible dans les lignes de devis."; msg.style.display = 'block';
+    renderLignesDevis();
+  }catch(e){ alert(e.message); }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer le catalogue"; }
+});
+
+/* ---------- Questions de découverte (générateur) ---------- */
+function renderQuestionsBuilder(){
+  const el = document.getElementById('questionsBuilder');
+  // Compatibilité avec d'anciennes questions enregistrées avant ce changement de vocabulaire.
+  questionsDecouverte.forEach(q=>{ if(q.type==='unique') q.type='menu'; if(q.type==='multiple') q.type='cases'; });
+  if(questionsDecouverte.length === 0){
+    el.innerHTML = '<p class="hint" style="margin-bottom:10px;">Aucune question pour le moment — ajoute la première.</p>';
+    return;
+  }
+  el.innerHTML = questionsDecouverte.map((q,gi)=> `
+    <div class="question-group">
+      <div class="qg-head">
+        <div style="display:flex; flex-direction:column; gap:4px; margin-right:4px;">
+          <button type="button" data-gi="${gi}" data-qmove="up" title="Monter" style="background:none; border:1px solid var(--line); border-radius:3px; cursor:pointer; padding:2px 6px; ${gi===0?'opacity:.3; pointer-events:none;':''}">▲</button>
+          <button type="button" data-gi="${gi}" data-qmove="down" title="Descendre" style="background:none; border:1px solid var(--line); border-radius:3px; cursor:pointer; padding:2px 6px; ${gi===questionsDecouverte.length-1?'opacity:.3; pointer-events:none;':''}">▼</button>
+        </div>
+        <div class="field" style="flex:2;"><label>${gi+1}. Intitulé de la question</label><input type="text" value="${(q.titre||'').replace(/"/g,'&quot;')}" data-gi="${gi}" data-qf="titre" placeholder="Ex : Type de toiture"></div>
+        <div class="field"><label>Affichage des réponses</label>
+          <select data-gi="${gi}" data-qf="type">
+            <option value="menu" ${q.type==='menu'?'selected':''}>Menu déroulant (1 réponse)</option>
+            <option value="cases" ${q.type==='cases'?'selected':''}>Cases à cocher (plusieurs réponses)</option>
+            <option value="texte" ${q.type==='texte'?'selected':''}>Texte libre</option>
+          </select>
+        </div>
+      </div>
+      ${q.type !== 'texte' ? `
+      <div class="qg-options">
+        ${(q.options||[]).map((opt,oi)=> `
+          <div class="qg-option-row">
+            <input type="text" value="${(opt||'').replace(/"/g,'&quot;')}" data-gi="${gi}" data-oi="${oi}" data-qf="option" placeholder="Réponse possible">
+            <button type="button" class="qg-del-btn" data-gi="${gi}" data-oi="${oi}" data-qdel="option">✕</button>
+          </div>`).join('')}
+        <button type="button" class="btn outline btn-small" data-gi="${gi}" data-qadd="option" style="margin-top:4px;">+ Ajouter une réponse possible</button>
+      </div>` : ''}
+      <button type="button" class="qg-del-group" data-gi="${gi}" data-qdel="group">Supprimer cette question</button>
+    </div>`).join('');
+
+  el.querySelectorAll('[data-qf="titre"]').forEach(inp=> inp.addEventListener('input', e=> questionsDecouverte[+e.target.dataset.gi].titre = e.target.value));
+  el.querySelectorAll('[data-qf="type"]').forEach(sel=> sel.addEventListener('change', e=>{
+    questionsDecouverte[+e.target.dataset.gi].type = e.target.value;
+    if(e.target.value !== 'texte' && !questionsDecouverte[+e.target.dataset.gi].options) questionsDecouverte[+e.target.dataset.gi].options = [''];
+    renderQuestionsBuilder();
+  }));
+  el.querySelectorAll('[data-qf="option"]').forEach(inp=> inp.addEventListener('input', e=>{
+    questionsDecouverte[+e.target.dataset.gi].options[+e.target.dataset.oi] = e.target.value;
+  }));
+  el.querySelectorAll('[data-qadd="option"]').forEach(btn=> btn.addEventListener('click', e=>{
+    const gi = +e.target.dataset.gi;
+    questionsDecouverte[gi].options = questionsDecouverte[gi].options || [];
+    questionsDecouverte[gi].options.push('');
+    renderQuestionsBuilder();
+  }));
+  el.querySelectorAll('[data-qdel="option"]').forEach(btn=> btn.addEventListener('click', e=>{
+    const gi = +e.target.dataset.gi, oi = +e.target.dataset.oi;
+    questionsDecouverte[gi].options.splice(oi,1);
+    renderQuestionsBuilder();
+  }));
+  el.querySelectorAll('[data-qdel="group"]').forEach(btn=> btn.addEventListener('click', e=>{
+    questionsDecouverte.splice(+e.target.dataset.gi, 1);
+    renderQuestionsBuilder();
+  }));
+  el.querySelectorAll('[data-qmove]').forEach(btn=> btn.addEventListener('click', e=>{
+    const gi = +e.target.dataset.gi;
+    const cible = e.target.dataset.qmove === 'up' ? gi-1 : gi+1;
+    if(cible < 0 || cible >= questionsDecouverte.length) return;
+    [questionsDecouverte[gi], questionsDecouverte[cible]] = [questionsDecouverte[cible], questionsDecouverte[gi]];
+    renderQuestionsBuilder();
+  }));
+}
+
+/* ---------- Import d'un document de découverte existant ---------- */
+document.getElementById('btnEnvoyerDocDecouverte').addEventListener('click', ()=>{
+  const fichierInput = document.getElementById('doc-decouverte-fichier');
+  const fichier = fichierInput.files[0];
+  const notes = document.getElementById('doc-decouverte-notes').value.trim();
+  const msg = document.getElementById('docDecouverteMsg');
+  const btn = document.getElementById('btnEnvoyerDocDecouverte');
+  const MAX_TAILLE = 8 * 1024 * 1024; // 8 Mo
+
+  msg.style.display = 'none';
+  if(!fichier){ msg.textContent = "Sélectionne d'abord un fichier."; msg.style.display = 'block'; return; }
+  if(fichier.size > MAX_TAILLE){ msg.textContent = "Ce fichier dépasse 8 Mo — envoie-le par email à contact.simplika@gmail.com."; msg.style.display = 'block'; return; }
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = "Envoi...";
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    const base64 = reader.result.split(',')[1];
+    try{
+      const res = await callBackend({
+        action: "upload_document_decouverte",
+        email: session.email,
+        token: session.token,
+        notes,
+        fichier: { name: fichier.name, mimeType: fichier.type || 'application/octet-stream', data: base64 }
+      });
+      if(!res.ok){ msg.textContent = res.error || "Envoi impossible."; msg.style.display = 'block'; return; }
+      msg.textContent = "Document envoyé ! On revient vers toi pour configurer tes questions et ton catalogue à partir de ce document.";
+      msg.style.display = 'block';
+      fichierInput.value = '';
+      document.getElementById('doc-decouverte-notes').value = '';
+    }catch(e){ msg.textContent = e.message; msg.style.display = 'block'; }
+    finally{ btn.disabled = false; btn.textContent = "Envoyer ce document à Simplika"; }
+  };
+  reader.onerror = ()=>{
+    msg.textContent = "Lecture du fichier impossible — réessaie.";
+    msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = "Envoyer ce document à Simplika";
+  };
+  reader.readAsDataURL(fichier);
+});
+
+document.getElementById('btnAddQuestion').addEventListener('click', ()=>{
+  questionsDecouverte.push({ titre:'', type:'menu', options:[''] });
+  renderQuestionsBuilder();
+});
+
+document.getElementById('btnSaveQuestions').addEventListener('click', async ()=>{
+  const questionsValides = questionsDecouverte
+    .filter(q=> q.titre.trim() !== '')
+    .map(q=> ({ titre:q.titre, type:q.type, options: q.type!=='texte' ? (q.options||[]).filter(o=>o.trim()!=='') : [] }));
+  const msg = document.getElementById('questionsMsg');
+  const btn = document.getElementById('btnSaveQuestions');
+
+  if(simulationMode){
+    msg.textContent = "Non disponible en mode démonstration."; msg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"save_questions_decouverte", email: session.email, token: session.token, questions: questionsValides });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    questionsDecouverte = questionsValides;
+    msg.textContent = "Questions enregistrées — elles apparaîtront dans la fiche découverte."; msg.style.display = 'block';
+  }catch(e){ alert(e.message); }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer les questions"; }
+});
+
+/* ---------- Rendu des réponses aux questions personnalisées, dans la fiche découverte d'un client ---------- */
+let reponsesDecouverteActuelles = {};
+
+function renderQuestionsReponses(reponsesExistantes){
+  reponsesDecouverteActuelles = reponsesExistantes ? {...reponsesExistantes} : {};
+  const zone = document.getElementById('questionsRenderZone');
+  if(!questionsDecouverte || questionsDecouverte.length === 0){ zone.innerHTML = ''; return; }
+
+  zone.innerHTML = questionsDecouverte.map((q,gi)=>{
+    const rep = reponsesDecouverteActuelles[q.titre];
+    if(q.type === 'texte'){
+      return `<div class="question-render"><div class="qr-titre">${gi+1}. ${q.titre}</div><textarea data-qtitre="${q.titre.replace(/"/g,'&quot;')}" data-qtype="texte" placeholder="Réponse...">${rep||''}</textarea></div>`;
+    }
+    if(q.type === 'menu'){
+      return `<div class="question-render">
+        <div class="qr-titre">${gi+1}. ${q.titre}</div>
+        <select data-qtitre="${q.titre.replace(/"/g,'&quot;')}" data-qtype="menu">
+          <option value="">— Sélectionner —</option>
+          ${(q.options||[]).map(opt=> `<option value="${opt.replace(/"/g,'&quot;')}" ${rep===opt?'selected':''}>${opt}</option>`).join('')}
+        </select>
+      </div>`;
+    }
+    // type "cases" — plusieurs réponses possibles
+    const repArray = Array.isArray(rep) ? rep : (rep ? [rep] : []);
+    return `<div class="question-render">
+      <div class="qr-titre">${gi+1}. ${q.titre}</div>
+      <div class="qr-choix">
+        ${(q.options||[]).map(opt=> `
+          <label class="qr-opt">
+            <input type="checkbox" value="${opt.replace(/"/g,'&quot;')}" data-qtitre="${q.titre.replace(/"/g,'&quot;')}" data-qtype="cases" ${repArray.includes(opt)?'checked':''}>
+            ${opt}
+          </label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function lireReponsesDecouverte(){
+  const zone = document.getElementById('questionsRenderZone');
+  const reponses = {};
+  zone.querySelectorAll('textarea[data-qtitre]').forEach(t=> reponses[t.dataset.qtitre] = t.value);
+  zone.querySelectorAll('select[data-qtitre]').forEach(s=>{ if(s.value) reponses[s.dataset.qtitre] = s.value; });
+  const multiples = {};
+  zone.querySelectorAll('input[type="checkbox"][data-qtitre]:checked').forEach(c=>{
+    multiples[c.dataset.qtitre] = multiples[c.dataset.qtitre] || [];
+    multiples[c.dataset.qtitre].push(c.value);
+  });
+  Object.assign(reponses, multiples);
+  return reponses;
+}
 
 /* ---------- Génération du devis (document Word, technique compatible MSO/VML) ---------- */
 function downloadWordDoc(html, filename){
@@ -794,7 +1428,8 @@ document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
   const entreprise = document.getElementById('d-entreprise').value.trim();
   const email = document.getElementById('d-email').value.trim();
   const telephone = document.getElementById('d-telephone').value.trim();
-  const emisPar = document.getElementById('d-emis-par').value.trim() || 'Simplika';
+  const infos = lireInfosLegales();
+  const emisPar = infos.nomEntreprise || 'Simplika';
   const lignesValides = lignesDevis.filter(l=> l.designation.trim() !== '');
 
   if(lignesValides.length === 0){ alert("Ajoute au moins une ligne de devis avant de générer le document."); return; }
@@ -802,19 +1437,35 @@ document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
 
   const total = lignesValides.reduce((s,l)=> s + (l.quantite||0)*(l.prixUnitaire||0), 0);
   const dateStr = new Date().toLocaleDateString('fr-FR');
+  const numeroDevis = 'DEV-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random()*900+100);
+  const dateValidite = new Date(Date.now() + 30*86400000).toLocaleDateString('fr-FR');
+  const AC = '.....................'; // valeur par défaut si le champ légal n'a pas été renseigné
 
   const lignesHtml = lignesValides.map(l=> `
     <tr>
       <td style="padding:8px; border:1px solid #ccc;">${l.designation}</td>
       <td style="padding:8px; border:1px solid #ccc; text-align:center;">${l.quantite}</td>
+      <td style="padding:8px; border:1px solid #ccc; text-align:center;">${l.unite||'Forfait'}</td>
       <td style="padding:8px; border:1px solid #ccc; text-align:right;">${(l.prixUnitaire||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
       <td style="padding:8px; border:1px solid #ccc; text-align:right;">${((l.quantite||0)*(l.prixUnitaire||0)).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
     </tr>`).join('');
 
+  const ligneTva = infos.franchiseEnBase
+    ? 'TVA non applicable, art. 293 B du CGI.'
+    : 'N° TVA intracommunautaire : ' + (infos.tvaIntra || AC) + ' — taux de TVA applicable et montant à préciser par ligne.';
+
   const html = `
     <div style="font-family:Calibri, Arial, sans-serif; font-size:12.5px; color:#20303A;">
       <table width="100%" style="margin-bottom:20px;"><tr>
-        <td style="vertical-align:top;"><div style="font-size:20px; font-weight:800;">${emisPar}</div><div style="font-size:12px; color:#555;">Devis établi le ${dateStr}</div></td>
+        <td style="vertical-align:top;">
+          <div style="font-size:20px; font-weight:800;">${emisPar}</div>
+          <div style="font-size:11.5px; color:#555; margin-top:4px;">
+            ${infos.formeJuridique || AC}${infos.siren ? ' — SIREN/SIRET : '+infos.siren : ' — SIREN/SIRET : '+AC}<br>
+            ${infos.adresse || AC}<br>
+            ${infos.rcsOuRm ? infos.rcsOuRm : ('RCS/RM : '+AC)}
+          </div>
+          <div style="font-size:12px; color:#555; margin-top:8px;">N° devis : ${numeroDevis}<br>Établi le ${dateStr} — valable jusqu'au ${dateValidite}</div>
+        </td>
         <td style="vertical-align:top; text-align:right;">
           <strong>Destinataire</strong><br>${nom}${entreprise ? ' — '+entreprise : ''}<br>${email||''}${telephone ? (email?' · ':'')+telephone : ''}
         </td>
@@ -823,6 +1474,7 @@ document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
         <tr style="background:#EEF0EC;">
           <th style="padding:8px; border:1px solid #ccc; text-align:left;">Désignation</th>
           <th style="padding:8px; border:1px solid #ccc;">Quantité</th>
+          <th style="padding:8px; border:1px solid #ccc;">Unité</th>
           <th style="padding:8px; border:1px solid #ccc;">Prix unitaire HT</th>
           <th style="padding:8px; border:1px solid #ccc;">Total HT</th>
         </tr>
@@ -832,7 +1484,13 @@ document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
         <td></td>
         <td style="text-align:right; padding:8px; font-size:15px; font-weight:800;">Total HT : ${total.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
       </tr></table>
-      <p style="margin-top:24px; font-size:11px; color:#777;">Devis établi via le CRM Simplika. TVA non applicable, art. 293 B du CGI (à adapter selon votre régime).</p>
+      <div style="margin-top:28px; padding-top:14px; border-top:1px solid #ccc; font-size:10.5px; color:#666; line-height:1.6;">
+        <p><strong>Mentions légales${(!infos.formeJuridique || !infos.siren || !infos.adresse) ? ' — certaines restent à compléter (voir "Mes informations légales" dans le CRM)' : ''} :</strong></p>
+        <p>${ligneTva}</p>
+        <p>Conditions de règlement : acompte de ....% à la commande, solde à réception. Aucun escompte pour paiement anticipé.</p>
+        <p>Pénalités de retard : taux applicable (minimum 3 fois le taux d'intérêt légal) + indemnité forfaitaire de recouvrement de 40 € en cas de retard de paiement (mentions obligatoires entre professionnels, art. L441-10 du Code de commerce).</p>
+        <p style="margin-top:8px; color:#999;">Ce document est un devis, pas une facture. Une fois accepté, l'émission de la facture correspondante devra respecter les mêmes mentions légales, complétées des informations de paiement effectif.</p>
+      </div>
     </div>`;
 
   downloadWordDoc(html, 'Devis - ' + (entreprise||nom) + ' - ' + dateStr.replace(/\//g,'-') + '.doc');
@@ -840,8 +1498,13 @@ document.getElementById('btnGenererDevis').addEventListener('click', ()=>{
 
 /* ---------- Modale d'édition ---------- */
 let editingId = null;
-function openModal(id){
-  const c = clients.find(x=> x.id === id);
+let adminMode = false;
+let adminCreds = { email:'', password:'' };
+let adminTargetCompte = '';
+
+function openModal(id, sourceClients){
+  const source = sourceClients || clients;
+  const c = source.find(x=> x.id === id);
   if(!c) return;
   editingId = id;
   document.getElementById('m-nom').value = c.nom || '';
@@ -858,7 +1521,10 @@ function openModal(id){
   document.querySelectorAll('#m-services input').forEach(i=> i.checked = (c.services||[]).includes(i.value));
   document.getElementById('clientModalBg').classList.add('show');
 }
-document.getElementById('btnCloseModal').addEventListener('click', ()=> document.getElementById('clientModalBg').classList.remove('show'));
+document.getElementById('btnCloseModal').addEventListener('click', ()=>{
+  document.getElementById('clientModalBg').classList.remove('show');
+  adminMode = false; // on referme toujours en repassant en mode normal, par sécurité
+});
 
 document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
   const client = {
@@ -877,6 +1543,20 @@ document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
     decouverteBudget: document.getElementById('m-decouverte-budget').value.trim()
   };
 
+  if(adminMode){
+    const btn = document.getElementById('btnSaveClient');
+    btn.disabled = true; btn.textContent = "Enregistrement...";
+    try{
+      const res = await callBackend({ action:"admin_save_client", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, client });
+      if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+      document.getElementById('clientModalBg').classList.remove('show');
+      adminMode = false;
+      await ouvrirCompteSupport(adminTargetCompte); // rafraîchit la vue support
+    }catch(e){ alert(e.message); }
+    finally{ btn.disabled = false; btn.textContent = "Enregistrer"; }
+    return;
+  }
+
   if(simulationMode){
     const idx = clients.findIndex(c=> c.id === editingId);
     if(idx>-1) clients[idx] = client;
@@ -888,7 +1568,7 @@ document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
   const btn = document.getElementById('btnSaveClient');
   btn.disabled = true; btn.textContent = "Enregistrement...";
   try{
-    const res = await callBackend({ action:"crm_save_client", compte: session.email, client });
+    const res = await callBackend({ action:"crm_save_client", compte: session.email, token: session.token, client });
     if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
     document.getElementById('clientModalBg').classList.remove('show');
     await loadClients();
@@ -899,6 +1579,17 @@ document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
 document.getElementById('btnDeleteClient').addEventListener('click', async ()=>{
   if(!confirm("Supprimer ce client définitivement ?")) return;
 
+  if(adminMode){
+    try{
+      const res = await callBackend({ action:"admin_delete_client", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, id: editingId });
+      if(!res.ok){ alert(res.error || "Suppression impossible."); return; }
+      document.getElementById('clientModalBg').classList.remove('show');
+      adminMode = false;
+      await ouvrirCompteSupport(adminTargetCompte);
+    }catch(e){ alert(e.message); }
+    return;
+  }
+
   if(simulationMode){
     clients = clients.filter(c=> c.id !== editingId);
     document.getElementById('clientModalBg').classList.remove('show');
@@ -907,7 +1598,7 @@ document.getElementById('btnDeleteClient').addEventListener('click', async ()=>{
   }
 
   try{
-    const res = await callBackend({ action:"crm_delete_client", compte: session.email, id: editingId });
+    const res = await callBackend({ action:"crm_delete_client", compte: session.email, token: session.token, id: editingId });
     if(!res.ok){ alert(res.error || "Suppression impossible."); return; }
     document.getElementById('clientModalBg').classList.remove('show');
     await loadClients();
@@ -1033,12 +1724,24 @@ async function chargerSessionsGoogleEnCache(){
 }
 
 /* ---------- Chargement initial ---------- */
-window.addEventListener('DOMContentLoaded', ()=>{
+window.addEventListener('DOMContentLoaded', async ()=>{
   lockApp();
-  if(session.email){
+  if(session.email && session.token){
     document.getElementById('authEmail').value = session.email;
     document.getElementById('authForm').style.display = 'none';
-    verifierAbonnement();
+    try{
+      const res = await callBackend({ action:"verify_session", email: session.email, token: session.token });
+      if(res.ok){
+        session.token = res.token;
+        sauvegarderSession();
+        await verifierAbonnement();
+      } else {
+        effacerSession();
+        document.getElementById('authForm').style.display = 'block';
+      }
+    }catch(e){
+      document.getElementById('authForm').style.display = 'block';
+    }
   }
 });
 </script>
