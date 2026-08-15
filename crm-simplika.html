@@ -521,9 +521,10 @@
             <select id="mv-type"><option value="entree">Entrée (réception)</option><option value="sortie">Sortie (chantier)</option></select>
           </div>
           <div class="field"><label>Date</label><input id="mv-date" type="date"></div>
-          <div class="field"><label>Client / chantier lié (facultatif)</label><select id="mv-client"><option value="">— Aucun —</option></select></div>
+          <div class="field"><label>Prix unitaire HT (facultatif)</label><input id="mv-prix" type="number" step="0.01" min="0" placeholder="Ex : 12.50"></div>
         </div>
         <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Client / chantier lié (facultatif)</label><select id="mv-client"><option value="">— Aucun —</option></select></div>
           <div class="field"><label>Notes</label><input id="mv-notes" type="text" placeholder="Ex : facture fournisseur n°..."></div>
         </div>
         <button class="btn" id="btnAddMouvement" style="margin-top:16px;">Enregistrer ce mouvement</button>
@@ -532,11 +533,12 @@
 
       <div class="panel">
         <h3>État des stocks</h3>
-        <p class="hint" style="margin-bottom:14px;">Calculé automatiquement (entrées − sorties) à partir de l'historique des mouvements ci-dessous — jamais saisi séparément, pour éviter toute désynchronisation.</p>
+        <p class="hint" style="margin-bottom:14px;">Quantité calculée automatiquement (entrées − sorties). Valorisation au coût unitaire moyen pondéré (CUMP) des entrées — utile quand le prix d'achat a varié d'une réception à l'autre.</p>
         <table class="devis-table">
-          <thead><tr><th>Produit</th><th>Unité</th><th>Quantité actuelle</th></tr></thead>
+          <thead><tr><th>Produit</th><th>Unité</th><th>Quantité actuelle</th><th>Valeur unitaire moy. (CUMP)</th><th>Valeur totale</th></tr></thead>
           <tbody id="etatStocksBody"></tbody>
         </table>
+        <div class="devis-total-row"><span class="lbl">Valeur totale du stock</span><span class="val" id="stockValeurTotale">0,00 €</span></div>
       </div>
 
       <div class="panel">
@@ -745,12 +747,13 @@ const MAIL_DEMO = [
   { from: 'Stripe <notifications@stripe.com>', subject: 'Paiement reçu', snippet: 'Un nouveau paiement a été confirmé sur votre compte...' }
 ];
 const MOUVEMENTS_STOCK_DEMO = [
-  { id:'demo-mv-1', date:new Date(Date.now()-14*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:200, type:'entree', clientId:'', clientNom:'', notes:'Import fichier (expert-comptable / grand livre)' },
-  { id:'demo-mv-2', date:new Date(Date.now()-10*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:45, type:'sortie', clientId:'demo-1', clientNom:'Julien Marchand', notes:'Chantier Marchand Toiture' },
-  { id:'demo-mv-3', date:new Date(Date.now()-9*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:80, type:'entree', clientId:'', clientNom:'', notes:'Réception fournisseur' },
-  { id:'demo-mv-4', date:new Date(Date.now()-5*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:12, type:'sortie', clientId:'demo-2', clientNom:'Sophie Renard', notes:'' },
-  { id:'demo-mv-5', date:new Date(Date.now()-3*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:150, type:'entree', clientId:'', clientNom:'', notes:'Import fichier (expert-comptable / grand livre)' },
-  { id:'demo-mv-6', date:new Date(Date.now()-1*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:60, type:'sortie', clientId:'demo-3', clientNom:'Marc Petit', notes:'Chantier Petit Isolation' }
+  { id:'demo-mv-1', date:new Date(Date.now()-14*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:200, type:'entree', clientId:'', clientNom:'', prixUnitaire:8.20, notes:'Import fichier (expert-comptable / grand livre)' },
+  { id:'demo-mv-1b', date:new Date(Date.now()-8*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:100, type:'entree', clientId:'', clientNom:'', prixUnitaire:8.90, notes:'Réception fournisseur — prix en hausse' },
+  { id:'demo-mv-2', date:new Date(Date.now()-10*86400000).toISOString(), produit:'Panneau isolant 100mm', unite:'m²', quantite:45, type:'sortie', clientId:'demo-1', clientNom:'Julien Marchand', prixUnitaire:0, notes:'Chantier Marchand Toiture' },
+  { id:'demo-mv-3', date:new Date(Date.now()-9*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:80, type:'entree', clientId:'', clientNom:'', prixUnitaire:4.50, notes:'Réception fournisseur' },
+  { id:'demo-mv-4', date:new Date(Date.now()-5*86400000).toISOString(), produit:'Colle de fixation', unite:'kg', quantite:12, type:'sortie', clientId:'demo-2', clientNom:'Sophie Renard', prixUnitaire:0, notes:'' },
+  { id:'demo-mv-5', date:new Date(Date.now()-3*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:150, type:'entree', clientId:'', clientNom:'', prixUnitaire:11.30, notes:'Import fichier (expert-comptable / grand livre)' },
+  { id:'demo-mv-6', date:new Date(Date.now()-1*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:60, type:'sortie', clientId:'demo-3', clientNom:'Marc Petit', prixUnitaire:0, notes:'Chantier Petit Isolation' }
 ];
 
 document.getElementById('btnSimulation').addEventListener('click', ()=>{
@@ -1824,20 +1827,37 @@ function remplirSelectClientMouvement(){
 function renderEtatStocks(){
   const body = document.getElementById('etatStocksBody');
   if(!body) return;
-  const totaux = {}; // clé "produit|unite" -> quantité
+  const totaux = {}; // clé "produit|unite" -> { quantite, valeurEntreesCumulee, quantiteEntreesCumulee }
   mouvementsStock.forEach(m=>{
     const cle = (m.produit||'').trim() + '|' + (m.unite||'');
-    if(!totaux[cle]) totaux[cle] = { produit: m.produit, unite: m.unite, quantite: 0 };
+    if(!totaux[cle]) totaux[cle] = { produit: m.produit, unite: m.unite, quantite: 0, valeurEntrees: 0, quantiteEntrees: 0 };
     totaux[cle].quantite += (m.type === 'sortie' ? -1 : 1) * (m.quantite||0);
+    if(m.type !== 'sortie' && m.prixUnitaire){
+      totaux[cle].valeurEntrees += (m.quantite||0) * m.prixUnitaire;
+      totaux[cle].quantiteEntrees += (m.quantite||0);
+    }
   });
   const lignes = Object.values(totaux).sort((a,b)=> a.produit.localeCompare(b.produit));
-  if(lignes.length === 0){ body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--ink-soft); padding:20px;">Aucun mouvement enregistré pour le moment.</td></tr>'; return; }
-  body.innerHTML = lignes.map(l=> `
+  if(lignes.length === 0){
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--ink-soft); padding:20px;">Aucun mouvement enregistré pour le moment.</td></tr>';
+    document.getElementById('stockValeurTotale').textContent = '0,00 €';
+    return;
+  }
+  let valeurTotaleStock = 0;
+  body.innerHTML = lignes.map(l=>{
+    const cump = l.quantiteEntrees > 0 ? l.valeurEntrees / l.quantiteEntrees : 0;
+    const valeurLigne = cump * l.quantite;
+    valeurTotaleStock += valeurLigne;
+    return `
     <tr>
       <td>${l.produit}</td>
       <td>${l.unite||'—'}</td>
       <td class="num" style="font-family:'IBM Plex Mono',monospace; text-align:right; ${l.quantite<=0?'color:var(--warn);':''}">${l.quantite.toLocaleString('fr-FR',{maximumFractionDigits:2})}</td>
-    </tr>`).join('');
+      <td class="num" style="font-family:'IBM Plex Mono',monospace; text-align:right;">${cump ? cump.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '—'}</td>
+      <td class="num" style="font-family:'IBM Plex Mono',monospace; text-align:right;">${cump ? valeurLigne.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('stockValeurTotale').textContent = valeurTotaleStock.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
 }
 
 function renderMouvementsList(){
@@ -1845,18 +1865,22 @@ function renderMouvementsList(){
   if(!el) return;
   if(mouvementsStock.length === 0){ el.innerHTML = '<div class="empty-note">Aucun mouvement pour le moment.</div>'; return; }
   const tries = [...mouvementsStock].sort((a,b)=> new Date(b.date||0) - new Date(a.date||0));
-  el.innerHTML = tries.map(m=> `
+  el.innerHTML = tries.map(m=> {
+    const total = (m.prixUnitaire||0) * (m.quantite||0);
+    return `
     <div class="mouvement-item">
       <div>
         <div class="when">${m.date ? new Date(m.date).toLocaleDateString('fr-FR') : '—'}</div>
         <div><strong>${m.produit}</strong> — ${m.quantite} ${m.unite||''} ${m.clientNom ? '· '+m.clientNom : ''}</div>
+        ${m.prixUnitaire ? '<div style="color:var(--ink-soft); font-size:12px;">'+m.prixUnitaire.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' € / unité — total '+total.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €</div>' : ''}
         ${m.notes ? '<div style="color:var(--ink-soft); font-size:12px;">'+m.notes+'</div>' : ''}
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
         <span class="badge ${m.type}">${m.type==='sortie'?'Sortie':'Entrée'}</span>
         <button type="button" data-id="${m.id}" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   el.querySelectorAll('button[data-id]').forEach(btn=> btn.addEventListener('click', async ()=>{
     if(!confirm("Supprimer ce mouvement ?")) return;
     if(simulationMode){
@@ -1888,12 +1912,14 @@ document.getElementById('btnAddMouvement').addEventListener('click', async ()=>{
     date: document.getElementById('mv-date').value || new Date().toISOString().slice(0,10),
     clientId: clientSel.value,
     clientNom: clientSel.value ? clientOpt.textContent : '',
-    notes: document.getElementById('mv-notes').value.trim()
+    notes: document.getElementById('mv-notes').value.trim(),
+    prixUnitaire: parseFloat(document.getElementById('mv-prix').value) || 0
   };
 
   function resetFormMouvement(){
     document.getElementById('mv-produit').value = '';
     document.getElementById('mv-quantite').value = '';
+    document.getElementById('mv-prix').value = '';
     document.getElementById('mv-notes').value = '';
   }
 
@@ -1955,7 +1981,7 @@ document.getElementById('stock-import-fichier').addEventListener('change', funct
 function afficherApercuImport(){
   const zone = document.getElementById('stockImportApercu');
   zone.style.display = 'block';
-  const champsCibles = ['Ignorer cette colonne', 'Produit', 'Quantité', 'Unité', 'Date'];
+  const champsCibles = ['Ignorer cette colonne', 'Produit', 'Quantité', 'Unité', 'Prix unitaire', 'Date'];
   zone.innerHTML =
     '<h4 style="font-size:14px; margin-bottom:10px;">Fais correspondre les colonnes de ton fichier (' + importRowsBrutes.length + ' lignes détectées)</h4>' +
     importColonnes.map((col,i)=> `
@@ -1977,6 +2003,7 @@ function deviner_(nomColonne){
   if(/produit|designation|article|reference|libelle/.test(n)) return 'Produit';
   if(/quantite|qte|qty/.test(n)) return 'Quantité';
   if(/unite|unit/.test(n)) return 'Unité';
+  if(/prix|tarif|cout|montant|pu\b/.test(n)) return 'Prix unitaire';
   if(/date/.test(n)) return 'Date';
   return '';
 }
@@ -1991,13 +2018,14 @@ async function confirmerImportStock(){
 
   const mouvements = importRowsBrutes.map(ligne=>{
     const valeurs = Object.values(ligne);
-    const m = { produit:'', quantite:1, unite:'', date:'', type:'entree', notes:'Import fichier (expert-comptable / grand livre)' };
+    const m = { produit:'', quantite:1, unite:'', date:'', type:'entree', prixUnitaire:0, notes:'Import fichier (expert-comptable / grand livre)' };
     Object.keys(mapping).forEach(idx=>{
       const champ = mapping[idx];
       const val = valeurs[idx];
       if(champ==='Produit') m.produit = String(val||'').trim();
       if(champ==='Quantité') m.quantite = parseFloat(val) || 1;
       if(champ==='Unité') m.unite = String(val||'').trim();
+      if(champ==='Prix unitaire') m.prixUnitaire = parseFloat(val) || 0;
       if(champ==='Date') m.date = val;
     });
     return m;
