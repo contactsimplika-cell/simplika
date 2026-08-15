@@ -402,13 +402,36 @@
 
     <!-- PRESTATIONS & TARIFS -->
     <div class="tab-panel" id="tab-prestations">
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Importer un catalogue fournisseur</h3>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Glisse le fichier de tarifs préférentiels envoyé par ton fournisseur (Excel/CSV) — pas de connexion directe possible à leur plateforme (chaque fournisseur a son propre système fermé), mais leur export de prix s'importe normalement. Applique ta marge : le prix de vente se calcule automatiquement pour chaque ligne.</p>
+        <div class="field-row">
+          <div class="field" style="flex:2;"><label>Fichier fournisseur (.xlsx, .xls ou .csv)</label><input id="fourn-import-fichier" type="file" accept=".xlsx,.xls,.csv"></div>
+          <div class="field"><label>Marge à appliquer (%) HT</label><input id="fourn-marge-defaut" type="number" step="0.1" min="0" value="20"></div>
+        </div>
+        <div id="fournImportApercu" style="display:none; margin-top:16px;"></div>
+        <p class="hint" id="fournImportMsg" style="display:none; margin-top:10px;"></p>
+      </div>
+
       <div class="panel">
         <h3>Prestations &amp; tarifs</h3>
-        <p class="hint" style="margin-bottom:14px;">Ton catalogue de prestations, avec leur unité et leur prix par défaut. Utilisé pour préremplir les lignes de devis dans la fiche découverte — adapté à ton métier (peu importe le corps d'état).</p>
-        <table class="devis-table">
-          <thead><tr><th style="width:35%;">Désignation</th><th style="width:20%;">Catégorie (facultatif)</th><th style="width:15%;">Unité</th><th style="width:20%;">Prix unitaire HT</th><th></th></tr></thead>
+        <p class="hint" style="margin-bottom:14px;">Ton catalogue de prestations et produits, avec référence fournisseur, prix d'achat et marge si applicable. Le prix de vente HT est ce qui alimente les lignes de devis dans la fiche découverte.</p>
+        <div style="overflow-x:auto;">
+        <table class="devis-table" style="min-width:900px;">
+          <thead><tr>
+            <th style="width:16%;">Désignation</th>
+            <th style="width:11%;">Fournisseur</th>
+            <th style="width:10%;">Référence</th>
+            <th style="width:16%;">Caractéristiques</th>
+            <th style="width:9%;">Unité</th>
+            <th style="width:10%;">Prix achat HT</th>
+            <th style="width:8%;">Marge %</th>
+            <th style="width:10%;">Prix vente HT</th>
+            <th></th>
+          </tr></thead>
           <tbody id="catalogueBody"></tbody>
         </table>
+        </div>
         <button class="btn outline btn-small" id="btnAddPrestation" style="margin-top:12px;">+ Ajouter une prestation</button>
         <div style="margin-top:18px;">
           <button class="btn" id="btnSaveCatalogue">Enregistrer le catalogue</button>
@@ -756,6 +779,13 @@ const MOUVEMENTS_STOCK_DEMO = [
   { id:'demo-mv-6', date:new Date(Date.now()-1*86400000).toISOString(), produit:'Rail métallique 3m', unite:'Unité', quantite:60, type:'sortie', clientId:'demo-3', clientNom:'Marc Petit', prixUnitaire:0, notes:'Chantier Petit Isolation' }
 ];
 
+const CATALOGUE_DEMO = [
+  { designation:'Panneau isolant 100mm', fournisseur:'Point P', reference:'PIR-100-PP', caracteristiques:'100mm, R=3.15 m².K/W', unite:'m²', prixAchat:8.90, margePourcent:25, prixUnitaire:11.13 },
+  { designation:'Colle de fixation', fournisseur:'Point P', reference:'COL-FX-25', caracteristiques:'Sac 25kg, prise rapide', unite:'kg', prixAchat:4.50, margePourcent:30, prixUnitaire:5.85 },
+  { designation:'Rail métallique 3m', fournisseur:'Cedeo', reference:'RM-3000-CD', caracteristiques:'Acier galvanisé, 3 mètres', unite:'Unité', prixAchat:11.30, margePourcent:20, prixUnitaire:13.56 },
+  { designation:'Pose et finition', fournisseur:'', reference:'', caracteristiques:'Main d\'œuvre', unite:'Forfait', prixAchat:0, margePourcent:0, prixUnitaire:45 }
+];
+
 document.getElementById('btnSimulation').addEventListener('click', ()=>{
   simulationMode = true;
   clients = CLIENTS_DEMO.map(c=> ({...c}));
@@ -773,6 +803,8 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   mouvementsStock = MOUVEMENTS_STOCK_DEMO.map(m=> ({...m}));
   remplirSelectClientMouvement();
   renderEtatStocks(); renderMouvementsList();
+  catalogue = CATALOGUE_DEMO.map(p=> ({...p}));
+  renderCatalogue();
 });
 document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -1236,29 +1268,45 @@ document.getElementById('btnSaveBranding').addEventListener('click', async ()=>{
 /* ---------- Prestations & tarifs (catalogue) ---------- */
 function renderCatalogue(){
   const body = document.getElementById('catalogueBody');
-  if(catalogue.length === 0) catalogue = [{designation:'', categorie:'', unite:'Forfait', prixUnitaire:0}];
+  if(catalogue.length === 0) catalogue = [{designation:'', fournisseur:'', reference:'', caracteristiques:'', unite:'Forfait', prixAchat:0, margePourcent:0, prixUnitaire:0}];
   body.innerHTML = catalogue.map((p,i)=>{
     const uniteConnue = UNITES_STANDARD.includes(p.unite) ? p.unite : (p.unite ? 'Autre' : 'Forfait');
     const uniteLibre = uniteConnue === 'Autre' ? (p.unite||'') : '';
     return `
     <tr>
       <td><input type="text" value="${(p.designation||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="designation" placeholder="Ex : Pose de prise électrique"></td>
-      <td><input type="text" value="${(p.categorie||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="categorie" placeholder="Ex : Électricité"></td>
+      <td><input type="text" value="${(p.fournisseur||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="fournisseur" placeholder="Ex : Point P"></td>
+      <td><input type="text" value="${(p.reference||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="reference" placeholder="Réf."></td>
+      <td><input type="text" value="${(p.caracteristiques||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="caracteristiques" placeholder="Ex : 100mm, R=3.15"></td>
       <td>
         <select data-i="${i}" data-f="unite-select" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 4px; font-size:13px;">
           ${UNITES_STANDARD.map(u=> `<option value="${u}" ${u===uniteConnue?'selected':''}>${u}</option>`).join('')}
         </select>
         ${uniteConnue==='Autre' ? `<input type="text" value="${uniteLibre.replace(/"/g,'&quot;')}" data-i="${i}" data-f="unite-libre" placeholder="Préciser..." style="margin-top:4px;">` : ''}
       </td>
-      <td><input type="number" class="num" min="0" step="0.01" value="${p.prixUnitaire||0}" data-i="${i}" data-f="prixUnitaire"></td>
+      <td><input type="number" class="num" min="0" step="0.01" value="${p.prixAchat||0}" data-i="${i}" data-f="prixAchat"></td>
+      <td><input type="number" class="num" min="0" step="0.1" value="${p.margePourcent||0}" data-i="${i}" data-f="margePourcent"></td>
+      <td><input type="number" class="num" min="0" step="0.01" value="${p.prixUnitaire||0}" data-i="${i}" data-f="prixUnitaire" style="font-weight:600;"></td>
       <td><button type="button" data-del="${i}" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button></td>
     </tr>`;
   }).join('');
 
+  const champsTexte = ['designation','fournisseur','reference','caracteristiques'];
   body.querySelectorAll('input[data-f]:not([data-f="unite-libre"])').forEach(inp=>{
     inp.addEventListener('input', e=>{
       const i = +e.target.dataset.i, f = e.target.dataset.f;
-      catalogue[i][f] = (f==='designation'||f==='categorie') ? e.target.value : parseFloat(e.target.value) || 0;
+      catalogue[i][f] = champsTexte.includes(f) ? e.target.value : (parseFloat(e.target.value) || 0);
+      // Recalcule automatiquement le prix de vente dès que le prix d'achat ou la marge changent —
+      // c'est ce prix de vente qui alimente ensuite les lignes de devis.
+      if(f === 'prixAchat' || f === 'margePourcent'){
+        const achat = catalogue[i].prixAchat || 0;
+        const marge = catalogue[i].margePourcent || 0;
+        if(achat > 0){
+          catalogue[i].prixUnitaire = Math.round(achat * (1 + marge/100) * 100) / 100;
+          const inputPrixVente = body.querySelector('input[data-f="prixUnitaire"][data-i="'+i+'"]');
+          if(inputPrixVente) inputPrixVente.value = catalogue[i].prixUnitaire;
+        }
+      }
     });
   });
   body.querySelectorAll('input[data-f="unite-libre"]').forEach(inp=>{
@@ -1280,9 +1328,107 @@ function renderCatalogue(){
 }
 
 document.getElementById('btnAddPrestation').addEventListener('click', ()=>{
-  catalogue.push({designation:'', categorie:'', unite:'Forfait', prixUnitaire:0});
+  catalogue.push({designation:'', fournisseur:'', reference:'', caracteristiques:'', unite:'Forfait', prixAchat:0, margePourcent:0, prixUnitaire:0});
   renderCatalogue();
 });
+
+/* ---------- Import de catalogue fournisseur (avec marge appliquée automatiquement) ---------- */
+let fournImportRowsBrutes = [];
+let fournImportColonnes = [];
+
+document.getElementById('fourn-import-fichier').addEventListener('change', function(e){
+  const fichier = e.target.files[0];
+  if(!fichier) return;
+  if(typeof XLSX === 'undefined'){
+    alert("La lecture de fichiers n'a pas pu se charger (connexion internet requise). Réessaie une fois en ligne.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const data = new Uint8Array(ev.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const premiereFeuille = workbook.Sheets[workbook.SheetNames[0]];
+      const lignes = XLSX.utils.sheet_to_json(premiereFeuille, { defval: '' });
+      if(lignes.length === 0){ alert("Ce fichier ne contient aucune ligne exploitable."); return; }
+      fournImportRowsBrutes = lignes;
+      fournImportColonnes = Object.keys(lignes[0]);
+      afficherApercuImportFournisseur();
+    }catch(err){
+      alert("Impossible de lire ce fichier : " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(fichier);
+});
+
+function afficherApercuImportFournisseur(){
+  const zone = document.getElementById('fournImportApercu');
+  zone.style.display = 'block';
+  const champsCibles = ['Ignorer cette colonne', 'Désignation', 'Fournisseur', 'Référence', 'Caractéristiques', 'Unité', 'Prix d\'achat HT'];
+  zone.innerHTML =
+    '<h4 style="font-size:14px; margin-bottom:10px;">Fais correspondre les colonnes de ton fichier (' + fournImportRowsBrutes.length + ' lignes détectées)</h4>' +
+    fournImportColonnes.map((col,i)=> `
+      <div class="import-mapping-row">
+        <div class="col-name">${col}</div>
+        <span>→</span>
+        <select data-col="${i}">
+          ${champsCibles.map((c,ci)=> `<option value="${ci===0?'':c}" ${devinerFournisseur_(col)===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>`).join('') +
+    '<button class="btn" id="btnConfirmerImportFourn" style="margin-top:14px;">Appliquer la marge et ajouter au catalogue (' + fournImportRowsBrutes.length + ' lignes)</button>';
+
+  document.getElementById('btnConfirmerImportFourn').addEventListener('click', confirmerImportFournisseur);
+}
+
+function devinerFournisseur_(nomColonne){
+  const n = nomColonne.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(/designation|produit|article|libelle|nom/.test(n)) return 'Désignation';
+  if(/fournisseur|marque/.test(n)) return 'Fournisseur';
+  if(/reference|ref\b|code/.test(n)) return 'Référence';
+  if(/caracteristique|description|detail|spec/.test(n)) return 'Caractéristiques';
+  if(/unite|unit/.test(n)) return 'Unité';
+  if(/prix|tarif|cout|pu\b|achat/.test(n)) return 'Prix d\'achat HT';
+  return '';
+}
+
+function confirmerImportFournisseur(){
+  const selects = document.querySelectorAll('#fournImportApercu select[data-col]');
+  const mapping = {};
+  selects.forEach(s=>{ if(s.value) mapping[+s.dataset.col] = s.value; });
+
+  const designationIdx = Object.keys(mapping).find(k=> mapping[k]==='Désignation');
+  if(designationIdx === undefined){ alert("Indique au moins quelle colonne correspond à la Désignation."); return; }
+
+  const margeDefaut = parseFloat(document.getElementById('fourn-marge-defaut').value) || 0;
+
+  const nouveauxProduits = fournImportRowsBrutes.map(ligne=>{
+    const valeurs = Object.values(ligne);
+    const p = { designation:'', fournisseur:'', reference:'', caracteristiques:'', unite:'Forfait', prixAchat:0, margePourcent: margeDefaut, prixUnitaire:0 };
+    Object.keys(mapping).forEach(idx=>{
+      const champ = mapping[idx];
+      const val = valeurs[idx];
+      if(champ==='Désignation') p.designation = String(val||'').trim();
+      if(champ==='Fournisseur') p.fournisseur = String(val||'').trim();
+      if(champ==='Référence') p.reference = String(val||'').trim();
+      if(champ==='Caractéristiques') p.caracteristiques = String(val||'').trim();
+      if(champ==='Unité') p.unite = String(val||'').trim() || 'Forfait';
+      if(champ==="Prix d'achat HT") p.prixAchat = parseFloat(val) || 0;
+    });
+    p.prixUnitaire = p.prixAchat > 0 ? Math.round(p.prixAchat * (1 + margeDefaut/100) * 100) / 100 : 0;
+    return p;
+  }).filter(p=> p.designation !== '');
+
+  // Ajouté à la liste en mémoire — il faut cliquer sur "Enregistrer le catalogue" plus bas
+  // pour que ce soit vraiment sauvegardé, comme pour tout ajout manuel.
+  if(catalogue.length === 1 && !catalogue[0].designation) catalogue = [];
+  catalogue.push(...nouveauxProduits);
+  renderCatalogue();
+
+  document.getElementById('fournImportMsg').textContent = nouveauxProduits.length + " produit(s) ajouté(s) au catalogue avec " + margeDefaut + "% de marge — pense à cliquer sur \"Enregistrer le catalogue\" pour les conserver.";
+  document.getElementById('fournImportMsg').style.display = 'block';
+  document.getElementById('fournImportApercu').style.display = 'none';
+  document.getElementById('fourn-import-fichier').value = '';
+}
 
 document.getElementById('btnSaveCatalogue').addEventListener('click', async ()=>{
   const catalogueValide = catalogue.filter(p=> p.designation.trim() !== '');
