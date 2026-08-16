@@ -324,12 +324,12 @@
       <thead><tr><th>Convention</th><th>IDCC</th><th>Signature</th><th>Champ</th><th></th></tr></thead>
       <tbody>
         <tr><td>Bâtiment — Ouvriers ≤ 10 salariés</td><td>1596</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635573" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Bâtiment — Ouvriers &gt; 10 salariés</td><td>1597</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Bâtiment — ETAM</td><td>2609</td><td>12 juillet 2006</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Bâtiment — Cadres</td><td>2420</td><td>1er juin 2004</td><td>National (grille nationale unique, sauf Nord/Pas-de-Calais)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Travaux Publics — Ouvriers</td><td>1702</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Travaux Publics — ETAM</td><td>2614</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
-        <tr><td>Travaux Publics — Cadres</td><td>3212</td><td>—</td><td>National (grille nationale unique)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Bâtiment — Ouvriers &gt; 10 salariés</td><td>1597</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/1597-batiment-ouvriers-entreprises-occupant-plus-de-10-salaries" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+        <tr><td>Bâtiment — ETAM</td><td>2609</td><td>12 juillet 2006</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2609-batiment-etam" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+        <tr><td>Bâtiment — Cadres</td><td>2420</td><td>1er juin 2004</td><td>National (grille nationale unique, sauf Nord/Pas-de-Calais)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2420-batiment-cadres" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+        <tr><td>Travaux Publics — Ouvriers</td><td>1702</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/1702-travaux-publics-tome-ii-ouvriers" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+        <tr><td>Travaux Publics — ETAM</td><td>2614</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2614-travaux-publics-tome-iii-etam" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+        <tr><td>Travaux Publics — Cadres</td><td>3212</td><td>—</td><td>National (grille nationale unique)</td><td><a href="https://code.travail.gouv.fr/convention-collective/3212-cadres-des-travaux-publics" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
       </tbody>
     </table>
     <div class="refresh-note">
@@ -348,9 +348,18 @@
       <div class="field"><label>Statut</label>
         <select id="bn-statut"><option value="nonCadre">Non-cadre</option><option value="cadre">Cadre</option></select>
       </div>
-      <div class="field"><label>Montant mensuel (€)</label><input id="bn-montant" type="number" min="0" step="1" placeholder="Ex : 2200"></div>
+      <div class="field"><label>Période</label>
+        <select id="bn-periode">
+          <option value="mensuel">Mensuel</option>
+          <option value="annuel">Annuel</option>
+          <option value="hebdomadaire">Hebdomadaire</option>
+          <option value="horaire">Horaire</option>
+        </select>
+      </div>
+      <div class="field"><label>Montant (€)</label><input id="bn-montant" type="number" min="0" step="1" placeholder="Ex : 2200"></div>
       <button class="btn" id="btnCalculerBN">Calculer</button>
     </div>
+    <p class="hint" style="margin-top:8px;">Base de conversion : 151,67 heures/mois (35h/semaine), 12 mois/an — comme sur une fiche de paie standard.</p>
     <div class="simu-result" id="bnResult" style="display:none;"></div>
   </div>
 
@@ -516,20 +525,40 @@ const TAUX_BN = {
   nonCadre: { salarial: 0.22, patronal: 0.42 },
   cadre:    { salarial: 0.25, patronal: 0.45 }
 };
+const HEURES_MENSUELLES = 151.67; // 35h/semaine, base légale standard
+const SEMAINES_PAR_MOIS = HEURES_MENSUELLES / 35;
+
+// Convertit un montant depuis la période choisie vers un équivalent mensuel.
+function versMensuel(montant, periode){
+  if(periode === 'annuel') return montant / 12;
+  if(periode === 'hebdomadaire') return montant * SEMAINES_PAR_MOIS;
+  if(periode === 'horaire') return montant * HEURES_MENSUELLES;
+  return montant; // mensuel
+}
+// Reconvertit un montant mensuel vers la période choisie, pour l'affichage.
+function depuisMensuel(montantMensuel, periode){
+  if(periode === 'annuel') return montantMensuel * 12;
+  if(periode === 'hebdomadaire') return montantMensuel / SEMAINES_PAR_MOIS;
+  if(periode === 'horaire') return montantMensuel / HEURES_MENSUELLES;
+  return montantMensuel;
+}
+const LABEL_PERIODE = { mensuel:'mensuel', annuel:'annuel', hebdomadaire:'hebdomadaire', horaire:'horaire' };
 
 document.getElementById('btnCalculerBN').addEventListener('click', ()=>{
   const sens = document.getElementById('bn-sens').value;
   const statut = document.getElementById('bn-statut').value;
-  const montant = parseFloat(document.getElementById('bn-montant').value);
+  const periode = document.getElementById('bn-periode').value;
+  const montantSaisi = parseFloat(document.getElementById('bn-montant').value);
   const resEl = document.getElementById('bnResult');
 
-  if(!montant || montant <= 0){
+  if(!montantSaisi || montantSaisi <= 0){
     resEl.style.display = 'block';
     resEl.innerHTML = '<p style="color:var(--warn);">Renseigne un montant valide.</p>';
     return;
   }
 
   const taux = TAUX_BN[statut];
+  const montant = versMensuel(montantSaisi, periode); // tout est calculé en équivalent mensuel
   let brut, net, coutEmployeur;
 
   if(sens === 'brutVersNet'){
@@ -543,13 +572,17 @@ document.getElementById('btnCalculerBN').addEventListener('click', ()=>{
   const cotisSalariales = brut - net;
   const cotisPatronales = coutEmployeur - brut;
 
+  // Reconversion de chaque montant dans la période choisie pour l'affichage.
+  const fmt = (m) => depuisMensuel(m, periode).toLocaleString('fr-FR',{maximumFractionDigits:2});
+  const lbl = LABEL_PERIODE[periode];
+
   resEl.style.display = 'block';
   resEl.innerHTML = `
-    <div class="row"><span>Salaire brut mensuel</span><span>${brut.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
-    <div class="row"><span>Cotisations salariales (≈ ${(taux.salarial*100).toFixed(0)}%)</span><span>− ${cotisSalariales.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
-    <div class="row"><span>Net avant impôt sur le revenu</span><span>${net.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
-    <div class="row"><span>Cotisations patronales (≈ ${(taux.patronal*100).toFixed(0)}%)</span><span>+ ${cotisPatronales.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
-    <div class="row"><span>Coût total employeur</span><span>${coutEmployeur.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+    <div class="row"><span>Salaire brut ${lbl}</span><span>${fmt(brut)} €</span></div>
+    <div class="row"><span>Cotisations salariales (≈ ${(taux.salarial*100).toFixed(0)}%)</span><span>− ${fmt(cotisSalariales)} €</span></div>
+    <div class="row"><span>Net avant impôt sur le revenu</span><span>${fmt(net)} €</span></div>
+    <div class="row"><span>Cotisations patronales (≈ ${(taux.patronal*100).toFixed(0)}%)</span><span>+ ${fmt(cotisPatronales)} €</span></div>
+    <div class="row"><span>Coût total employeur</span><span>${fmt(coutEmployeur)} €</span></div>
   `;
 });
 
@@ -584,18 +617,18 @@ const PORTAILS_SUBVENTIONS = {
 };
 const SITES_REGIONS = {
   "Auvergne-Rhône-Alpes": "https://www.auvergnerhonealpes.fr/aides",
-  "Bourgogne-Franche-Comté": "https://www.bourgognefranchecomte.fr/aides-appels-projets",
+  "Bourgogne-Franche-Comté": "https://www.bourgognefranchecomte.fr",
   "Bretagne": "https://www.bretagne.bzh/aides/",
-  "Centre-Val de Loire": "https://www.centre-valdeloire.fr/aides-appels-a-projets",
-  "Corse": "https://www.corse.fr/aides",
-  "Grand Est": "https://www.grandest.fr/aides-appels-a-projets/",
-  "Hauts-de-France": "https://www.hautsdefrance.fr/aides-et-appels-a-projets/",
-  "Île-de-France": "https://www.iledefrance.fr/aides-appels-a-projets",
-  "Normandie": "https://www.normandie.fr/aides-appels-a-projets",
+  "Centre-Val de Loire": "https://www.regioncentre-valdeloire.fr/accueil/ma-region-et-moi/une-chance-pour-tous/artisanat-industries-et-services/developpement-des-entreprises.html",
+  "Corse": "https://www.isula.corsica/",
+  "Grand Est": "https://www.grandest.fr/aides/",
+  "Hauts-de-France": "https://guide-aides.hautsdefrance.fr/",
+  "Île-de-France": "https://www.iledefrance.fr/aides-et-appels-a-projets",
+  "Normandie": "https://www.normandie.fr/demande-daides-regionales",
   "Nouvelle-Aquitaine": "https://les-aides.nouvelle-aquitaine.fr",
-  "Occitanie": "https://www.laregion.fr/Toutes-les-aides",
-  "Pays de la Loire": "https://www.paysdelaloire.fr/aides-appels-a-projets",
-  "Provence-Alpes-Côte d'Azur": "https://www.maregionsud.fr/aides-et-appels-a-projets"
+  "Occitanie": "https://www.laregion.fr/-Toutes-les-aides-",
+  "Pays de la Loire": "https://www.paysdelaloire.fr/economie-et-innovation/entreprise",
+  "Provence-Alpes-Côte d'Azur": "https://entreprises.maregionsud.fr/aides-et-appels-a-projet"
 };
 
 document.getElementById('btnVoirSubventions').addEventListener('click', ()=>{
@@ -759,9 +792,11 @@ const SECTEUR_RISQUES = {
 /* ---------- Seuils sociaux (obligations liées à l'effectif) ---------- */
 const SEUILS = [
   { min:1, titre:"Document unique d'évaluation des risques (DUERP)", desc:"Obligatoire dès le premier salarié, à mettre à jour au moins une fois par an.",
-    exemple:{ headers:["Unité de travail","Risque identifié","Mesure de prévention"], rows:[["Atelier / chantier","Chute de hauteur","Port du harnais, garde-corps"],["Bureau","Troubles musculo-squelettiques","Siège ergonomique, pauses régulières"]] } },
+    exemple:{ headers:["Unité de travail","Risque identifié","Mesure de prévention"], rows:[["Atelier / chantier","Chute de hauteur","Port du harnais, garde-corps"],["Bureau","Troubles musculo-squelettiques","Siège ergonomique, pauses régulières"]] },
+    fichier:{ nom:"DUERP-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
   { min:1, titre:"Affichages obligatoires", desc:"Durée du travail, égalité professionnelle, harcèlement, coordonnées inspection du travail et médecine du travail.",
-    exemple:{ headers:["Affichage","Contenu"], rows:[["Horaires de travail","Heures de début/fin, pauses"],["Numéros utiles","Inspection du travail, médecine du travail, secours"]] } },
+    exemple:{ headers:["Affichage","Contenu"], rows:[["Horaires de travail","Heures de début/fin, pauses"],["Numéros utiles","Inspection du travail, médecine du travail, secours"]] },
+    fichier:{ nom:"Checklist-Affichages-Obligatoires-Simplika.docx", label:"⬇ Télécharger la checklist à imprimer" } },
   { min:11, titre:"Mise en place du CSE", desc:"Obligatoire si l'effectif atteint 11 salariés pendant 12 mois consécutifs.",
     exemple:{ headers:["Étape","Délai indicatif"], rows:[["Information du personnel","Dès le seuil atteint"],["Élections professionnelles","Dans les mois qui suivent"]] } },
   { min:20, titre:"Obligation d'emploi de travailleurs handicapés (OETH)", desc:"Déclaration et contribution si le quota de 6% n'est pas atteint.",
@@ -783,7 +818,8 @@ const OBLIGATIONS_ADMIN = [
   { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/embaucher-gerer-salaries/embaucher/declaration-prealable-embauche.html",
     exemple:{ headers:["Information à préparer","Exemple"], rows:[["Identité du salarié","Nom, prénom, date et lieu de naissance"],["Numéro de sécurité sociale","Si déjà connu"],["Date d'embauche prévue","01/09/2026"]] } },
   { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F1784",
-    exemple:{ headers:["Nom / Prénom","Date d'embauche","Emploi occupé","Type de contrat"], rows:[["Dupont Marie","03/01/2025","Assistante administrative","CDI"],["Martin Paul","15/06/2025","Ouvrier qualifié","CDD 6 mois"]] } },
+    exemple:{ headers:["Nom / Prénom","Date d'embauche","Emploi occupé","Type de contrat"], rows:[["Dupont Marie","03/01/2025","Assistante administrative","CDI"],["Martin Paul","15/06/2025","Ouvrier qualifié","CDD 6 mois"]] },
+    fichier:{ nom:"Registre-Unique-Personnel-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
   { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite d'information et de prévention (VIP) auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F23107",
     exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Poste et qualification","Ouvrier qualifié, niveau N2"],["Rémunération","Selon grille conventionnelle applicable"],["Date de la VIP","À planifier dans les 3 mois"]] } },
   { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://travail-emploi.gouv.fr/les-services-de-prevention-et-de-sante-au-travail-autonomes-et-interentreprises",
@@ -791,12 +827,13 @@ const OBLIGATIONS_ADMIN = [
   { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F33754",
     exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Organisme choisi","Mutuelle ou assureur au choix"],["Participation employeur","50% minimum, souvent plus selon la convention"]] } },
 
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/declarer-payer/dsn.html",
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/gerer-entreprise/declaration-sociale-nominative.html",
     exemple:{ headers:["Donnée transmise","Fréquence"], rows:[["Salaires et cotisations","Chaque mois"],["Arrêt de travail","Dès la survenance"]] } },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Bulletin de paie conforme", desc:"Mentions obligatoires précises (convention collective, classification, cotisations détaillées) — modèle simplifié en vigueur depuis 2018.",
     exemple:{ headers:["Mention obligatoire","Exemple"], rows:[["Convention collective","IDCC 1596 — Bâtiment ouvriers"],["Coefficient / classification","Niveau II, coefficient 185"]] } },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Registre des accidents du travail bénins", desc:"À tenir si l'entreprise dispose d'un poste de secours et d'un médecin/infirmier, pour les accidents ne nécessitant pas d'arrêt ni de soins médicaux externes.",
-    exemple:{ headers:["Date","Salarié","Circonstances","Soins donnés"], rows:[["12/03/2026","Martin Paul","Petite coupure à la main","Pansement"],["28/04/2026","Dupont Marie","Contusion légère","Repos 10 min, aucun soin"]] } },
+    exemple:{ headers:["Date","Salarié","Circonstances","Soins donnés"], rows:[["12/03/2026","Martin Paul","Petite coupure à la main","Pansement"],["28/04/2026","Dupont Marie","Contusion légère","Repos 10 min, aucun soin"]] },
+    fichier:{ nom:"Registre-Accidents-Benins-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels (réforme en cours)", desc:"Jusqu'ici tous les 2 ans, plus bilan à 6 ans. À compter du 1er octobre 2026 (loi du 24/10/2025) : remplacés par l'entretien de parcours professionnel (EPP), tous les 4 ans — à vérifier selon la date de l'audit.", lien:"https://www.service-public.gouv.fr/particuliers/vosdroits/F32040",
     exemple:{ headers:["Élément abordé","Exemple"], rows:[["Souhaits d'évolution","Formation envisagée, mobilité interne"],["Compte-rendu signé","Par le salarié et l'employeur"]] } },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Contribution à la formation professionnelle et taxe d'apprentissage", desc:"Contribution unique collectée par l'URSSAF, taux variable selon l'effectif.",
@@ -805,13 +842,18 @@ const OBLIGATIONS_ADMIN = [
     exemple:{ headers:["Dispositif","Exemple"], rows:[["Prime de partage de la valeur","Montant et conditions d'attribution à documenter"]] } },
 
   { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.infogreffe.fr/dossiers-thematiques/vie-de-l-entreprise/gerer-l-entreprise/le-proces-verbal-d-assemblee-d-approbation-des-comptes-des-societes-commerciales",
-    exemple:{ headers:["Élément du PV","Exemple"], rows:[["Date et lieu","15/06/2026, siège social"],["Résolution votée","Approbation des comptes de l'exercice 2025"]] } },
+    exemple:{ headers:["Élément du PV","Exemple"], rows:[["Date et lieu","15/06/2026, siège social"],["Résolution votée","Approbation des comptes de l'exercice 2025"]] },
+    fichier:{ nom:"Modele-PV-Assemblee-Generale-Simplika.docx", label:"⬇ Télécharger le modèle Word à compléter" } },
   { categorie:"Vie sociale de l'entreprise", titre:"Registre des délibérations / décisions", desc:"Registre légal côté et paraphé, ou registre dématérialisé conforme, où sont consignées toutes les décisions collectives des associés/actionnaires.",
-    exemple:{ headers:["Date","Décision"], rows:[["15/06/2026","Approbation des comptes annuels"],["20/09/2026","Nomination d'un nouveau gérant"]] } },
+    exemple:{ headers:["Date","Décision"], rows:[["15/06/2026","Approbation des comptes annuels"],["20/09/2026","Nomination d'un nouveau gérant"]] },
+    fichier:{ nom:"Registre-Deliberations-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
   { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans le mois suivant l'approbation des comptes en assemblée (délai porté à 2 mois en cas de dépôt par voie électronique).", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F31214",
     exemple:{ headers:["Document déposé","Délai"], rows:[["Bilan, compte de résultat, annexe","1 mois après l'AG (2 mois en ligne)"]] } },
   { categorie:"Vie sociale de l'entreprise", titre:"Registre des bénéficiaires effectifs", desc:"Déclaration au greffe du tribunal de commerce, obligatoire pour la plupart des sociétés.",
     exemple:{ headers:["Élément déclaré","Exemple"], rows:[["Bénéficiaire effectif","Nom du dirigeant détenant plus de 25% des parts"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Suivi des dépôts au greffe (bonne pratique — pas une obligation légale distincte)", desc:"Il n'existe pas de \"registre des dépôts au greffe\" imposé sous ce nom en droit français. En revanche, garder une trace chronologique de chaque dépôt (comptes annuels, statuts modifiés, changement de dirigeant...) avec son numéro de récépissé est une excellente pratique, utile en cas de contrôle ou de litige.",
+    exemple:{ headers:["Date de dépôt","Type de document","N° de récépissé"], rows:[["15/07/2026","Comptes annuels","GU-2026-048213"]] },
+    fichier:{ nom:"Suivi-Depots-Greffe-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
 ];
 
 /* ---------- Grilles de rémunération connues (indicatif, année de validité indiquée — à revérifier) ---------- */
@@ -1009,13 +1051,14 @@ function renderDashboard(){
 }
 
 // Construit un bouton "Voir un exemple" + un mini-tableau replié par défaut, à partir de {headers, rows}.
-function exempleHtml(id, exemple){
+function exempleHtml(id, exemple, fichier){
   if(!exemple) return '';
   const table = '<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px;">' +
     '<thead><tr>' + exemple.headers.map(h=> '<th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); font-family:IBM Plex Mono,monospace; font-size:10.5px; text-transform:uppercase; color:var(--ink-soft);">'+h+'</th>').join('') + '</tr></thead>' +
     '<tbody>' + exemple.rows.map(r=> '<tr>'+r.map(c=> '<td style="padding:6px 8px; border-bottom:1px solid var(--line);">'+c+'</td>').join('')+'</tr>').join('') + '</tbody></table>';
+  const fichierHtml = fichier ? '<a href="'+fichier.nom+'" download style="display:inline-block; margin-top:10px; background:var(--accent); color:#fff; border-radius:20px; padding:6px 14px; font-size:12px; text-decoration:none;">'+fichier.label+'</a>' : '';
   return '<button type="button" class="btn-exemple" data-target="'+id+'" style="background:none; border:1px solid var(--line); border-radius:20px; padding:4px 12px; font-size:12px; color:var(--accent); cursor:pointer; margin-top:6px;">📄 Voir un exemple</button>' +
-    '<div id="'+id+'" style="display:none; background:var(--card); border-radius:6px; padding:4px 12px 10px;">'+table+'</div>';
+    '<div id="'+id+'" style="display:none; background:var(--card); border-radius:6px; padding:4px 12px 10px;">'+table+fichierHtml+'</div>';
 }
 function activerBoutonsExemple(){
   document.querySelectorAll('.btn-exemple').forEach(btn=>{
@@ -1047,7 +1090,7 @@ function renderObligations(){
       '<div class="seuil">≥ '+s.min+' sal.</div>'+
       '<div><h4>'+s.titre+'</h4><p>'+s.desc+'</p>'+
       '<span class="badge '+(applic?'applic':'napplic')+'">'+(applic?'Applicable':'Non atteint')+'</span>'+
-      exempleHtml('ex-seuil-'+i, s.exemple)+
+      exempleHtml('ex-seuil-'+i, s.exemple, s.fichier)+
       '</div>';
     el.appendChild(div);
   });
@@ -1084,7 +1127,7 @@ function renderObligations(){
       div.className = "oblig-item";
       div.style.gridTemplateColumns = "1fr";
       const lienHtml = o.lien ? '<a href="'+o.lien+'" target="_blank" rel="noopener" style="font-family:IBM Plex Mono,monospace; font-size:12px; color:var(--accent); margin-right:12px;">→ source officielle</a>' : '';
-      div.innerHTML = '<div><h4>'+o.titre+'</h4><p>'+o.desc+'</p>'+lienHtml+exempleHtml('ex-admin-'+ci+'-'+i, o.exemple)+'</div>';
+      div.innerHTML = '<div><h4>'+o.titre+'</h4><p>'+o.desc+'</p>'+lienHtml+exempleHtml('ex-admin-'+ci+'-'+i, o.exemple, o.fichier)+'</div>';
       el.appendChild(div);
     });
   });
