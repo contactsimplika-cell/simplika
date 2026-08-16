@@ -578,14 +578,14 @@ function renderEmbaucheSteps(){
 const PORTAILS_SUBVENTIONS = {
   default: [
     { nom:"Les Aides — portail officiel des aides aux entreprises", url:"https://les-aides.fr" },
-    { nom:"Bpifrance Création — aides à la création/reprise", url:"https://bpifrance-creation.fr/encyclopedie/financer-entreprise/aides-a-creation-a-linnovation" },
+    { nom:"Bpifrance Création — aides à la création/reprise", url:"https://bpifrance-creation.fr/encyclopedie/aides-a-creation-a-reprise-dentreprise" },
     { nom:"aides-entreprises.fr — moteur de recherche par filtre région/secteur", url:"https://aides-entreprises.fr" }
   ]
 };
 const SITES_REGIONS = {
   "Auvergne-Rhône-Alpes": "https://www.auvergnerhonealpes.fr/aides",
   "Bourgogne-Franche-Comté": "https://www.bourgognefranchecomte.fr/aides-appels-projets",
-  "Bretagne": "https://www.bretagne.bzh/aides-appels-a-projets/",
+  "Bretagne": "https://www.bretagne.bzh/aides/",
   "Centre-Val de Loire": "https://www.centre-valdeloire.fr/aides-appels-a-projets",
   "Corse": "https://www.corse.fr/aides",
   "Grand Est": "https://www.grandest.fr/aides-appels-a-projets/",
@@ -758,36 +758,60 @@ const SECTEUR_RISQUES = {
 
 /* ---------- Seuils sociaux (obligations liées à l'effectif) ---------- */
 const SEUILS = [
-  { min:1, titre:"Document unique d'évaluation des risques (DUERP)", desc:"Obligatoire dès le premier salarié, à mettre à jour au moins une fois par an." },
-  { min:1, titre:"Affichages obligatoires", desc:"Durée du travail, égalité professionnelle, harcèlement, coordonnées inspection du travail et médecine du travail." },
-  { min:11, titre:"Mise en place du CSE", desc:"Obligatoire si l'effectif atteint 11 salariés pendant 12 mois consécutifs." },
-  { min:20, titre:"Obligation d'emploi de travailleurs handicapés (OETH)", desc:"Déclaration et contribution si le quota de 6% n'est pas atteint." },
-  { min:50, titre:"Règlement intérieur", desc:"Obligatoire ; doit reprendre les règles d'hygiène, de sécurité et de discipline." },
-  { min:50, titre:"CSE avec attributions renforcées + BDESE", desc:"Base de données économiques, sociales et environnementales à jour." },
-  { min:50, titre:"Index de l'égalité professionnelle", desc:"Calcul et publication annuels obligatoires." },
-  { min:50, titre:"Participation obligatoire", desc:"Accord de participation aux résultats si l'effectif est atteint pendant 5 exercices consécutifs." },
-  { min:300, titre:"Gestion prévisionnelle des emplois et des compétences (GPEC)", desc:"Négociation triennale obligatoire." },
+  { min:1, titre:"Document unique d'évaluation des risques (DUERP)", desc:"Obligatoire dès le premier salarié, à mettre à jour au moins une fois par an.",
+    exemple:{ headers:["Unité de travail","Risque identifié","Mesure de prévention"], rows:[["Atelier / chantier","Chute de hauteur","Port du harnais, garde-corps"],["Bureau","Troubles musculo-squelettiques","Siège ergonomique, pauses régulières"]] } },
+  { min:1, titre:"Affichages obligatoires", desc:"Durée du travail, égalité professionnelle, harcèlement, coordonnées inspection du travail et médecine du travail.",
+    exemple:{ headers:["Affichage","Contenu"], rows:[["Horaires de travail","Heures de début/fin, pauses"],["Numéros utiles","Inspection du travail, médecine du travail, secours"]] } },
+  { min:11, titre:"Mise en place du CSE", desc:"Obligatoire si l'effectif atteint 11 salariés pendant 12 mois consécutifs.",
+    exemple:{ headers:["Étape","Délai indicatif"], rows:[["Information du personnel","Dès le seuil atteint"],["Élections professionnelles","Dans les mois qui suivent"]] } },
+  { min:20, titre:"Obligation d'emploi de travailleurs handicapés (OETH)", desc:"Déclaration et contribution si le quota de 6% n'est pas atteint.",
+    exemple:{ headers:["Élément à suivre","Exemple"], rows:[["Effectif total","45 salariés"],["Quota théorique (6%)","≈ 3 postes"]] } },
+  { min:50, titre:"Règlement intérieur", desc:"Obligatoire ; doit reprendre les règles d'hygiène, de sécurité et de discipline.",
+    exemple:{ headers:["Rubrique","Exemple de contenu"], rows:[["Hygiène et sécurité","Port des EPI obligatoire sur chantier"],["Discipline","Procédure en cas de retard répété"]] } },
+  { min:50, titre:"CSE avec attributions renforcées + BDESE", desc:"Base de données économiques, sociales et environnementales à jour.",
+    exemple:{ headers:["Rubrique BDESE","Exemple de donnée"], rows:[["Investissements","Montant investi sur l'année"],["Égalité professionnelle","Écart de rémunération H/F"]] } },
+  { min:50, titre:"Index de l'égalité professionnelle", desc:"Calcul et publication annuels obligatoires.",
+    exemple:{ headers:["Indicateur","Exemple de résultat"], rows:[["Écart de rémunération","37 / 40 points"],["Note globale","82 / 100"]] } },
+  { min:50, titre:"Participation obligatoire", desc:"Accord de participation aux résultats si l'effectif est atteint pendant 5 exercices consécutifs.",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Bénéfice net","120 000 €"],["Réserve spéciale de participation","Calculée selon la formule légale"]] } },
+  { min:300, titre:"Gestion prévisionnelle des emplois et des compétences (GPEC)", desc:"Négociation triennale obligatoire.",
+    exemple:{ headers:["Thème abordé","Exemple"], rows:[["Métiers en évolution","Digitalisation d'un poste administratif"],["Plan de formation associé","Formation logiciel de gestion"]] } },
 ];
 
 /* ---------- Obligations administratives (indépendantes de l'effectif), avec liens vers les sources officielles ---------- */
 const OBLIGATIONS_ADMIN = [
-  { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/embaucher-gerer-salaries/embaucher/declaration-prealable-embauche.html" },
-  { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F1784" },
-  { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite d'information et de prévention (VIP) auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F23107" },
-  { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://travail-emploi.gouv.fr/les-services-de-prevention-et-de-sante-au-travail-autonomes-et-interentreprises" },
-  { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F33754" },
+  { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/embaucher-gerer-salaries/embaucher/declaration-prealable-embauche.html",
+    exemple:{ headers:["Information à préparer","Exemple"], rows:[["Identité du salarié","Nom, prénom, date et lieu de naissance"],["Numéro de sécurité sociale","Si déjà connu"],["Date d'embauche prévue","01/09/2026"]] } },
+  { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F1784",
+    exemple:{ headers:["Nom / Prénom","Date d'embauche","Emploi occupé","Type de contrat"], rows:[["Dupont Marie","03/01/2025","Assistante administrative","CDI"],["Martin Paul","15/06/2025","Ouvrier qualifié","CDD 6 mois"]] } },
+  { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite d'information et de prévention (VIP) auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F23107",
+    exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Poste et qualification","Ouvrier qualifié, niveau N2"],["Rémunération","Selon grille conventionnelle applicable"],["Date de la VIP","À planifier dans les 3 mois"]] } },
+  { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://travail-emploi.gouv.fr/les-services-de-prevention-et-de-sante-au-travail-autonomes-et-interentreprises",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Service choisi","SPST interentreprises de votre secteur"],["Cotisation annuelle","Variable selon effectif"]] } },
+  { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F33754",
+    exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Organisme choisi","Mutuelle ou assureur au choix"],["Participation employeur","50% minimum, souvent plus selon la convention"]] } },
 
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/declarer-payer/dsn.html" },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Bulletin de paie conforme", desc:"Mentions obligatoires précises (convention collective, classification, cotisations détaillées) — modèle simplifié en vigueur depuis 2018." },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Registre des accidents du travail bénins", desc:"À tenir si l'entreprise dispose d'un poste de secours et d'un médecin/infirmier, pour les accidents ne nécessitant pas d'arrêt ni de soins médicaux externes." },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels (réforme en cours)", desc:"Jusqu'ici tous les 2 ans, plus bilan à 6 ans. À compter du 1er octobre 2026 (loi du 24/10/2025) : remplacés par l'entretien de parcours professionnel (EPP), tous les 4 ans — à vérifier selon la date de l'audit.", lien:"https://www.service-public.gouv.fr/particuliers/vosdroits/F32040" },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Contribution à la formation professionnelle et taxe d'apprentissage", desc:"Contribution unique collectée par l'URSSAF, taux variable selon l'effectif." },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Médailles du travail, prime de partage de la valeur (facultatif)", desc:"Non obligatoires mais fréquemment audités car mal maîtrisés — vérifier si l'entreprise en verse." },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/declarer-payer/dsn.html",
+    exemple:{ headers:["Donnée transmise","Fréquence"], rows:[["Salaires et cotisations","Chaque mois"],["Arrêt de travail","Dès la survenance"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Bulletin de paie conforme", desc:"Mentions obligatoires précises (convention collective, classification, cotisations détaillées) — modèle simplifié en vigueur depuis 2018.",
+    exemple:{ headers:["Mention obligatoire","Exemple"], rows:[["Convention collective","IDCC 1596 — Bâtiment ouvriers"],["Coefficient / classification","Niveau II, coefficient 185"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Registre des accidents du travail bénins", desc:"À tenir si l'entreprise dispose d'un poste de secours et d'un médecin/infirmier, pour les accidents ne nécessitant pas d'arrêt ni de soins médicaux externes.",
+    exemple:{ headers:["Date","Salarié","Circonstances","Soins donnés"], rows:[["12/03/2026","Martin Paul","Petite coupure à la main","Pansement"],["28/04/2026","Dupont Marie","Contusion légère","Repos 10 min, aucun soin"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels (réforme en cours)", desc:"Jusqu'ici tous les 2 ans, plus bilan à 6 ans. À compter du 1er octobre 2026 (loi du 24/10/2025) : remplacés par l'entretien de parcours professionnel (EPP), tous les 4 ans — à vérifier selon la date de l'audit.", lien:"https://www.service-public.gouv.fr/particuliers/vosdroits/F32040",
+    exemple:{ headers:["Élément abordé","Exemple"], rows:[["Souhaits d'évolution","Formation envisagée, mobilité interne"],["Compte-rendu signé","Par le salarié et l'employeur"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Contribution à la formation professionnelle et taxe d'apprentissage", desc:"Contribution unique collectée par l'URSSAF, taux variable selon l'effectif.",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Taux applicable","Variable selon effectif (à vérifier chaque année)"],["Base de calcul","Masse salariale annuelle brute"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Médailles du travail, prime de partage de la valeur (facultatif)", desc:"Non obligatoires mais fréquemment audités car mal maîtrisés — vérifier si l'entreprise en verse.",
+    exemple:{ headers:["Dispositif","Exemple"], rows:[["Prime de partage de la valeur","Montant et conditions d'attribution à documenter"]] } },
 
-  { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.infogreffe.fr/dossiers-thematiques/vie-de-l-entreprise/gerer-l-entreprise/le-proces-verbal-d-assemblee-d-approbation-des-comptes-des-societes-commerciales" },
-  { categorie:"Vie sociale de l'entreprise", titre:"Registre des délibérations / décisions", desc:"Registre légal côté et paraphé, ou registre dématérialisé conforme, où sont consignées toutes les décisions collectives des associés/actionnaires." },
-  { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans le mois suivant l'approbation des comptes en assemblée (délai porté à 2 mois en cas de dépôt par voie électronique).", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F31214" },
-  { categorie:"Vie sociale de l'entreprise", titre:"Registre des bénéficiaires effectifs", desc:"Déclaration au greffe du tribunal de commerce, obligatoire pour la plupart des sociétés." },
+  { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.infogreffe.fr/dossiers-thematiques/vie-de-l-entreprise/gerer-l-entreprise/le-proces-verbal-d-assemblee-d-approbation-des-comptes-des-societes-commerciales",
+    exemple:{ headers:["Élément du PV","Exemple"], rows:[["Date et lieu","15/06/2026, siège social"],["Résolution votée","Approbation des comptes de l'exercice 2025"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Registre des délibérations / décisions", desc:"Registre légal côté et paraphé, ou registre dématérialisé conforme, où sont consignées toutes les décisions collectives des associés/actionnaires.",
+    exemple:{ headers:["Date","Décision"], rows:[["15/06/2026","Approbation des comptes annuels"],["20/09/2026","Nomination d'un nouveau gérant"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans le mois suivant l'approbation des comptes en assemblée (délai porté à 2 mois en cas de dépôt par voie électronique).", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F31214",
+    exemple:{ headers:["Document déposé","Délai"], rows:[["Bilan, compte de résultat, annexe","1 mois après l'AG (2 mois en ligne)"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Registre des bénéficiaires effectifs", desc:"Déclaration au greffe du tribunal de commerce, obligatoire pour la plupart des sociétés.",
+    exemple:{ headers:["Élément déclaré","Exemple"], rows:[["Bénéficiaire effectif","Nom du dirigeant détenant plus de 25% des parts"]] } },
 ];
 
 /* ---------- Grilles de rémunération connues (indicatif, année de validité indiquée — à revérifier) ---------- */
@@ -984,6 +1008,26 @@ function renderDashboard(){
   renderRisques();
 }
 
+// Construit un bouton "Voir un exemple" + un mini-tableau replié par défaut, à partir de {headers, rows}.
+function exempleHtml(id, exemple){
+  if(!exemple) return '';
+  const table = '<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px;">' +
+    '<thead><tr>' + exemple.headers.map(h=> '<th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); font-family:IBM Plex Mono,monospace; font-size:10.5px; text-transform:uppercase; color:var(--ink-soft);">'+h+'</th>').join('') + '</tr></thead>' +
+    '<tbody>' + exemple.rows.map(r=> '<tr>'+r.map(c=> '<td style="padding:6px 8px; border-bottom:1px solid var(--line);">'+c+'</td>').join('')+'</tr>').join('') + '</tbody></table>';
+  return '<button type="button" class="btn-exemple" data-target="'+id+'" style="background:none; border:1px solid var(--line); border-radius:20px; padding:4px 12px; font-size:12px; color:var(--accent); cursor:pointer; margin-top:6px;">📄 Voir un exemple</button>' +
+    '<div id="'+id+'" style="display:none; background:var(--card); border-radius:6px; padding:4px 12px 10px;">'+table+'</div>';
+}
+function activerBoutonsExemple(){
+  document.querySelectorAll('.btn-exemple').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cible = document.getElementById(btn.dataset.target);
+      const ouvert = cible.style.display !== 'none';
+      cible.style.display = ouvert ? 'none' : 'block';
+      btn.textContent = ouvert ? '📄 Voir un exemple' : '📄 Masquer l\'exemple';
+    });
+  });
+}
+
 function renderObligations(){
   const el = document.getElementById('dash-obligations');
   el.innerHTML = "";
@@ -995,14 +1039,16 @@ function renderObligations(){
   el.appendChild(sousTitre1);
 
   const seuilsAffiches = limite ? SEUILS.slice(0,2) : SEUILS;
-  seuilsAffiches.forEach(s=>{
+  seuilsAffiches.forEach((s,i)=>{
     const applic = currentData.effectif >= s.min;
     const div = document.createElement('div');
     div.className = "oblig-item";
     div.innerHTML =
       '<div class="seuil">≥ '+s.min+' sal.</div>'+
       '<div><h4>'+s.titre+'</h4><p>'+s.desc+'</p>'+
-      '<span class="badge '+(applic?'applic':'napplic')+'">'+(applic?'Applicable':'Non atteint')+'</span></div>';
+      '<span class="badge '+(applic?'applic':'napplic')+'">'+(applic?'Applicable':'Non atteint')+'</span>'+
+      exempleHtml('ex-seuil-'+i, s.exemple)+
+      '</div>';
     el.appendChild(div);
   });
 
@@ -1033,12 +1079,12 @@ function renderObligations(){
     const itemsAffiches = (limite && ci===0) ? itemsCat.slice(0,2) : itemsCat;
     nbAffiches += itemsAffiches.length;
 
-    itemsAffiches.forEach(o=>{
+    itemsAffiches.forEach((o,i)=>{
       const div = document.createElement('div');
       div.className = "oblig-item";
       div.style.gridTemplateColumns = "1fr";
-      const lienHtml = o.lien ? '<a href="'+o.lien+'" target="_blank" rel="noopener" style="font-family:IBM Plex Mono,monospace; font-size:12px; color:var(--accent);">→ source officielle</a>' : '';
-      div.innerHTML = '<div><h4>'+o.titre+'</h4><p>'+o.desc+'</p>'+lienHtml+'</div>';
+      const lienHtml = o.lien ? '<a href="'+o.lien+'" target="_blank" rel="noopener" style="font-family:IBM Plex Mono,monospace; font-size:12px; color:var(--accent); margin-right:12px;">→ source officielle</a>' : '';
+      div.innerHTML = '<div><h4>'+o.titre+'</h4><p>'+o.desc+'</p>'+lienHtml+exempleHtml('ex-admin-'+ci+'-'+i, o.exemple)+'</div>';
       el.appendChild(div);
     });
   });
@@ -1053,6 +1099,8 @@ function renderObligations(){
   disc2.className = "disclaimer";
   disc2.innerHTML = "<strong>Important :</strong> cette liste couvre les obligations les plus fréquemment auditées, pas l'intégralité du droit social et du droit des sociétés. Certaines obligations dépendent de la forme juridique (SARL, SAS, entreprise individuelle...) ou du secteur (habilitations, licences). À compléter au cas par cas.";
   el.appendChild(disc2);
+
+  activerBoutonsExemple();
 }
 
 let grilleRows = [ {niveau:"", repere:"", minimum:""} ];
