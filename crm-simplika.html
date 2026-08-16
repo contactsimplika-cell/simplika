@@ -114,6 +114,69 @@
 
   footer{padding:30px 0; text-align:center; font-size:13px; color:var(--ink-soft);}
 
+  /* AUDIT D'ENTREPRISE — intégré au CRM */
+  .lookup-result{margin-top:18px; padding-top:16px; border-top:1px solid var(--line); display:none;}
+  .lookup-result.show{display:block;}
+  .lookup-result .name{font-family:'Newsreader',serif; font-size:19px;}
+  .lookup-result .meta{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-soft); margin-top:4px;}
+  .error-msg{color:var(--warn); font-size:13.5px; margin-top:10px; display:none;}
+  /* Sous-onglets SIRET/Saisie manuelle — nommage distinct de .tab-btn (navigation principale du CRM) */
+  .audit-tabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .audit-tab-btn{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; background:none; border:none; padding:10px 4px; margin-right:20px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; transition:color .15s;}
+  .audit-tab-btn.active{color:var(--ink); border-bottom-color:var(--brass);}
+  .audit-tab-panel{display:none;}
+  .audit-tab-panel.active{display:block;}
+
+  #auditDashboard{display:none;}
+  #auditDashboard.show{display:block;}
+  .id-card{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; background:var(--ink); color:var(--paper); border-radius:6px; padding:22px 26px; margin-bottom:24px;}
+  .id-card .co{font-family:'Newsreader',serif; font-size:22px;}
+  .id-card .co-meta{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#9fb3b0; margin-top:4px;}
+  .stamp{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; border:1.5px solid var(--brass); color:var(--brass-soft); padding:6px 12px; border-radius:2px; transform:rotate(-2deg); white-space:nowrap;}
+
+  .dash-tabs{display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:26px; flex-wrap:wrap;}
+  .dash-tab{font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; background:none; border:none; padding:12px 18px 12px 0; margin-right:22px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent;}
+  .dash-tab.active{color:var(--ink); border-bottom-color:var(--accent);}
+  .dash-panel{display:none;}
+  .dash-panel.active{display:block;}
+
+  .oblig-item{display:grid; grid-template-columns:100px 1fr; gap:18px; padding:16px 0; border-top:1px solid var(--line);}
+  .oblig-item:first-child{border-top:none;}
+  .oblig-item .seuil{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--brass);}
+  .oblig-item h4{font-family:'Newsreader',serif; font-size:16.5px; font-weight:500; margin-bottom:4px;}
+  .oblig-item p{color:var(--ink-soft); font-size:14px;}
+  .badge.applic{background:var(--accent-soft); color:var(--accent);}
+  .badge.napplic{background:var(--line); color:var(--ink-soft);}
+
+  table.grille{width:100%; border-collapse:collapse; font-size:14px;}
+  table.grille th, table.grille td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);}
+  table.grille th{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft);}
+  table.grille td.val{font-family:'IBM Plex Mono',monospace;}
+  .disclaimer{background:var(--warn-soft); border:1px solid #e3c9c2; border-radius:4px; padding:12px 14px; font-size:13px; color:#6e332a; margin-top:16px;}
+  .disclaimer strong{color:var(--warn);}
+
+  .risk-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  @media (max-width:640px){ .risk-grid{grid-template-columns:1fr;} }
+  .risk-card{background:var(--card); border:1px solid var(--line); border-radius:5px; padding:16px 18px;}
+  .risk-card .lvl{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; margin-bottom:6px; display:inline-block; padding:2px 7px; border-radius:2px;}
+  .lvl.haut{background:var(--warn-soft); color:var(--warn);}
+  .lvl.moyen{background:var(--brass-soft); color:var(--brass);}
+  .risk-card h4{font-family:'Newsreader',serif; font-size:16px; margin-bottom:4px;}
+  .risk-card p{font-size:13.5px; color:var(--ink-soft);}
+
+  .simu-section{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:24px; margin-bottom:22px;}
+  .simu-section h3{font-size:18px; margin-bottom:6px;}
+  .simu-section > p.hint{margin-bottom:16px;}
+  table.ccn-table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;}
+  table.ccn-table th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.ccn-table td{padding:9px 10px; border-bottom:1px solid var(--line);}
+  table.ccn-table a{color:var(--accent);}
+  .refresh-note{background:var(--accent-soft); color:var(--accent); border-radius:5px; padding:12px 16px; font-size:13.5px; margin-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .simu-result{background:#fff; border:1px solid var(--line); border-radius:6px; padding:18px; margin-top:16px;}
+  .simu-result .row{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .simu-result .row:last-child{border-bottom:none; font-weight:700; padding-top:12px;}
+  .simu-result .row span:last-child{font-family:'IBM Plex Mono',monospace;}
+
   /* ASSISTANT IA — bouton flottant + panneau de discussion */
   #aiHelpBtn{position:fixed; bottom:24px; right:24px; z-index:200; background:var(--ink); color:var(--paper); border:none; border-radius:50px; padding:13px 20px 13px 16px; display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; font-size:14px; font-weight:500; cursor:pointer; box-shadow:0 4px 16px rgba(23,36,46,0.25); transition:transform .15s;}
   #aiHelpBtn:hover{background:var(--accent); transform:translateY(-2px);}
@@ -274,6 +337,7 @@
       <button class="tab-btn" data-tab="personnalisation">Personnalisation</button>
       <button class="tab-btn" data-tab="support">Support (admin)</button>
       <button class="tab-btn" data-tab="stocks">Stocks</button>
+      <button class="tab-btn" data-tab="audit">Audit d'entreprise</button>
     </div>
 
     <!-- TABLEAU DE BORD -->
@@ -591,6 +655,164 @@
       </div>
     </div>
 
+    <!-- AUDIT D'ENTREPRISE (intégré depuis l'ancien audit-simplika.html) -->
+    <div class="tab-panel" id="tab-audit">
+      <div class="panel">
+        <div class="audit-tabs">
+          <button class="audit-tab-btn active" data-audit-tab="siret">Par SIRET</button>
+          <button class="audit-tab-btn" data-audit-tab="manuel">Saisie manuelle</button>
+        </div>
+
+        <div class="audit-tab-panel active" id="audit-tab-siret">
+          <div class="field-row">
+            <div class="field" style="flex:2;">
+              <label for="siretInput">Numéro SIRET (ou SIREN)</label>
+              <input id="siretInput" type="text" placeholder="Ex : 552 100 554 00019" maxlength="17">
+            </div>
+            <button class="btn" id="btnSiret">Rechercher</button>
+          </div>
+          <p class="hint">Recherche via l'API publique data.gouv.fr — raison sociale et code APE remplis automatiquement. La convention collective est suggérée à partir du code APE et reste à confirmer.</p>
+          <p class="error-msg" id="siretError"></p>
+          <div class="lookup-result" id="siretResult">
+            <div class="name" id="resName"></div>
+            <div class="meta" id="resMeta"></div>
+          </div>
+        </div>
+
+        <div class="audit-tab-panel" id="audit-tab-manuel">
+          <div class="field-row">
+            <div class="field">
+              <label for="manName">Nom de l'entreprise</label>
+              <input id="manName" type="text" placeholder="Ex : Dupont Rénovation">
+            </div>
+            <div class="field">
+              <label for="manApe">Code APE</label>
+              <input id="manApe" type="text" placeholder="Ex : 4322B" maxlength="6">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:14px;">
+            <div class="field">
+              <label for="manIdcc">Convention collective (nom ou n° IDCC)</label>
+              <input id="manIdcc" type="text" placeholder="Ex : 1596 ou Bâtiment ouvriers">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row" style="margin-top:18px; padding-top:18px; border-top:1px solid var(--line);">
+          <div class="field" style="max-width:180px;">
+            <label for="effectif">Effectif (nb salariés)</label>
+            <input id="effectif" type="number" min="0" placeholder="Ex : 8">
+          </div>
+          <button class="btn" id="btnAudit" style="align-self:flex-end;">Lancer l'audit</button>
+        </div>
+      </div>
+
+      <div id="auditDashboard">
+        <div class="id-card">
+          <div>
+            <div class="co" id="dashName">—</div>
+            <div class="co-meta" id="dashMeta">—</div>
+          </div>
+          <div class="stamp" id="dashStamp">Audit généré</div>
+        </div>
+
+        <div class="refresh-note" style="margin-bottom:20px;">
+          <span>📄 Un guide complet reprend chaque obligation ci-dessous, expliquée simplement, avec un exemple concret pour chacune.</span>
+          <a href="Guide-Audit-Simplika.docx" class="btn" style="background:var(--accent); flex-shrink:0;">Télécharger le guide (Word) →</a>
+        </div>
+
+        <div class="dash-tabs">
+          <button class="dash-tab active" data-dash="obligations">Obligations RH &amp; légales</button>
+          <button class="dash-tab" data-dash="grille">Grille de rémunération</button>
+          <button class="dash-tab" data-dash="risques">Risques sectoriels</button>
+        </div>
+
+        <div class="dash-panel active" id="dash-obligations"></div>
+        <div class="dash-panel" id="dash-grille"></div>
+        <div class="dash-panel" id="dash-risques"></div>
+      </div>
+
+      <!-- ===================== SIMULATEURS & AIDES ===================== -->
+
+      <div class="simu-section">
+        <h3>Conventions collectives du Bâtiment &amp; Travaux Publics</h3>
+        <p class="hint">Secteur cible principal — 7 conventions nationales, chacune avec son propre IDCC.</p>
+        <table class="ccn-table">
+          <thead><tr><th>Convention</th><th>IDCC</th><th>Signature</th><th>Champ</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Bâtiment — Ouvriers ≤ 10 salariés</td><td>1596</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635573" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+            <tr><td>Bâtiment — Ouvriers &gt; 10 salariés</td><td>1597</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/1597-batiment-ouvriers-entreprises-occupant-plus-de-10-salaries" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+            <tr><td>Bâtiment — ETAM</td><td>2609</td><td>12 juillet 2006</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2609-batiment-etam" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+            <tr><td>Bâtiment — Cadres</td><td>2420</td><td>1er juin 2004</td><td>National (grille nationale unique, sauf Nord/Pas-de-Calais)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2420-batiment-cadres" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+            <tr><td>Travaux Publics — Ouvriers</td><td>1702</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/1702-travaux-publics-tome-ii-ouvriers" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+            <tr><td>Travaux Publics — ETAM</td><td>2614</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://code.travail.gouv.fr/convention-collective/2614-travaux-publics-tome-iii-etam" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+            <tr><td>Travaux Publics — Cadres</td><td>3212</td><td>—</td><td>National (grille nationale unique)</td><td><a href="https://code.travail.gouv.fr/convention-collective/3212-cadres-des-travaux-publics" target="_blank" rel="noopener">Fiche officielle →</a></td></tr>
+          </tbody>
+        </table>
+        <div class="refresh-note">
+          <span>⚠️ Les grilles de salaires des <strong>ouvriers et ETAM</strong> sont négociées <strong>région par région</strong> (parfois plusieurs fois par an) — trop changeantes pour être figées ici de façon fiable. La Fédération Française du Bâtiment centralise et actualise en continu tous les minima par région.</span>
+          <a href="https://www.ffbatiment.fr/outils-modeles-document/outils/minima-sociaux-du-batiment" target="_blank" rel="noopener" class="btn" style="background:var(--accent); flex-shrink:0;">🔄 Vérifier les grilles régionales à jour</a>
+        </div>
+      </div>
+
+      <div class="simu-section">
+        <h3>Simulateur brut ↔ net</h3>
+        <p class="hint">Estimation simplifiée à partir de taux moyens 2026 — ne remplace pas un logiciel de paie ni l'avis d'un expert-comptable (les taux réels varient selon la tranche de salaire, la convention collective et les exonérations applicables).</p>
+        <div class="field-row">
+          <div class="field"><label>Sens du calcul</label>
+            <select id="bn-sens"><option value="brutVersNet">Brut → Net</option><option value="netVersBrut">Net → Brut</option></select>
+          </div>
+          <div class="field"><label>Statut</label>
+            <select id="bn-statut"><option value="nonCadre">Non-cadre</option><option value="cadre">Cadre</option></select>
+          </div>
+          <div class="field"><label>Période</label>
+            <select id="bn-periode">
+              <option value="mensuel">Mensuel</option>
+              <option value="annuel">Annuel</option>
+              <option value="hebdomadaire">Hebdomadaire</option>
+              <option value="horaire">Horaire</option>
+            </select>
+          </div>
+          <div class="field"><label>Montant (€)</label><input id="bn-montant" type="number" min="0" step="1" placeholder="Ex : 2200"></div>
+          <button class="btn" id="btnCalculerBN">Calculer</button>
+        </div>
+        <p class="hint" style="margin-top:8px;">Base de conversion : 151,67 heures/mois (35h/semaine), 12 mois/an — comme sur une fiche de paie standard.</p>
+        <div class="simu-result" id="bnResult" style="display:none;"></div>
+      </div>
+
+      <div class="simu-section">
+        <h3>Zone France Ruralités Revitalisation (anciennement ZRR)</h3>
+        <p class="hint"><strong>Important :</strong> la ZRR n'existe plus sous ce nom depuis le 1er juillet 2024 — elle a été remplacée par le zonage <strong>France Ruralités Revitalisation (ZFRR)</strong>, avec un niveau renforcé ZFRR+. Certaines anciennes communes ZRR non reclassées gardent les effets du dispositif jusqu'au 31 décembre 2027.</p>
+        <p style="font-size:13.5px; margin-bottom:14px;">Une entreprise qui s'installe en zone ZFRR peut bénéficier d'exonérations d'impôt sur les bénéfices, de CFE, de taxe foncière, et sous conditions de charges patronales à l'embauche.</p>
+        <a href="https://www.service-public.gouv.fr/simulateur/calcul/zonageFranceRuralitesRevitalisation" target="_blank" rel="noopener" class="btn">Vérifier une commune (simulateur officiel) →</a>
+      </div>
+
+      <div class="simu-section">
+        <h3>Accompagnement à l'embauche</h3>
+        <p class="hint">Les étapes clés — les aides financières à l'embauche changent trop souvent pour être calculées ici de façon fiable ; on t'oriente vers les bons dispositifs à vérifier au moment de l'embauche.</p>
+        <div id="embaucheSteps"></div>
+      </div>
+
+      <div class="simu-section">
+        <h3>Subventions création &amp; investissement, par localité</h3>
+        <p class="hint">Il n'existe pas de base de données publique unifiée et fiable des milliers de dispositifs locaux (région, département, intercommunalité, commune) — un annuaire figé ici serait obsolète en quelques mois. On oriente vers les bons portails selon la localisation.</p>
+        <div class="field-row">
+          <div class="field"><label>Région de l'entreprise</label>
+            <select id="subv-region">
+              <option value="">— Sélectionner —</option>
+              <option>Auvergne-Rhône-Alpes</option><option>Bourgogne-Franche-Comté</option><option>Bretagne</option>
+              <option>Centre-Val de Loire</option><option>Corse</option><option>Grand Est</option>
+              <option>Hauts-de-France</option><option>Île-de-France</option><option>Normandie</option>
+              <option>Nouvelle-Aquitaine</option><option>Occitanie</option><option>Pays de la Loire</option>
+              <option>Provence-Alpes-Côte d'Azur</option>
+            </select>
+          </div>
+          <button class="btn" id="btnVoirSubventions">Voir les portails de cette région</button>
+        </div>
+        <div id="subvResult" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -742,6 +964,11 @@ async function verifierAbonnement(){
       await chargerSessionsGoogleEnCache();
       await chargerInfosLegales();
       await chargerMouvements();
+      renderEmbaucheSteps();
+      // Ouvre directement un onglet précis si l'URL contient une ancre (ex. crm-simplika.html#audit) —
+      // utile pour les liens externes qui redirigent vers une section spécifique du CRM.
+      const ancre = window.location.hash.replace('#','');
+      if(ancre && document.querySelector('.tab-btn[data-tab="'+ancre+'"]')) activerOnglet(ancre);
     } else if(res.reason === 'no_session'){
       effacerSession();
       document.getElementById('authForm').style.display = 'block';
@@ -826,6 +1053,7 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   renderEtatStocks(); renderMouvementsList();
   catalogue = CATALOGUE_DEMO.map(p=> ({...p}));
   renderCatalogue();
+  renderEmbaucheSteps();
 });
 document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -2221,6 +2449,744 @@ async function confirmerImportStock(){
   }catch(e){ msg.textContent = e.message; msg.style.display = 'block'; }
   finally{ btn.disabled = false; btn.textContent = "Confirmer l'import"; }
 }
+
+/* ============================== AUDIT D'ENTREPRISE (intégré) ============================== */
+
+/* ---------- Simulateur brut ↔ net (estimation simplifiée, taux moyens 2026) ---------- */
+// Taux volontairement arrondis et globaux — pas un calcul de bulletin de paie précis.
+// Objectif : donner un ordre de grandeur rapide, pas remplacer un logiciel de paie.
+const TAUX_BN = {
+  nonCadre: { salarial: 0.22, patronal: 0.42 },
+  cadre:    { salarial: 0.25, patronal: 0.45 }
+};
+const HEURES_MENSUELLES = 151.67; // 35h/semaine, base légale standard
+const SEMAINES_PAR_MOIS = HEURES_MENSUELLES / 35;
+
+// Convertit un montant depuis la période choisie vers un équivalent mensuel.
+function versMensuel(montant, periode){
+  if(periode === 'annuel') return montant / 12;
+  if(periode === 'hebdomadaire') return montant * SEMAINES_PAR_MOIS;
+  if(periode === 'horaire') return montant * HEURES_MENSUELLES;
+  return montant; // mensuel
+}
+// Reconvertit un montant mensuel vers la période choisie, pour l'affichage.
+function depuisMensuel(montantMensuel, periode){
+  if(periode === 'annuel') return montantMensuel * 12;
+  if(periode === 'hebdomadaire') return montantMensuel / SEMAINES_PAR_MOIS;
+  if(periode === 'horaire') return montantMensuel / HEURES_MENSUELLES;
+  return montantMensuel;
+}
+const LABEL_PERIODE = { mensuel:'mensuel', annuel:'annuel', hebdomadaire:'hebdomadaire', horaire:'horaire' };
+
+document.getElementById('btnCalculerBN').addEventListener('click', ()=>{
+  const sens = document.getElementById('bn-sens').value;
+  const statut = document.getElementById('bn-statut').value;
+  const periode = document.getElementById('bn-periode').value;
+  const montantSaisi = parseFloat(document.getElementById('bn-montant').value);
+  const resEl = document.getElementById('bnResult');
+
+  if(!montantSaisi || montantSaisi <= 0){
+    resEl.style.display = 'block';
+    resEl.innerHTML = '<p style="color:var(--warn);">Renseigne un montant valide.</p>';
+    return;
+  }
+
+  const taux = TAUX_BN[statut];
+  const montant = versMensuel(montantSaisi, periode); // tout est calculé en équivalent mensuel
+  let brut, net, coutEmployeur;
+
+  if(sens === 'brutVersNet'){
+    brut = montant;
+    net = brut * (1 - taux.salarial);
+  } else {
+    net = montant;
+    brut = net / (1 - taux.salarial);
+  }
+  coutEmployeur = brut * (1 + taux.patronal);
+  const cotisSalariales = brut - net;
+  const cotisPatronales = coutEmployeur - brut;
+
+  // Reconversion de chaque montant dans la période choisie pour l'affichage.
+  const fmt = (m) => depuisMensuel(m, periode).toLocaleString('fr-FR',{maximumFractionDigits:2});
+  const lbl = LABEL_PERIODE[periode];
+
+  resEl.style.display = 'block';
+  resEl.innerHTML = `
+    <div class="row"><span>Salaire brut ${lbl}</span><span>${fmt(brut)} €</span></div>
+    <div class="row"><span>Cotisations salariales (≈ ${(taux.salarial*100).toFixed(0)}%)</span><span>− ${fmt(cotisSalariales)} €</span></div>
+    <div class="row"><span>Net avant impôt sur le revenu</span><span>${fmt(net)} €</span></div>
+    <div class="row"><span>Cotisations patronales (≈ ${(taux.patronal*100).toFixed(0)}%)</span><span>+ ${fmt(cotisPatronales)} €</span></div>
+    <div class="row"><span>Coût total employeur</span><span>${fmt(coutEmployeur)} €</span></div>
+  `;
+});
+
+/* ---------- Guide d'accompagnement à l'embauche ---------- */
+const ETAPES_EMBAUCHE = [
+  { titre:"Vérifier la convention collective applicable", desc:"Le code APE de l'entreprise détermine (en général) la convention — utilise l'audit ci-dessus pour la retrouver, avec sa grille de salaires minima." },
+  { titre:"Rédiger et faire signer le contrat de travail", desc:"Obligatoire pour un CDD ou un temps partiel. Fortement conseillé même en CDI temps plein, pour prévoir les clauses particulières." },
+  { titre:"Effectuer la Déclaration Préalable à l'Embauche (DPAE)", desc:"Au plus tôt 8 jours avant la prise de poste, auprès de l'URSSAF dont dépend l'établissement." },
+  { titre:"Vérifier son éligibilité aux aides à l'embauche", desc:"Aides variables selon le profil (apprenti, alternant, jeune, senior, zone ZFRR...) — à vérifier au cas par cas sur le site de France Travail au moment de l'embauche, car les dispositifs changent régulièrement." },
+  { titre:"Organiser la visite d'information et de prévention (VIP)", desc:"Dans les 3 mois suivant l'embauche, auprès du service de santé au travail auquel l'entreprise est affiliée." },
+  { titre:"Inscrire le salarié au registre unique du personnel", desc:"Dès son arrivée, à l'encre indélébile — obligatoire dès le premier salarié." },
+  { titre:"Mettre en place la mutuelle d'entreprise", desc:"Obligatoire pour tout salarié du secteur privé, sauf cas de dispense légale." },
+  { titre:"Démarrer la Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF dès le premier bulletin de paie." }
+];
+
+function renderEmbaucheSteps(){
+  const el = document.getElementById('embaucheSteps');
+  el.innerHTML = ETAPES_EMBAUCHE.map((e,i)=> `
+    <div class="oblig-item" style="grid-template-columns:40px 1fr;">
+      <div class="seuil" style="font-size:16px; text-align:center;">${i+1}</div>
+      <div><h4>${e.titre}</h4><p>${e.desc}</p></div>
+    </div>`).join('');
+}
+
+/* ---------- Orientation subventions par région (portails officiels, pas d'annuaire figé) ---------- */
+const PORTAILS_SUBVENTIONS = {
+  default: [
+    { nom:"Les Aides — portail officiel des aides aux entreprises", url:"https://les-aides.fr" },
+    { nom:"Bpifrance Création — aides à la création/reprise", url:"https://bpifrance-creation.fr/encyclopedie/aides-a-creation-a-reprise-dentreprise" },
+    { nom:"aides-entreprises.fr — moteur de recherche par filtre région/secteur", url:"https://aides-entreprises.fr" }
+  ]
+};
+const SITES_REGIONS = {
+  "Auvergne-Rhône-Alpes": "https://www.auvergnerhonealpes.fr/aides",
+  "Bourgogne-Franche-Comté": "https://www.bourgognefranchecomte.fr",
+  "Bretagne": "https://www.bretagne.bzh/aides/",
+  "Centre-Val de Loire": "https://www.regioncentre-valdeloire.fr/accueil/ma-region-et-moi/une-chance-pour-tous/artisanat-industries-et-services/developpement-des-entreprises.html",
+  "Corse": "https://www.isula.corsica/",
+  "Grand Est": "https://www.grandest.fr/aides/",
+  "Hauts-de-France": "https://guide-aides.hautsdefrance.fr/",
+  "Île-de-France": "https://www.iledefrance.fr/aides-et-appels-a-projets",
+  "Normandie": "https://www.normandie.fr/demande-daides-regionales",
+  "Nouvelle-Aquitaine": "https://les-aides.nouvelle-aquitaine.fr",
+  "Occitanie": "https://www.laregion.fr/-Toutes-les-aides-",
+  "Pays de la Loire": "https://www.paysdelaloire.fr/economie-et-innovation/entreprise",
+  "Provence-Alpes-Côte d'Azur": "https://entreprises.maregionsud.fr/aides-et-appels-a-projet"
+};
+
+document.getElementById('btnVoirSubventions').addEventListener('click', ()=>{
+  const region = document.getElementById('subv-region').value;
+  const el = document.getElementById('subvResult');
+  if(!region){ el.innerHTML = '<p style="color:var(--warn); font-size:13.5px;">Choisis une région.</p>'; return; }
+
+  const liens = [...PORTAILS_SUBVENTIONS.default];
+  if(SITES_REGIONS[region]) liens.unshift({ nom:"Conseil régional " + region + " — aides économiques", url: SITES_REGIONS[region] });
+
+  el.innerHTML = '<p class="hint" style="margin-bottom:10px;">Portails à consulter pour ' + region + ' (vérifie aussi ta communauté de communes et ton département, qui ont souvent leurs propres dispositifs) :</p>' +
+    liens.map(l=> '<div class="mouvement-item" style="display:block;"><a href="'+l.url+'" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600;">'+l.nom+' →</a></div>').join('');
+});
+
+const APE_CCN = [
+  // Agriculture, sylviculture, pêche
+  { prefix:"01", idcc:"variable (accord régional)", nom:"Exploitations agricoles — convention selon département", secteur:"Agriculture" },
+  { prefix:"02", idcc:"variable (accord régional)", nom:"Exploitations forestières — convention selon région", secteur:"Agriculture" },
+  { prefix:"03", idcc:"variable", nom:"Pêche et aquaculture", secteur:"Agriculture" },
+  // Industrie agroalimentaire
+  { prefix:"10", idcc:"variable (branche par filière)", nom:"Industries alimentaires — à préciser par filière", secteur:"Agroalimentaire" },
+  { prefix:"11", idcc:"variable", nom:"Fabrication de boissons", secteur:"Agroalimentaire" },
+  // Industrie manufacturière
+  { prefix:"13", idcc:"0247", nom:"Textile", secteur:"Industrie" },
+  { prefix:"14", idcc:"0247", nom:"Habillement", secteur:"Industrie" },
+  { prefix:"16", idcc:"0158", nom:"Bois — scieries et industries du bois", secteur:"Industrie" },
+  { prefix:"17", idcc:"0489", nom:"Industries papetières", secteur:"Industrie" },
+  { prefix:"18", idcc:"0184", nom:"Imprimerie et industries graphiques", secteur:"Industrie" },
+  { prefix:"20", idcc:"0044", nom:"Industries chimiques", secteur:"Industrie" },
+  { prefix:"22", idcc:"0292", nom:"Plasturgie / caoutchouc", secteur:"Industrie" },
+  { prefix:"23", idcc:"0087", nom:"Industries de carrières et matériaux", secteur:"Industrie" },
+  { prefix:"24", idcc:"0054", nom:"Métallurgie", secteur:"Industrie" },
+  { prefix:"25", idcc:"0054", nom:"Métallurgie", secteur:"Industrie" },
+  { prefix:"26", idcc:"0054", nom:"Métallurgie (électronique)", secteur:"Industrie" },
+  { prefix:"27", idcc:"0054", nom:"Métallurgie (équipements électriques)", secteur:"Industrie" },
+  { prefix:"28", idcc:"0054", nom:"Métallurgie (machines)", secteur:"Industrie" },
+  { prefix:"29", idcc:"0054", nom:"Métallurgie (automobile)", secteur:"Industrie" },
+  { prefix:"30", idcc:"0054", nom:"Métallurgie (autres matériels de transport)", secteur:"Industrie" },
+  { prefix:"31", idcc:"1411", nom:"Ameublement", secteur:"Industrie" },
+  { prefix:"33", idcc:"0054", nom:"Métallurgie (réparation, installation)", secteur:"Industrie" },
+  // Énergie, eau, déchets
+  { prefix:"35", idcc:"variable (IEG / branches énergie)", nom:"Production et distribution d'énergie", secteur:"Industrie" },
+  { prefix:"36", idcc:"5021", nom:"Eau et assainissement", secteur:"Industrie" },
+  { prefix:"38", idcc:"variable", nom:"Collecte, traitement des déchets", secteur:"Propreté" },
+  // Construction
+  { prefix:"41", idcc:"1596/2609", nom:"Bâtiment — ouvriers / ETAM selon effectif", secteur:"Construction" },
+  { prefix:"42", idcc:"1702", nom:"Travaux publics", secteur:"Construction" },
+  { prefix:"43", idcc:"1596/2609", nom:"Bâtiment — corps d'état techniques", secteur:"Construction" },
+  // Commerce
+  { prefix:"45", idcc:"1090", nom:"Commerce et réparation automobile", secteur:"Commerce" },
+  { prefix:"46", idcc:"1408/0573", nom:"Commerce de gros (selon produits)", secteur:"Commerce" },
+  { prefix:"47", idcc:"2216", nom:"Commerce de détail à prédominance alimentaire", secteur:"Commerce" },
+  // Transport / logistique
+  { prefix:"49", idcc:"0016", nom:"Transports routiers et activités auxiliaires", secteur:"Transport" },
+  { prefix:"50", idcc:"0016", nom:"Transport fluvial et maritime", secteur:"Transport" },
+  { prefix:"51", idcc:"0275", nom:"Transport aérien", secteur:"Transport" },
+  { prefix:"52", idcc:"0016/3013", nom:"Entreposage et manutention", secteur:"Transport" },
+  { prefix:"53", idcc:"2216", nom:"Activités de poste et de courrier", secteur:"Transport" },
+  // Hôtellerie-restauration
+  { prefix:"55", idcc:"1979", nom:"Hôtellerie de tourisme", secteur:"Hôtellerie-restauration" },
+  { prefix:"56", idcc:"1979", nom:"Hôtels, cafés, restaurants (HCR)", secteur:"Hôtellerie-restauration" },
+  // Information, communication
+  { prefix:"58", idcc:"0043", nom:"Édition", secteur:"Communication" },
+  { prefix:"59", idcc:"2642", nom:"Production audiovisuelle / cinéma", secteur:"Communication" },
+  { prefix:"60", idcc:"2642", nom:"Radio et télédiffusion", secteur:"Communication" },
+  { prefix:"61", idcc:"variable", nom:"Télécommunications", secteur:"Informatique / Conseil" },
+  { prefix:"62", idcc:"1486", nom:"Bureaux d'études techniques (Syntec)", secteur:"Informatique / Conseil" },
+  { prefix:"63", idcc:"1486", nom:"Bureaux d'études techniques (Syntec)", secteur:"Informatique / Conseil" },
+  // Finance, assurance
+  { prefix:"64", idcc:"2120", nom:"Banque", secteur:"Banque / Assurance" },
+  { prefix:"65", idcc:"1672", nom:"Sociétés d'assurance", secteur:"Banque / Assurance" },
+  { prefix:"66", idcc:"1672/2247", nom:"Activités financières et agents généraux d'assurance", secteur:"Banque / Assurance" },
+  // Immobilier
+  { prefix:"68", idcc:"1527", nom:"Immobilier (administration de biens, agences)", secteur:"Immobilier" },
+  // Conseil, juridique, technique
+  { prefix:"69", idcc:"1850/1607", nom:"Cabinets d'avocats / experts-comptables (selon activité)", secteur:"Professions juridiques" },
+  { prefix:"70", idcc:"1486", nom:"Sièges sociaux, conseil de gestion (Syntec)", secteur:"Conseil" },
+  { prefix:"71", idcc:"1486/2332", nom:"Ingénierie / architecture", secteur:"Ingénierie" },
+  { prefix:"72", idcc:"1486", nom:"Recherche-développement scientifique", secteur:"Informatique / Conseil" },
+  { prefix:"73", idcc:"0086", nom:"Publicité et études de marché", secteur:"Communication" },
+  { prefix:"74", idcc:"1486", nom:"Activités spécialisées, scientifiques et techniques diverses", secteur:"Conseil" },
+  { prefix:"75", idcc:"variable", nom:"Activités vétérinaires", secteur:"Santé" },
+  // Services administratifs et de soutien
+  { prefix:"77", idcc:"1423", nom:"Location et location-bail", secteur:"Commerce" },
+  { prefix:"78", idcc:"1413", nom:"Travail temporaire et placement de main-d'œuvre", secteur:"Conseil" },
+  { prefix:"79", idcc:"1710", nom:"Agences de voyage et voyagistes", secteur:"Hôtellerie-restauration" },
+  { prefix:"80", idcc:"1351", nom:"Prévention et sécurité privée", secteur:"Sécurité" },
+  { prefix:"81", idcc:"3241/1043", nom:"Propreté et nettoyage / services aux bâtiments", secteur:"Propreté" },
+  { prefix:"82", idcc:"1486", nom:"Centres d'appels, services administratifs (Syntec selon activité)", secteur:"Informatique / Conseil" },
+  // Administration publique, enseignement, santé, social
+  { prefix:"84", idcc:"n/a (fonction publique)", nom:"Administration publique", secteur:"default" },
+  { prefix:"85", idcc:"variable (branches de l'enseignement privé)", nom:"Enseignement privé — à préciser", secteur:"Enseignement" },
+  { prefix:"86", idcc:"0029/2264", nom:"Établissements de santé (hospitalisation privée)", secteur:"Santé" },
+  { prefix:"87", idcc:"0413", nom:"Établissements et services pour personnes inadaptées et handicapées", secteur:"Médico-social" },
+  { prefix:"88", idcc:"3239/0413", nom:"Action sociale sans hébergement (aide à domicile...)", secteur:"Médico-social" },
+  // Arts, spectacles, autres services
+  { prefix:"90", idcc:"1285", nom:"Spectacle vivant", secteur:"Communication" },
+  { prefix:"93", idcc:"1631", nom:"Sport / activités récréatives", secteur:"default" },
+  { prefix:"94", idcc:"variable (selon association)", nom:"Organisations associatives", secteur:"default" },
+  { prefix:"95", idcc:"1686", nom:"Réparation d'ordinateurs et de biens personnels", secteur:"Commerce" },
+  { prefix:"96", idcc:"3032", nom:"Coiffure et soins de beauté", secteur:"Coiffure / Esthétique" },
+  { prefix:"97", idcc:"3180", nom:"Emploi à domicile (particuliers employeurs)", secteur:"Médico-social" },
+];
+
+const SECTEUR_RISQUES = {
+  "Construction":[
+    {niv:"haut", titre:"Chutes de hauteur et coactivité chantier", desc:"Premier facteur d'accidents graves du secteur ; plan de prévention obligatoire si coactivité."},
+    {niv:"haut", titre:"Amiante et matériaux dangereux", desc:"Repérage avant travaux obligatoire sur bâtiments anciens (RAT)."},
+    {niv:"moyen", titre:"Troubles musculo-squelettiques", desc:"Manutention manuelle, postures contraignantes récurrentes."},
+  ],
+  "Commerce":[
+    {niv:"moyen", titre:"Manutention et port de charges", desc:"Réassort, réception de marchandises."},
+    {niv:"moyen", titre:"Sécurité incendie ERP", desc:"Registre de sécurité et vérifications périodiques si magasin ouvert au public."},
+    {niv:"moyen", titre:"Vol et sécurité des espèces", desc:"Procédures de caisse et de fond de sécurité."},
+  ],
+  "Hôtellerie-restauration":[
+    {niv:"haut", titre:"Hygiène alimentaire (HACCP)", desc:"Plan de maîtrise sanitaire obligatoire en restauration."},
+    {niv:"moyen", titre:"Coupures, brûlures, chutes en cuisine", desc:"Sinistralité élevée sur les postes de cuisine et plonge."},
+    {niv:"moyen", titre:"Travail de nuit / horaires décalés", desc:"Contreparties conventionnelles spécifiques."},
+  ],
+  "Informatique / Conseil":[
+    {niv:"haut", titre:"Risques psychosociaux (charge, délais)", desc:"Secteur particulièrement exposé, à surveiller via le DUERP."},
+    {niv:"moyen", titre:"Travail sur écran prolongé", desc:"Troubles visuels et musculo-squelettiques liés au poste."},
+    {niv:"moyen", titre:"Forfait-jours et suivi du temps de travail", desc:"Contentieux fréquent sur le suivi de la charge de travail."},
+  ],
+  "Conseil":[
+    {niv:"moyen", titre:"Risques psychosociaux", desc:"Charge de travail et déplacements fréquents."},
+    {niv:"moyen", titre:"Forfait-jours", desc:"Encadrement conventionnel du temps de travail à vérifier."},
+  ],
+  "Transport":[
+    {niv:"haut", titre:"Risque routier", desc:"Premier risque professionnel mortel du secteur."},
+    {niv:"haut", titre:"Réglementation temps de conduite/repos", desc:"Chronotachygraphe et contrôle des temps obligatoires."},
+    {niv:"moyen", titre:"Manutention lors du chargement/déchargement", desc:"Selon activité (messagerie, déménagement...)."},
+  ],
+  "Propreté":[
+    {niv:"haut", titre:"Exposition aux produits chimiques", desc:"Fiches de données de sécurité et EPI à jour indispensables."},
+    {niv:"moyen", titre:"Horaires fragmentés / temps partiel", desc:"Point de vigilance social récurrent du secteur."},
+  ],
+  "Industrie":[
+    {niv:"haut", titre:"Machines et équipements de travail", desc:"Conformité et maintenance des équipements sous vigilance renforcée."},
+    {niv:"haut", titre:"Bruit et vibrations", desc:"Suivi individuel renforcé selon exposition."},
+    {niv:"moyen", titre:"Troubles musculo-squelettiques", desc:"Postes répétitifs sur ligne de production."},
+  ],
+  "Agroalimentaire":[
+    {niv:"haut", titre:"Hygiène et sécurité sanitaire", desc:"Traçabilité et plan de maîtrise sanitaire stricts."},
+    {niv:"moyen", titre:"Ambiances thermiques (froid/chaud)", desc:"Postes en chambre froide ou zone de cuisson."},
+  ],
+  "Médico-social":[
+    {niv:"haut", titre:"Risques psychosociaux et charge émotionnelle", desc:"Accompagnement de publics vulnérables."},
+    {niv:"moyen", titre:"Manutention de personnes", desc:"Aide au déplacement, formation gestes et postures recommandée."},
+  ],
+  "Agriculture":[
+    {niv:"haut", titre:"Utilisation de produits phytosanitaires", desc:"Certiphyto et suivi médical renforcé selon exposition."},
+    {niv:"haut", titre:"Machines agricoles", desc:"Premier poste d'accidents graves du secteur."},
+  ],
+  "default":[
+    {niv:"moyen", titre:"Risques génériques à préciser", desc:"Aucune fiche sectorielle prête pour ce code APE — à compléter au cas par cas lors de l'audit."},
+  ]
+};
+
+/* ---------- Seuils sociaux (obligations liées à l'effectif) ---------- */
+const SEUILS = [
+  { min:1, titre:"Document unique d'évaluation des risques (DUERP)", desc:"Obligatoire dès le premier salarié, à mettre à jour au moins une fois par an.",
+    exemple:{ headers:["Unité de travail","Risque identifié","Mesure de prévention"], rows:[["Atelier / chantier","Chute de hauteur","Port du harnais, garde-corps"],["Bureau","Troubles musculo-squelettiques","Siège ergonomique, pauses régulières"]] },
+    fichier:{ nom:"DUERP-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
+  { min:1, titre:"Affichages obligatoires", desc:"Durée du travail, égalité professionnelle, harcèlement, coordonnées inspection du travail et médecine du travail.",
+    exemple:{ headers:["Affichage","Contenu"], rows:[["Horaires de travail","Heures de début/fin, pauses"],["Numéros utiles","Inspection du travail, médecine du travail, secours"]] },
+    fichier:{ nom:"Checklist-Affichages-Obligatoires-Simplika.docx", label:"⬇ Télécharger la checklist à imprimer" } },
+  { min:11, titre:"Mise en place du CSE", desc:"Obligatoire si l'effectif atteint 11 salariés pendant 12 mois consécutifs.",
+    exemple:{ headers:["Étape","Délai indicatif"], rows:[["Information du personnel","Dès le seuil atteint"],["Élections professionnelles","Dans les mois qui suivent"]] } },
+  { min:20, titre:"Obligation d'emploi de travailleurs handicapés (OETH)", desc:"Déclaration et contribution si le quota de 6% n'est pas atteint.",
+    exemple:{ headers:["Élément à suivre","Exemple"], rows:[["Effectif total","45 salariés"],["Quota théorique (6%)","≈ 3 postes"]] } },
+  { min:50, titre:"Règlement intérieur", desc:"Obligatoire ; doit reprendre les règles d'hygiène, de sécurité et de discipline.",
+    exemple:{ headers:["Rubrique","Exemple de contenu"], rows:[["Hygiène et sécurité","Port des EPI obligatoire sur chantier"],["Discipline","Procédure en cas de retard répété"]] } },
+  { min:50, titre:"CSE avec attributions renforcées + BDESE", desc:"Base de données économiques, sociales et environnementales à jour.",
+    exemple:{ headers:["Rubrique BDESE","Exemple de donnée"], rows:[["Investissements","Montant investi sur l'année"],["Égalité professionnelle","Écart de rémunération H/F"]] } },
+  { min:50, titre:"Index de l'égalité professionnelle", desc:"Calcul et publication annuels obligatoires.",
+    exemple:{ headers:["Indicateur","Exemple de résultat"], rows:[["Écart de rémunération","37 / 40 points"],["Note globale","82 / 100"]] } },
+  { min:50, titre:"Participation obligatoire", desc:"Accord de participation aux résultats si l'effectif est atteint pendant 5 exercices consécutifs.",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Bénéfice net","120 000 €"],["Réserve spéciale de participation","Calculée selon la formule légale"]] } },
+  { min:300, titre:"Gestion prévisionnelle des emplois et des compétences (GPEC)", desc:"Négociation triennale obligatoire.",
+    exemple:{ headers:["Thème abordé","Exemple"], rows:[["Métiers en évolution","Digitalisation d'un poste administratif"],["Plan de formation associé","Formation logiciel de gestion"]] } },
+];
+
+/* ---------- Obligations administratives (indépendantes de l'effectif), avec liens vers les sources officielles ---------- */
+const OBLIGATIONS_ADMIN = [
+  { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/embaucher-gerer-salaries/embaucher/declaration-prealable-embauche.html",
+    exemple:{ headers:["Information à préparer","Exemple"], rows:[["Identité du salarié","Nom, prénom, date et lieu de naissance"],["Numéro de sécurité sociale","Si déjà connu"],["Date d'embauche prévue","01/09/2026"]] } },
+  { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F1784",
+    exemple:{ headers:["Nom / Prénom","Date d'embauche","Emploi occupé","Type de contrat"], rows:[["Dupont Marie","03/01/2025","Assistante administrative","CDI"],["Martin Paul","15/06/2025","Ouvrier qualifié","CDD 6 mois"]] },
+    fichier:{ nom:"Registre-Unique-Personnel-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
+  { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite d'information et de prévention (VIP) auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F23107",
+    exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Poste et qualification","Ouvrier qualifié, niveau N2"],["Rémunération","Selon grille conventionnelle applicable"],["Date de la VIP","À planifier dans les 3 mois"]] } },
+  { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://travail-emploi.gouv.fr/les-services-de-prevention-et-de-sante-au-travail-autonomes-et-interentreprises",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Service choisi","SPST interentreprises de votre secteur"],["Cotisation annuelle","Variable selon effectif"]] } },
+  { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F33754",
+    exemple:{ headers:["Élément du contrat","Exemple"], rows:[["Organisme choisi","Mutuelle ou assureur au choix"],["Participation employeur","50% minimum, souvent plus selon la convention"]] } },
+
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/gerer-entreprise/declaration-sociale-nominative.html",
+    exemple:{ headers:["Donnée transmise","Fréquence"], rows:[["Salaires et cotisations","Chaque mois"],["Arrêt de travail","Dès la survenance"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Bulletin de paie conforme", desc:"Mentions obligatoires précises (convention collective, classification, cotisations détaillées) — modèle simplifié en vigueur depuis 2018.",
+    exemple:{ headers:["Mention obligatoire","Exemple"], rows:[["Convention collective","IDCC 1596 — Bâtiment ouvriers"],["Coefficient / classification","Niveau II, coefficient 185"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Registre des accidents du travail bénins", desc:"À tenir si l'entreprise dispose d'un poste de secours et d'un médecin/infirmier, pour les accidents ne nécessitant pas d'arrêt ni de soins médicaux externes.",
+    exemple:{ headers:["Date","Salarié","Circonstances","Soins donnés"], rows:[["12/03/2026","Martin Paul","Petite coupure à la main","Pansement"],["28/04/2026","Dupont Marie","Contusion légère","Repos 10 min, aucun soin"]] },
+    fichier:{ nom:"Registre-Accidents-Benins-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels (réforme en cours)", desc:"Jusqu'ici tous les 2 ans, plus bilan à 6 ans. À compter du 1er octobre 2026 (loi du 24/10/2025) : remplacés par l'entretien de parcours professionnel (EPP), tous les 4 ans — à vérifier selon la date de l'audit.", lien:"https://www.service-public.gouv.fr/particuliers/vosdroits/F32040",
+    exemple:{ headers:["Élément abordé","Exemple"], rows:[["Souhaits d'évolution","Formation envisagée, mobilité interne"],["Compte-rendu signé","Par le salarié et l'employeur"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Contribution à la formation professionnelle et taxe d'apprentissage", desc:"Contribution unique collectée par l'URSSAF, taux variable selon l'effectif.",
+    exemple:{ headers:["Élément","Exemple"], rows:[["Taux applicable","Variable selon effectif (à vérifier chaque année)"],["Base de calcul","Masse salariale annuelle brute"]] } },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Médailles du travail, prime de partage de la valeur (facultatif)", desc:"Non obligatoires mais fréquemment audités car mal maîtrisés — vérifier si l'entreprise en verse.",
+    exemple:{ headers:["Dispositif","Exemple"], rows:[["Prime de partage de la valeur","Montant et conditions d'attribution à documenter"]] } },
+
+  { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.infogreffe.fr/dossiers-thematiques/vie-de-l-entreprise/gerer-l-entreprise/le-proces-verbal-d-assemblee-d-approbation-des-comptes-des-societes-commerciales",
+    exemple:{ headers:["Élément du PV","Exemple"], rows:[["Date et lieu","15/06/2026, siège social"],["Résolution votée","Approbation des comptes de l'exercice 2025"]] },
+    fichier:{ nom:"Modele-PV-Assemblee-Generale-Simplika.docx", label:"⬇ Télécharger le modèle Word à compléter" } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Registre des délibérations / décisions", desc:"Registre légal côté et paraphé, ou registre dématérialisé conforme, où sont consignées toutes les décisions collectives des associés/actionnaires.",
+    exemple:{ headers:["Date","Décision"], rows:[["15/06/2026","Approbation des comptes annuels"],["20/09/2026","Nomination d'un nouveau gérant"]] },
+    fichier:{ nom:"Registre-Deliberations-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans le mois suivant l'approbation des comptes en assemblée (délai porté à 2 mois en cas de dépôt par voie électronique).", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F31214",
+    exemple:{ headers:["Document déposé","Délai"], rows:[["Bilan, compte de résultat, annexe","1 mois après l'AG (2 mois en ligne)"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Registre des bénéficiaires effectifs", desc:"Déclaration au greffe du tribunal de commerce, obligatoire pour la plupart des sociétés.",
+    exemple:{ headers:["Élément déclaré","Exemple"], rows:[["Bénéficiaire effectif","Nom du dirigeant détenant plus de 25% des parts"]] } },
+  { categorie:"Vie sociale de l'entreprise", titre:"Suivi des dépôts au greffe (bonne pratique — pas une obligation légale distincte)", desc:"Il n'existe pas de \"registre des dépôts au greffe\" imposé sous ce nom en droit français. En revanche, garder une trace chronologique de chaque dépôt (comptes annuels, statuts modifiés, changement de dirigeant...) avec son numéro de récépissé est une excellente pratique, utile en cas de contrôle ou de litige.",
+    exemple:{ headers:["Date de dépôt","Type de document","N° de récépissé"], rows:[["15/07/2026","Comptes annuels","GU-2026-048213"]] },
+    fichier:{ nom:"Suivi-Depots-Greffe-Simplika.xlsx", label:"⬇ Télécharger le modèle Excel prêt à l'emploi" } },
+];
+
+/* ---------- Grilles de rémunération connues (indicatif, année de validité indiquée — à revérifier) ---------- */
+const GRILLES_CONNUES = {
+  "1486": {
+    annee: "2026",
+    source: "Avenant du 26 juin 2024 (étendu), SMIC applicable en dessous",
+    url: "https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635573",
+    lignes: [
+      { niveau:"ETAM — position 1.1 (coef. 240)", repere:"SMIC applicable", minimum:"1 867,02 € (SMIC, minimum conventionnel inférieur)" },
+      { niveau:"ETAM — position 2.3 (coef. 355)", repere:"coef. 355", minimum:"2 045 €" },
+      { niveau:"ETAM — position 3.3 (coef. 500)", repere:"coef. 500", minimum:"2 490 €" },
+      { niveau:"Cadre — position 1.1 (coef. 95)", repere:"coef. 95", minimum:"2 135 €" },
+      { niveau:"Cadre — position 3.3 (coef. 270)", repere:"coef. 270", minimum:"5 755 €" },
+    ]
+  },
+  "1979": {
+    annee: "2026",
+    source: "Avenant n°33 du 19 juin 2024 (étendu), SMIC applicable en dessous",
+    url: "https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635182",
+    lignes: [
+      { niveau:"Niveau I — échelon 1", repere:"coef. 118", minimum:"1 867,02 € (SMIC, minimum conventionnel inférieur)" },
+      { niveau:"Niveau II — échelon 1", repere:"coef. 125", minimum:"≈ 1 850 €" },
+      { niveau:"Niveau III — échelon 1", repere:"coef. 140", minimum:"≈ 2 072 €" },
+      { niveau:"Niveau IV — échelon 1", repere:"coef. 160", minimum:"≈ 2 368 €" },
+      { niveau:"Niveau V — échelon 1", repere:"coef. 190", minimum:"≈ 2 814 € (jusqu'à 4 265 € en échelon 3)" },
+    ]
+  },
+  "2216": {
+    annee: "2026",
+    source: "Avenant n°99 du 17 avril 2026, applicable depuis le 1er août 2026",
+    url: "https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635915",
+    lignes: [
+      { niveau:"Niveau 1 (employé)", repere:"échelon A", minimum:"1 867,02 € (SMIC, minimum conventionnel inférieur)" },
+      { niveau:"Niveau 1 (employé)", repere:"échelon B", minimum:"≈ 1 824,59 € → SMIC applicable" },
+      { niveau:"Niveau 8 (cadre confirmé)", repere:"—", minimum:"3 996,47 €" },
+    ]
+  },
+};
+
+function getGrilleConnuePourConvention(idccLabel){
+  const m = (idccLabel||"").match(/IDCC\s*(\d{3,4})/);
+  if(!m) return null;
+  return GRILLES_CONNUES[m[1]] || null;
+}
+
+/* ---------- Utilitaires ---------- */
+function matchApe(ape){
+  if(!ape) return null;
+  const prefix2 = ape.slice(0,2);
+  return APE_CCN.find(r => r.prefix === prefix2) || null;
+}
+
+let currentData = { name:"", ape:"", idccLabel:"", secteur:"default", effectif:0 };
+
+/* ---------- Onglets identification ---------- */
+document.querySelectorAll('.audit-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.audit-tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.audit-tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('audit-tab-'+btn.dataset.auditTab).classList.add('active');
+  });
+});
+
+/* ---------- Recherche SIRET ---------- */
+async function fetchJson(url){
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error("HTTP "+resp.status);
+  return resp.json();
+}
+
+// Tente plusieurs stratégies de requête, car l'API indexe surtout au niveau SIREN :
+// 1) recherche directe sur le SIRET complet, 2) filtre officiel siren:XXXXXXXXX,
+// 3) recherche texte brut sur le SIREN seul.
+async function lookupBySiretOrSiren(siret, siren){
+  const attempts = [
+    "https://recherche-entreprises.api.gouv.fr/search?q="+siret+"&page=1&per_page=5",
+    "https://recherche-entreprises.api.gouv.fr/search?q=siren:"+siren+"&page=1&per_page=5",
+    "https://recherche-entreprises.api.gouv.fr/search?q="+siren+"&page=1&per_page=5",
+  ];
+  for(const url of attempts){
+    try{
+      const data = await fetchJson(url);
+      if(data.results && data.results.length>0) return data.results;
+    }catch(e){ /* on tente la stratégie suivante */ }
+  }
+  return [];
+}
+
+document.getElementById('btnSiret').addEventListener('click', async ()=>{
+  const raw = document.getElementById('siretInput').value.replace(/\D/g,'');
+  const errEl = document.getElementById('siretError');
+  const resEl = document.getElementById('siretResult');
+  errEl.style.display='none'; resEl.classList.remove('show');
+  if(!/^\d{9}$/.test(raw) && !/^\d{14}$/.test(raw)){
+    errEl.textContent = "Format attendu : 9 chiffres (SIREN) ou 14 chiffres (SIRET).";
+    errEl.style.display='block';
+    return;
+  }
+  const siret = raw.length===14 ? raw : "";
+  const siren = raw.length===14 ? raw.slice(0,9) : raw;
+
+  const btn = document.getElementById('btnSiret');
+  btn.disabled = true; btn.textContent = "Recherche...";
+  try{
+    const results = await lookupBySiretOrSiren(siret||siren, siren);
+    if(results.length===0){
+      throw new Error("Aucun résultat pour ce numéro.");
+    }
+    // Le SIREN peut correspondre à plusieurs unités légales homonymes : on prend
+    // celle dont le SIREN correspond exactement.
+    const r = results.find(x => x.siren === siren) || results[0];
+
+    // On cherche l'établissement précis (SIRET) dans les établissements correspondants ;
+    // à défaut on retombe sur le siège, puis sur l'activité de l'unité légale.
+    let etab = null;
+    if(siret && Array.isArray(r.matching_etablissements)){
+      etab = r.matching_etablissements.find(e => e.siret === siret);
+    }
+    if(!etab && r.siege && (!siret || r.siege.siret === siret)) etab = r.siege;
+    if(!etab && Array.isArray(r.matching_etablissements) && r.matching_etablissements.length>0){
+      etab = r.matching_etablissements[0];
+    }
+
+    const apeRaw = (etab && etab.activite_principale) || r.activite_principale || "";
+    const ape = apeRaw.replace(".","");
+    const libelleApe = (etab && etab.libelle_activite_principale) || r.libelle_activite_principale || "";
+    const nom = r.nom_complet || r.nom_raison_sociale || "Entreprise";
+    const siretAffiche = (etab && etab.siret) || siret || "—";
+
+    document.getElementById('resName').textContent = nom;
+    document.getElementById('resMeta').textContent =
+      "SIRET " + siretAffiche + " · APE " + (apeRaw||"?") + " — " + libelleApe;
+    resEl.classList.add('show');
+    resEl.dataset.name = nom;
+    resEl.dataset.ape = ape;
+  }catch(e){
+    errEl.textContent = "Recherche impossible : " + e.message + " Vous pouvez basculer sur la saisie manuelle.";
+    errEl.style.display='block';
+  }finally{
+    btn.disabled = false; btn.textContent = "Rechercher";
+  }
+});
+
+/* ---------- Lancer l'audit ---------- */
+document.getElementById('btnAudit').addEventListener('click', ()=>{
+  const isSiretTab = document.getElementById('audit-tab-siret').classList.contains('active');
+  let name, ape, idccInput;
+  const effectif = parseInt(document.getElementById('effectif').value || "0", 10);
+
+  if(isSiretTab){
+    const resEl = document.getElementById('siretResult');
+    name = resEl.dataset.name || "Entreprise non identifiée";
+    ape = resEl.dataset.ape || "";
+  } else {
+    name = document.getElementById('manName').value || "Entreprise non identifiée";
+    ape = document.getElementById('manApe').value.trim().toUpperCase();
+    idccInput = document.getElementById('manIdcc').value.trim();
+  }
+
+  const match = matchApe(ape);
+  const secteur = match ? match.secteur : "default";
+  const idccLabel = idccInput ? idccInput : (match ? ("IDCC " + match.idcc + " — " + match.nom) : "Convention non déterminée — à renseigner manuellement");
+
+  // Journal discret côté serveur (best-effort, ne bloque jamais l'utilisateur — paiement en sommeil).
+  callBackend({ action:"log_audit_free", entreprise:name, ape: ape||"—", convention: idccLabel, effectif }).catch(()=>{});
+
+  currentData = { name, ape: ape||"—", idccLabel, secteur, effectif };
+  grilleRows = [ {niveau:"", repere:"", minimum:""} ];
+  renderAuditDashboard();
+});
+
+function estEnEssaiLimite(){
+  return session.plan === 'essai' && session.dateFin && new Date(session.dateFin) >= new Date();
+}
+
+function teaserHtml(nbCaches, label){
+  return '<div class="disclaimer" style="background:var(--brass-soft); border-color:#e0d3ad; color:#7a5f24; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">'+
+    '<span><strong>Version essai :</strong> '+nbCaches+' '+label+' supplémentaire(s) disponible(s) avec l\'abonnement ou le paiement à l\'utilisation.</span>'+
+    '<button class="btn" style="background:var(--brass); flex-shrink:0;" onclick="document.getElementById(\'accessGate\').scrollIntoView({behavior:\'smooth\'})">Débloquer l\'accès complet</button>'+
+    '</div>';
+}
+
+function renderAuditDashboard(){
+  document.getElementById('auditDashboard').classList.add('show');
+  document.getElementById('dashName').textContent = currentData.name;
+  document.getElementById('dashMeta').textContent =
+    "APE " + currentData.ape + " · " + currentData.idccLabel + " · Effectif : " + (currentData.effectif||"non renseigné");
+  document.getElementById('auditDashboard').scrollIntoView({behavior:"smooth", block:"start"});
+
+  renderObligations();
+  renderGrille();
+  renderRisques();
+}
+
+// Construit un bouton "Voir un exemple" + un mini-tableau replié par défaut, à partir de {headers, rows}.
+function exempleHtml(id, exemple, fichier){
+  if(!exemple) return '';
+  const table = '<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px;">' +
+    '<thead><tr>' + exemple.headers.map(h=> '<th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); font-family:IBM Plex Mono,monospace; font-size:10.5px; text-transform:uppercase; color:var(--ink-soft);">'+h+'</th>').join('') + '</tr></thead>' +
+    '<tbody>' + exemple.rows.map(r=> '<tr>'+r.map(c=> '<td style="padding:6px 8px; border-bottom:1px solid var(--line);">'+c+'</td>').join('')+'</tr>').join('') + '</tbody></table>';
+  const fichierHtml = fichier ? '<a href="'+fichier.nom+'" download style="display:inline-block; margin-top:10px; background:var(--accent); color:#fff; border-radius:20px; padding:6px 14px; font-size:12px; text-decoration:none;">'+fichier.label+'</a>' : '';
+  return '<button type="button" class="btn-exemple" data-target="'+id+'" style="background:none; border:1px solid var(--line); border-radius:20px; padding:4px 12px; font-size:12px; color:var(--accent); cursor:pointer; margin-top:6px;">📄 Voir un exemple</button>' +
+    '<div id="'+id+'" style="display:none; background:var(--card); border-radius:6px; padding:4px 12px 10px;">'+table+fichierHtml+'</div>';
+}
+function activerBoutonsExemple(){
+  document.querySelectorAll('.btn-exemple').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cible = document.getElementById(btn.dataset.target);
+      const ouvert = cible.style.display !== 'none';
+      cible.style.display = ouvert ? 'none' : 'block';
+      btn.textContent = ouvert ? '📄 Voir un exemple' : '📄 Masquer l\'exemple';
+    });
+  });
+}
+
+function renderObligations(){
+  const el = document.getElementById('dash-obligations');
+  el.innerHTML = "";
+  const limite = estEnEssaiLimite();
+
+  const sousTitre1 = document.createElement('h4');
+  sousTitre1.textContent = "Obligations liées à l'effectif";
+  sousTitre1.style.marginBottom = "4px";
+  el.appendChild(sousTitre1);
+
+  const seuilsAffiches = limite ? SEUILS.slice(0,2) : SEUILS;
+  seuilsAffiches.forEach((s,i)=>{
+    const applic = currentData.effectif >= s.min;
+    const div = document.createElement('div');
+    div.className = "oblig-item";
+    div.innerHTML =
+      '<div class="seuil">≥ '+s.min+' sal.</div>'+
+      '<div><h4>'+s.titre+'</h4><p>'+s.desc+'</p>'+
+      '<span class="badge '+(applic?'applic':'napplic')+'">'+(applic?'Applicable':'Non atteint')+'</span>'+
+      exempleHtml('ex-seuil-'+i, s.exemple, s.fichier)+
+      '</div>';
+    el.appendChild(div);
+  });
+
+  if(limite && SEUILS.length > seuilsAffiches.length){
+    const t = document.createElement('div');
+    t.innerHTML = teaserHtml(SEUILS.length - seuilsAffiches.length, "seuil social");
+    el.appendChild(t);
+  }
+
+  const disc1 = document.createElement('div');
+  disc1.className = "disclaimer";
+  disc1.innerHTML = "<strong>À vérifier :</strong> ces seuils sociaux sont ceux du droit du travail général ; la convention collective peut ajouter des obligations spécifiques (classification, primes, durée du travail).";
+  el.appendChild(disc1);
+
+  // Obligations administratives, groupées par catégorie, indépendantes de l'effectif
+  const categoriesToutes = [...new Set(OBLIGATIONS_ADMIN.map(o=>o.categorie))];
+  const categories = limite ? categoriesToutes.slice(0,1) : categoriesToutes;
+  let nbAffiches = 0;
+
+  categories.forEach((cat, ci)=>{
+    const h = document.createElement('h4');
+    h.textContent = cat;
+    h.style.marginTop = "28px";
+    h.style.marginBottom = "4px";
+    el.appendChild(h);
+
+    const itemsCat = OBLIGATIONS_ADMIN.filter(o=>o.categorie===cat);
+    const itemsAffiches = (limite && ci===0) ? itemsCat.slice(0,2) : itemsCat;
+    nbAffiches += itemsAffiches.length;
+
+    itemsAffiches.forEach((o,i)=>{
+      const div = document.createElement('div');
+      div.className = "oblig-item";
+      div.style.gridTemplateColumns = "1fr";
+      const lienHtml = o.lien ? '<a href="'+o.lien+'" target="_blank" rel="noopener" style="font-family:IBM Plex Mono,monospace; font-size:12px; color:var(--accent); margin-right:12px;">→ source officielle</a>' : '';
+      div.innerHTML = '<div><h4>'+o.titre+'</h4><p>'+o.desc+'</p>'+lienHtml+exempleHtml('ex-admin-'+ci+'-'+i, o.exemple, o.fichier)+'</div>';
+      el.appendChild(div);
+    });
+  });
+
+  if(limite){
+    const t2 = document.createElement('div');
+    t2.innerHTML = teaserHtml(OBLIGATIONS_ADMIN.length - nbAffiches, "obligation administrative");
+    el.appendChild(t2);
+  }
+
+  const disc2 = document.createElement('div');
+  disc2.className = "disclaimer";
+  disc2.innerHTML = "<strong>Important :</strong> cette liste couvre les obligations les plus fréquemment auditées, pas l'intégralité du droit social et du droit des sociétés. Certaines obligations dépendent de la forme juridique (SARL, SAS, entreprise individuelle...) ou du secteur (habilitations, licences). À compléter au cas par cas.";
+  el.appendChild(disc2);
+
+  activerBoutonsExemple();
+}
+
+let grilleRows = [ {niveau:"", repere:"", minimum:""} ];
+
+function renderGrille(){
+  const el = document.getElementById('dash-grille');
+  const connue = getGrilleConnuePourConvention(currentData.idccLabel);
+  const limite = estEnEssaiLimite();
+
+  let bandeau = '<p class="hint" style="margin-bottom:14px;">Grille pour « '+currentData.idccLabel+' » — les lignes ci-dessous sont modifiables : ajoute, corrige ou complète selon la grille réellement en vigueur au moment de l\'audit.</p>';
+  if(connue){
+    bandeau = '<div class="disclaimer" style="background:var(--accent-soft); border-color:#bcd6d1; color:var(--accent); margin-bottom:16px;">'+
+      '<strong>Année de validité : '+connue.annee+'</strong> — '+connue.source+
+      (connue.url ? ' — <a href="'+connue.url+'" target="_blank" rel="noopener" style="color:var(--accent);">voir le texte sur Légifrance</a>' : '')+
+      '<br>Pré-rempli à titre indicatif : à revérifier avant de le communiquer à un client, ces montants évoluent par accord de branche.</div>';
+  }
+
+  el.innerHTML = bandeau +
+    '<table class="grille" id="grilleTable"><thead><tr><th>Niveau / catégorie</th><th>Repère (coefficient, échelon...)</th><th>Minimum conventionnel</th><th></th></tr></thead><tbody id="grilleBody"></tbody></table>'+
+    (limite ? '' : '<button class="btn" id="btnAddRow" style="margin-top:14px; background:var(--accent-soft); color:var(--accent);">+ Ajouter une ligne</button>')+
+    '<div class="disclaimer"><strong>Important :</strong> les minima conventionnels évoluent chaque année (NAO). Ne jamais s\'appuyer sur une valeur mémorisée d\'une session précédente sans la revérifier.</div>';
+
+  if(connue && grilleRows.length === 1 && !grilleRows[0].niveau && !grilleRows[0].minimum){
+    grilleRows = connue.lignes.map(l => ({ ...l }));
+  }
+
+  if(limite && grilleRows.length > 1){
+    const total = grilleRows.length;
+    renderGrilleRows(grilleRows.slice(0,1), true);
+    const t = document.createElement('div');
+    t.innerHTML = teaserHtml(total - 1, "ligne de grille");
+    el.appendChild(t);
+    return;
+  }
+
+  renderGrilleRows(grilleRows, limite);
+  if(!limite){
+    document.getElementById('btnAddRow').addEventListener('click', ()=>{
+      grilleRows.push({niveau:"", repere:"", minimum:""});
+      renderGrilleRows(grilleRows, false);
+    });
+  }
+}
+
+function renderGrilleRows(rows, lectureSeule){
+  const body = document.getElementById('grilleBody');
+  body.innerHTML = "";
+  rows.forEach((row, i)=>{
+    const tr = document.createElement('tr');
+    if(lectureSeule){
+      tr.innerHTML =
+        '<td>'+(row.niveau||'—')+'</td><td>'+(row.repere||'—')+'</td><td class="val">'+(row.minimum||'—')+'</td><td></td>';
+      body.appendChild(tr);
+      return;
+    }
+    tr.innerHTML =
+      '<td><input type="text" value="'+row.niveau+'" data-i="'+i+'" data-f="niveau" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 8px; font-family:Inter,sans-serif;"></td>'+
+      '<td><input type="text" value="'+row.repere+'" data-i="'+i+'" data-f="repere" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 8px; font-family:Inter,sans-serif;"></td>'+
+      '<td class="val"><input type="text" value="'+row.minimum+'" data-i="'+i+'" data-f="minimum" placeholder="Ex : 1 850 € brut" style="width:100%; border:1px solid var(--line); border-radius:3px; padding:6px 8px; font-family:IBM Plex Mono,monospace;"></td>'+
+      '<td><button data-del="'+i+'" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">Suppr.</button></td>';
+    body.appendChild(tr);
+  });
+  if(lectureSeule) return;
+  body.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const i = +e.target.dataset.i, f = e.target.dataset.f;
+      grilleRows[i][f] = e.target.value;
+    });
+  });
+  body.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      grilleRows.splice(+e.target.dataset.del, 1);
+      if(grilleRows.length===0) grilleRows.push({niveau:"", repere:"", minimum:""});
+      renderGrilleRows(grilleRows, false);
+    });
+  });
+}
+
+function renderRisques(){
+  const el = document.getElementById('dash-risques');
+  const risks = SECTEUR_RISQUES[currentData.secteur] || SECTEUR_RISQUES.default;
+  const limite = estEnEssaiLimite();
+  const risksAffiches = limite ? risks.slice(0,1) : risks;
+  el.innerHTML = '<div class="risk-grid"></div>';
+  const grid = el.querySelector('.risk-grid');
+  risksAffiches.forEach(r=>{
+    const div = document.createElement('div');
+    div.className = "risk-card";
+    div.innerHTML = '<span class="lvl '+r.niv+'">'+(r.niv==='haut'?'Risque élevé':'Risque moyen')+'</span>'+
+      '<h4>'+r.titre+'</h4><p>'+r.desc+'</p>';
+    grid.appendChild(div);
+  });
+  if(limite && risks.length > risksAffiches.length){
+    const t = document.createElement('div');
+    t.innerHTML = teaserHtml(risks.length - risksAffiches.length, "risque sectoriel");
+    el.appendChild(t);
+  }
+}
+
+/* ---------- Onglets dashboard ---------- */
+document.querySelectorAll('.dash-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.dash-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.dash-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dash-'+btn.dataset.dash).classList.add('active');
+  });
+});
+
 
 /* ---------- Chargement initial ---------- */
 window.addEventListener('DOMContentLoaded', async ()=>{
