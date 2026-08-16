@@ -95,6 +95,20 @@
   .risk-card p{font-size:13.5px; color:var(--ink-soft);}
 
   .empty-note{color:var(--ink-soft); font-size:14.5px; padding:20px 0;}
+
+  /* SIMULATEURS & AIDES */
+  .simu-section{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:24px; margin-bottom:22px;}
+  .simu-section h3{font-size:18px; margin-bottom:6px;}
+  .simu-section > p.hint{margin-bottom:16px;}
+  table.ccn-table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;}
+  table.ccn-table th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.ccn-table td{padding:9px 10px; border-bottom:1px solid var(--line);}
+  table.ccn-table a{color:var(--accent);}
+  .refresh-note{background:var(--accent-soft); color:var(--accent); border-radius:5px; padding:12px 16px; font-size:13.5px; margin-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .simu-result{background:#fff; border:1px solid var(--line); border-radius:6px; padding:18px; margin-top:16px;}
+  .simu-result .row{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .simu-result .row:last-child{border-bottom:none; font-weight:700; padding-top:12px;}
+  .simu-result .row span:last-child{font-family:'IBM Plex Mono',monospace;}
   footer{padding:30px 0; text-align:center; font-size:13px; color:var(--ink-soft);}
 
   /* ACCÈS / COMPTE / PAIEMENT */
@@ -285,6 +299,11 @@
       <div class="stamp" id="dashStamp">Audit généré</div>
     </div>
 
+    <div class="refresh-note" style="margin-bottom:20px;">
+      <span>📄 Un guide complet reprend chaque obligation ci-dessous, expliquée simplement, avec un exemple concret pour chacune.</span>
+      <a href="Guide-Audit-Simplika.docx" class="btn" style="background:var(--accent); flex-shrink:0;">Télécharger le guide (Word) →</a>
+    </div>
+
     <div class="dash-tabs">
       <button class="dash-tab active" data-dash="obligations">Obligations RH &amp; légales</button>
       <button class="dash-tab" data-dash="grille">Grille de rémunération</button>
@@ -295,6 +314,78 @@
     <div class="dash-panel" id="dash-grille"></div>
     <div class="dash-panel" id="dash-risques"></div>
   </div>
+
+  <!-- ===================== SIMULATEURS & AIDES ===================== -->
+
+  <div class="simu-section">
+    <h3>Conventions collectives du Bâtiment &amp; Travaux Publics</h3>
+    <p class="hint">Secteur cible principal — 7 conventions nationales, chacune avec son propre IDCC.</p>
+    <table class="ccn-table">
+      <thead><tr><th>Convention</th><th>IDCC</th><th>Signature</th><th>Champ</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Bâtiment — Ouvriers ≤ 10 salariés</td><td>1596</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll/id/KALICONT000005635573" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Bâtiment — Ouvriers &gt; 10 salariés</td><td>1597</td><td>8 octobre 1990</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Bâtiment — ETAM</td><td>2609</td><td>12 juillet 2006</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Bâtiment — Cadres</td><td>2420</td><td>1er juin 2004</td><td>National (grille nationale unique, sauf Nord/Pas-de-Calais)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Travaux Publics — Ouvriers</td><td>1702</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Travaux Publics — ETAM</td><td>2614</td><td>—</td><td>National (grilles régionales)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+        <tr><td>Travaux Publics — Cadres</td><td>3212</td><td>—</td><td>National (grille nationale unique)</td><td><a href="https://www.legifrance.gouv.fr/conv_coll" target="_blank" rel="noopener">Légifrance →</a></td></tr>
+      </tbody>
+    </table>
+    <div class="refresh-note">
+      <span>⚠️ Les grilles de salaires des <strong>ouvriers et ETAM</strong> sont négociées <strong>région par région</strong> (parfois plusieurs fois par an) — trop changeantes pour être figées ici de façon fiable. La Fédération Française du Bâtiment centralise et actualise en continu tous les minima par région.</span>
+      <a href="https://www.ffbatiment.fr/outils-modeles-document/outils/minima-sociaux-du-batiment" target="_blank" rel="noopener" class="btn" style="background:var(--accent); flex-shrink:0;">🔄 Vérifier les grilles régionales à jour</a>
+    </div>
+  </div>
+
+  <div class="simu-section">
+    <h3>Simulateur brut ↔ net</h3>
+    <p class="hint">Estimation simplifiée à partir de taux moyens 2026 — ne remplace pas un logiciel de paie ni l'avis d'un expert-comptable (les taux réels varient selon la tranche de salaire, la convention collective et les exonérations applicables).</p>
+    <div class="field-row">
+      <div class="field"><label>Sens du calcul</label>
+        <select id="bn-sens"><option value="brutVersNet">Brut → Net</option><option value="netVersBrut">Net → Brut</option></select>
+      </div>
+      <div class="field"><label>Statut</label>
+        <select id="bn-statut"><option value="nonCadre">Non-cadre</option><option value="cadre">Cadre</option></select>
+      </div>
+      <div class="field"><label>Montant mensuel (€)</label><input id="bn-montant" type="number" min="0" step="1" placeholder="Ex : 2200"></div>
+      <button class="btn" id="btnCalculerBN">Calculer</button>
+    </div>
+    <div class="simu-result" id="bnResult" style="display:none;"></div>
+  </div>
+
+  <div class="simu-section">
+    <h3>Zone France Ruralités Revitalisation (anciennement ZRR)</h3>
+    <p class="hint"><strong>Important :</strong> la ZRR n'existe plus sous ce nom depuis le 1er juillet 2024 — elle a été remplacée par le zonage <strong>France Ruralités Revitalisation (ZFRR)</strong>, avec un niveau renforcé ZFRR+. Certaines anciennes communes ZRR non reclassées gardent les effets du dispositif jusqu'au 31 décembre 2027.</p>
+    <p style="font-size:13.5px; margin-bottom:14px;">Une entreprise qui s'installe en zone ZFRR peut bénéficier d'exonérations d'impôt sur les bénéfices, de CFE, de taxe foncière, et sous conditions de charges patronales à l'embauche.</p>
+    <a href="https://www.service-public.gouv.fr/simulateur/calcul/zonageFranceRuralitesRevitalisation" target="_blank" rel="noopener" class="btn">Vérifier une commune (simulateur officiel) →</a>
+  </div>
+
+  <div class="simu-section">
+    <h3>Accompagnement à l'embauche</h3>
+    <p class="hint">Les étapes clés — les aides financières à l'embauche changent trop souvent pour être calculées ici de façon fiable ; on t'oriente vers les bons dispositifs à vérifier au moment de l'embauche.</p>
+    <div id="embaucheSteps"></div>
+  </div>
+
+  <div class="simu-section">
+    <h3>Subventions création &amp; investissement, par localité</h3>
+    <p class="hint">Il n'existe pas de base de données publique unifiée et fiable des milliers de dispositifs locaux (région, département, intercommunalité, commune) — un annuaire figé ici serait obsolète en quelques mois. On oriente vers les bons portails selon la localisation.</p>
+    <div class="field-row">
+      <div class="field"><label>Région de l'entreprise</label>
+        <select id="subv-region">
+          <option value="">— Sélectionner —</option>
+          <option>Auvergne-Rhône-Alpes</option><option>Bourgogne-Franche-Comté</option><option>Bretagne</option>
+          <option>Centre-Val de Loire</option><option>Corse</option><option>Grand Est</option>
+          <option>Hauts-de-France</option><option>Île-de-France</option><option>Normandie</option>
+          <option>Nouvelle-Aquitaine</option><option>Occitanie</option><option>Pays de la Loire</option>
+          <option>Provence-Alpes-Côte d'Azur</option>
+        </select>
+      </div>
+      <button class="btn" id="btnVoirSubventions">Voir les portails de cette région</button>
+    </div>
+    <div id="subvResult" style="margin-top:16px;"></div>
+  </div>
+
   </div><!-- /toolLocked -->
 
 </div>
@@ -397,6 +488,7 @@ document.getElementById('btnAuth').addEventListener('click', async ()=>{
 // (sans redemander le mot de passe) via verify_session, qui fait aussi tourner le jeton.
 window.addEventListener('DOMContentLoaded', async ()=>{
   lockTool();
+  renderEmbaucheSteps();
   if(session.email && session.token){
     document.getElementById('authEmail').value = session.email;
     document.getElementById('authForm').style.display = 'none';
@@ -415,6 +507,107 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       document.getElementById('authForm').style.display = 'block';
     }
   }
+});
+
+/* ---------- Simulateur brut ↔ net (estimation simplifiée, taux moyens 2026) ---------- */
+// Taux volontairement arrondis et globaux — pas un calcul de bulletin de paie précis.
+// Objectif : donner un ordre de grandeur rapide, pas remplacer un logiciel de paie.
+const TAUX_BN = {
+  nonCadre: { salarial: 0.22, patronal: 0.42 },
+  cadre:    { salarial: 0.25, patronal: 0.45 }
+};
+
+document.getElementById('btnCalculerBN').addEventListener('click', ()=>{
+  const sens = document.getElementById('bn-sens').value;
+  const statut = document.getElementById('bn-statut').value;
+  const montant = parseFloat(document.getElementById('bn-montant').value);
+  const resEl = document.getElementById('bnResult');
+
+  if(!montant || montant <= 0){
+    resEl.style.display = 'block';
+    resEl.innerHTML = '<p style="color:var(--warn);">Renseigne un montant valide.</p>';
+    return;
+  }
+
+  const taux = TAUX_BN[statut];
+  let brut, net, coutEmployeur;
+
+  if(sens === 'brutVersNet'){
+    brut = montant;
+    net = brut * (1 - taux.salarial);
+  } else {
+    net = montant;
+    brut = net / (1 - taux.salarial);
+  }
+  coutEmployeur = brut * (1 + taux.patronal);
+  const cotisSalariales = brut - net;
+  const cotisPatronales = coutEmployeur - brut;
+
+  resEl.style.display = 'block';
+  resEl.innerHTML = `
+    <div class="row"><span>Salaire brut mensuel</span><span>${brut.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+    <div class="row"><span>Cotisations salariales (≈ ${(taux.salarial*100).toFixed(0)}%)</span><span>− ${cotisSalariales.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+    <div class="row"><span>Net avant impôt sur le revenu</span><span>${net.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+    <div class="row"><span>Cotisations patronales (≈ ${(taux.patronal*100).toFixed(0)}%)</span><span>+ ${cotisPatronales.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+    <div class="row"><span>Coût total employeur</span><span>${coutEmployeur.toLocaleString('fr-FR',{maximumFractionDigits:2})} €</span></div>
+  `;
+});
+
+/* ---------- Guide d'accompagnement à l'embauche ---------- */
+const ETAPES_EMBAUCHE = [
+  { titre:"Vérifier la convention collective applicable", desc:"Le code APE de l'entreprise détermine (en général) la convention — utilise l'audit ci-dessus pour la retrouver, avec sa grille de salaires minima." },
+  { titre:"Rédiger et faire signer le contrat de travail", desc:"Obligatoire pour un CDD ou un temps partiel. Fortement conseillé même en CDI temps plein, pour prévoir les clauses particulières." },
+  { titre:"Effectuer la Déclaration Préalable à l'Embauche (DPAE)", desc:"Au plus tôt 8 jours avant la prise de poste, auprès de l'URSSAF dont dépend l'établissement." },
+  { titre:"Vérifier son éligibilité aux aides à l'embauche", desc:"Aides variables selon le profil (apprenti, alternant, jeune, senior, zone ZFRR...) — à vérifier au cas par cas sur le site de France Travail au moment de l'embauche, car les dispositifs changent régulièrement." },
+  { titre:"Organiser la visite d'information et de prévention (VIP)", desc:"Dans les 3 mois suivant l'embauche, auprès du service de santé au travail auquel l'entreprise est affiliée." },
+  { titre:"Inscrire le salarié au registre unique du personnel", desc:"Dès son arrivée, à l'encre indélébile — obligatoire dès le premier salarié." },
+  { titre:"Mettre en place la mutuelle d'entreprise", desc:"Obligatoire pour tout salarié du secteur privé, sauf cas de dispense légale." },
+  { titre:"Démarrer la Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF dès le premier bulletin de paie." }
+];
+
+function renderEmbaucheSteps(){
+  const el = document.getElementById('embaucheSteps');
+  el.innerHTML = ETAPES_EMBAUCHE.map((e,i)=> `
+    <div class="oblig-item" style="grid-template-columns:40px 1fr;">
+      <div class="seuil" style="font-size:16px; text-align:center;">${i+1}</div>
+      <div><h4>${e.titre}</h4><p>${e.desc}</p></div>
+    </div>`).join('');
+}
+
+/* ---------- Orientation subventions par région (portails officiels, pas d'annuaire figé) ---------- */
+const PORTAILS_SUBVENTIONS = {
+  default: [
+    { nom:"Les Aides — portail officiel des aides aux entreprises", url:"https://les-aides.fr" },
+    { nom:"Bpifrance Création — aides à la création/reprise", url:"https://bpifrance-creation.fr/encyclopedie/financer-entreprise/aides-a-creation-a-linnovation" },
+    { nom:"aides-entreprises.fr — moteur de recherche par filtre région/secteur", url:"https://aides-entreprises.fr" }
+  ]
+};
+const SITES_REGIONS = {
+  "Auvergne-Rhône-Alpes": "https://www.auvergnerhonealpes.fr/aides",
+  "Bourgogne-Franche-Comté": "https://www.bourgognefranchecomte.fr/aides-appels-projets",
+  "Bretagne": "https://www.bretagne.bzh/aides-appels-a-projets/",
+  "Centre-Val de Loire": "https://www.centre-valdeloire.fr/aides-appels-a-projets",
+  "Corse": "https://www.corse.fr/aides",
+  "Grand Est": "https://www.grandest.fr/aides-appels-a-projets/",
+  "Hauts-de-France": "https://www.hautsdefrance.fr/aides-et-appels-a-projets/",
+  "Île-de-France": "https://www.iledefrance.fr/aides-appels-a-projets",
+  "Normandie": "https://www.normandie.fr/aides-appels-a-projets",
+  "Nouvelle-Aquitaine": "https://les-aides.nouvelle-aquitaine.fr",
+  "Occitanie": "https://www.laregion.fr/Toutes-les-aides",
+  "Pays de la Loire": "https://www.paysdelaloire.fr/aides-appels-a-projets",
+  "Provence-Alpes-Côte d'Azur": "https://www.maregionsud.fr/aides-et-appels-a-projets"
+};
+
+document.getElementById('btnVoirSubventions').addEventListener('click', ()=>{
+  const region = document.getElementById('subv-region').value;
+  const el = document.getElementById('subvResult');
+  if(!region){ el.innerHTML = '<p style="color:var(--warn); font-size:13.5px;">Choisis une région.</p>'; return; }
+
+  const liens = [...PORTAILS_SUBVENTIONS.default];
+  if(SITES_REGIONS[region]) liens.unshift({ nom:"Conseil régional " + region + " — aides économiques", url: SITES_REGIONS[region] });
+
+  el.innerHTML = '<p class="hint" style="margin-bottom:10px;">Portails à consulter pour ' + region + ' (vérifie aussi ta communauté de communes et ton département, qui ont souvent leurs propres dispositifs) :</p>' +
+    liens.map(l=> '<div class="mouvement-item" style="display:block;"><a href="'+l.url+'" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600;">'+l.nom+' →</a></div>').join('');
 });
 
 const APE_CCN = [
@@ -578,22 +771,22 @@ const SEUILS = [
 
 /* ---------- Obligations administratives (indépendantes de l'effectif), avec liens vers les sources officielles ---------- */
 const OBLIGATIONS_ADMIN = [
-  { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/gerer-declarations/declaration-prealable-embauche.html" },
-  { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://www.service-public.fr/professionnels-entreprises/vosdroits/F32131" },
-  { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite médicale auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://www.service-public.fr/particuliers/vosdroits/F32152" },
-  { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://www.service-public.fr/professionnels-entreprises/vosdroits/F23703" },
-  { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://www.service-public.fr/particuliers/vosdroits/F31380" },
+  { categorie:"À l'embauche", titre:"Déclaration préalable à l'embauche (DPAE)", desc:"À transmettre à l'URSSAF au plus tôt 8 jours avant la prise de poste.", lien:"https://www.urssaf.fr/accueil/employeur/embaucher-gerer-salaries/embaucher/declaration-prealable-embauche.html" },
+  { categorie:"À l'embauche", titre:"Registre unique du personnel (\"carnet du personnel\")", desc:"Doit lister tous les salariés dans l'ordre des embauches, tenu à jour dès le premier salarié, consultable par l'inspection du travail.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F1784" },
+  { categorie:"À l'embauche", titre:"Contrat de travail écrit et visite d'information et de prévention", desc:"Contrat écrit obligatoire pour un CDD ou un temps partiel ; visite d'information et de prévention (VIP) auprès du service de santé au travail dans les 3 mois suivant l'embauche.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F23107" },
+  { categorie:"À l'embauche", titre:"Affiliation à un service de santé au travail", desc:"Adhésion obligatoire dès le premier salarié, avant même l'embauche.", lien:"https://travail-emploi.gouv.fr/les-services-de-prevention-et-de-sante-au-travail-autonomes-et-interentreprises" },
+  { categorie:"À l'embauche", titre:"Mutuelle santé collective", desc:"Couverture complémentaire santé obligatoire pour tous les salariés du secteur privé, avec participation employeur d'au moins 50%.", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F33754" },
 
   { categorie:"Récurrent (mensuel / annuel)", titre:"Déclaration Sociale Nominative (DSN)", desc:"Transmission mensuelle obligatoire à l'URSSAF regroupant l'ensemble des données sociales (salaires, cotisations, arrêts...).", lien:"https://www.urssaf.fr/accueil/employeur/declarer-payer/dsn.html" },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Bulletin de paie conforme", desc:"Mentions obligatoires précises (convention collective, classification, cotisations détaillées) — modèle simplifié en vigueur depuis 2018." },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Registre des accidents du travail bénins", desc:"À tenir si l'entreprise dispose d'un poste de secours et d'un médecin/infirmier, pour les accidents ne nécessitant pas d'arrêt ni de soins médicaux externes." },
-  { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels", desc:"Un entretien tous les 2 ans par salarié, plus un bilan récapitulatif tous les 6 ans (parcours professionnel, formations suivies).", lien:"https://www.service-public.fr/particuliers/vosdroits/F32131" },
+  { categorie:"Récurrent (mensuel / annuel)", titre:"Entretiens professionnels (réforme en cours)", desc:"Jusqu'ici tous les 2 ans, plus bilan à 6 ans. À compter du 1er octobre 2026 (loi du 24/10/2025) : remplacés par l'entretien de parcours professionnel (EPP), tous les 4 ans — à vérifier selon la date de l'audit.", lien:"https://www.service-public.gouv.fr/particuliers/vosdroits/F32040" },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Contribution à la formation professionnelle et taxe d'apprentissage", desc:"Contribution unique collectée par l'URSSAF, taux variable selon l'effectif." },
   { categorie:"Récurrent (mensuel / annuel)", titre:"Médailles du travail, prime de partage de la valeur (facultatif)", desc:"Non obligatoires mais fréquemment audités car mal maîtrisés — vérifier si l'entreprise en verse." },
 
-  { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.service-public.fr/professionnels-entreprises/vosdroits/F31766" },
+  { categorie:"Vie sociale de l'entreprise", titre:"Procès-verbal d'assemblée générale annuelle", desc:"Pour les SARL, SAS, SA : approbation des comptes en AG dans les 6 mois suivant la clôture de l'exercice, PV à conserver dans le registre des délibérations.", lien:"https://www.infogreffe.fr/dossiers-thematiques/vie-de-l-entreprise/gerer-l-entreprise/le-proces-verbal-d-assemblee-d-approbation-des-comptes-des-societes-commerciales" },
   { categorie:"Vie sociale de l'entreprise", titre:"Registre des délibérations / décisions", desc:"Registre légal côté et paraphé, ou registre dématérialisé conforme, où sont consignées toutes les décisions collectives des associés/actionnaires." },
-  { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans les 7 mois suivant la clôture de l'exercice (délai porté à 8 mois en cas d'approbation par voie électronique).", lien:"https://www.service-public.fr/professionnels-entreprises/vosdroits/F31977" },
+  { categorie:"Vie sociale de l'entreprise", titre:"Dépôt des comptes annuels au greffe", desc:"Dans le mois suivant l'approbation des comptes en assemblée (délai porté à 2 mois en cas de dépôt par voie électronique).", lien:"https://entreprendre.service-public.gouv.fr/vosdroits/F31214" },
   { categorie:"Vie sociale de l'entreprise", titre:"Registre des bénéficiaires effectifs", desc:"Déclaration au greffe du tribunal de commerce, obligatoire pour la plupart des sociétés." },
 ];
 
