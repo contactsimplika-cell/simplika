@@ -304,21 +304,14 @@
 
     <div id="planBuilder" style="display:none; margin-top:8px;">
       <h4 style="font-size:16px; margin-bottom:10px;">Compose ton abonnement</h4>
-      <div class="service-tags" style="margin-bottom:16px;">
-        <label class="service-check" style="background:var(--accent); color:#fff; opacity:.85;">
-          <input type="checkbox" checked disabled> CRM (base) — clients, suivi commercial, découverte, devis, stocks, audit
-        </label>
-        <label class="service-check"><input type="checkbox" class="plan-service" value="agenda"> + Agenda Google</label>
-        <label class="service-check"><input type="checkbox" class="plan-service" value="mail"> + Boîte mail Gmail</label>
-        <label class="service-check"><input type="checkbox" class="plan-service" value="ik"> + Indemnités kilométriques</label>
-      </div>
+      <p class="hint" style="margin-bottom:16px;">Tout est inclus : CRM (clients, suivi commercial, découverte, devis, stocks, audit), Agenda Google, Boîte mail Gmail et Indemnités kilométriques. Le 1er utilisateur (toi) est au tarif de base ; chaque collaborateur supplémentaire est facturé à un tarif réduit.</p>
       <div class="field-row">
         <div class="field" style="max-width:140px;"><label>Nombre de sièges</label><input type="number" id="plan-sieges" value="1" min="1" step="1"></div>
         <div class="field"><label>Période</label>
           <select id="plan-periode"><option value="mensuel">Mensuel</option><option value="annuel">Annuel</option></select>
         </div>
       </div>
-      <p class="hint" style="margin:10px 0 16px;">Chaque service sélectionné est facturé par siège. Le nombre de sièges détermine combien de collaborateurs tu pourras inviter dans l'onglet "Équipe" une fois abonné.</p>
+      <p class="hint" style="margin:10px 0 16px;">Le nombre de sièges détermine combien de collaborateurs tu pourras inviter dans l'onglet "Équipe" une fois abonné.</p>
       <button class="btn" id="btnSouscrire">S'abonner →</button>
     </div>
 
@@ -396,6 +389,13 @@
           </div>
         </div>
         <button class="btn" id="btnAddClient" style="margin-top:16px;">Ajouter ce client</button>
+      </div>
+
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Exporter tous les devis (facturation externe)</h3>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Un fichier CSV avec toutes les lignes de tous les devis existants, prêt à importer dans EBP, Henrri ou tout autre logiciel de facturation (assistant d'import avec correspondance de colonnes) — pour ne pas avoir à ressaisir tes devis.</p>
+        <button class="btn" id="btnExportDevisCsv">⬇ Exporter tous les devis (CSV)</button>
+        <p class="hint" id="exportDevisMsg" style="display:none; margin-top:10px;"></p>
       </div>
 
       <div id="clientsList"></div>
@@ -589,9 +589,17 @@
 
       <div class="panel">
         <h3>Mon abonnement</h3>
-        <p class="hint" style="margin-bottom:14px;">Services actifs sur ton compte et nombre de sièges achetés.</p>
+        <p class="hint" style="margin-bottom:14px;">CRM, Agenda, Boîte mail et Indemnités kilométriques sont tous inclus. 1er utilisateur au tarif de base, chaque collaborateur supplémentaire à tarif réduit.</p>
         <div id="abonnementResume"></div>
-        <p class="hint" style="margin-top:14px;">Pour ajouter un service ou des sièges supplémentaires à un abonnement déjà actif, contacte <a href="mailto:contact.simplika@gmail.com" style="color:var(--accent);">contact.simplika@gmail.com</a> — la modification d'un abonnement en cours n'est pas encore en libre-service.</p>
+        <div id="ajoutSiegesPanel" style="display:none; margin-top:18px; padding-top:18px; border-top:1px solid var(--line);">
+          <h4 style="font-size:15px; margin-bottom:8px;">Ajouter des sièges</h4>
+          <p class="hint" style="margin-bottom:12px;">Débloque immédiatement des invitations supplémentaires dans l'onglet "Équipe", au tarif réduit "collaborateur". Stripe facture au prorata du temps restant sur la période en cours, puis le plein tarif dès le renouvellement suivant.</p>
+          <div class="field-row">
+            <div class="field" style="max-width:140px;"><label>Sièges à ajouter</label><input type="number" id="sieges-a-ajouter" value="1" min="1" step="1"></div>
+            <button class="btn" id="btnAjouterSieges">Ajouter →</button>
+          </div>
+          <p class="hint" id="ajoutSiegesMsg" style="display:none; margin-top:10px;"></p>
+        </div>
       </div>
     </div>
 
@@ -1125,16 +1133,15 @@ function appliquerVerrouillageServices(){
 }
 
 document.getElementById('btnSouscrire').addEventListener('click', ()=>{
-  const services = ['crm', ...[...document.querySelectorAll('.plan-service:checked')].map(i=>i.value)];
   const sieges = parseInt(document.getElementById('plan-sieges').value, 10) || 1;
   const mode = document.getElementById('plan-periode').value;
-  startCheckout(mode, services, sieges);
+  startCheckout(mode, sieges);
 });
 
-async function startCheckout(mode, services, sieges){
+async function startCheckout(mode, sieges){
   if(!session.email){ alert("Connecte-toi d'abord."); return; }
   try{
-    const res = await callBackend({ action:"create_checkout", email: session.email, token: session.token, mode, services, sieges });
+    const res = await callBackend({ action:"create_checkout", email: session.email, token: session.token, mode, sieges });
     if(!res.ok){ alert("Abonnement impossible : " + res.error); return; }
     window.location.href = res.url;
   }catch(e){
@@ -1227,6 +1234,59 @@ document.querySelectorAll('[data-goto]').forEach(link=>{
 });
 
 /* ---------- Clients : chargement, ajout, affichage ---------- */
+/* ---------- Export universel de tous les devis (CSV pour EBP, Henrri, etc.) ---------- */
+function csvEscape_(v){
+  const s = String(v ?? '');
+  if(/[;"\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+function fmtNumFr_(n){
+  return (Math.round((n+Number.EPSILON)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+document.getElementById('btnExportDevisCsv').addEventListener('click', ()=>{
+  const msg = document.getElementById('exportDevisMsg');
+  msg.style.display = 'none';
+
+  const lignes = [];
+  lignes.push(['Client','Entreprise','Email client','Téléphone','Désignation','Quantité','Unité','Prix unitaire HT','Montant HT']);
+
+  let nbClients = 0;
+  clients.forEach(c=>{
+    const ld = Array.isArray(c.lignesDevis) ? c.lignesDevis.filter(l=> l.designation && l.designation.trim() !== '') : [];
+    if(ld.length === 0) return;
+    nbClients++;
+    ld.forEach(l=>{
+      const montant = (l.quantite||0) * (l.prixUnitaire||0);
+      lignes.push([
+        c.nom || '', c.entreprise || '', c.email || '', c.telephone || '',
+        l.designation || '', fmtNumFr_(l.quantite||0), l.unite || '', fmtNumFr_(l.prixUnitaire||0), fmtNumFr_(montant)
+      ]);
+    });
+  });
+
+  if(nbClients === 0){
+    msg.textContent = "Aucun devis avec des lignes à exporter pour le moment.";
+    msg.style.display = 'block';
+    return;
+  }
+
+  const csv = lignes.map(r=> r.map(csvEscape_).join(';')).join('\r\n');
+  // BOM UTF-8 + séparateur ';' + décimales à la virgule : Excel (locale FR) ouvre le fichier
+  // correctement sans mélanger les colonnes ni lire les nombres comme du texte.
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'devis-simplika-export.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+
+  msg.textContent = nbClients + " client(s), " + (lignes.length-1) + " ligne(s) de devis exportée(s).";
+  msg.style.display = 'block';
+});
+
 async function loadClients(){
   try{
     const res = await callBackend({ action:"crm_list_clients", compte: session.email, token: session.token });
@@ -1631,8 +1691,33 @@ async function chargerEquipe(){
 
     // Seul le compte principal peut inviter — et seulement s'il reste des sièges disponibles.
     inviteEl.style.display = (roleCourant === 'owner') ? 'block' : 'none';
+    const siegesPanel = document.getElementById('ajoutSiegesPanel');
+    if(siegesPanel) siegesPanel.style.display = (roleCourant === 'owner') ? 'block' : 'none';
   }catch(e){ /* silencieux */ }
 }
+
+document.getElementById('btnAjouterSieges').addEventListener('click', async ()=>{
+  const siegesAAjouter = parseInt(document.getElementById('sieges-a-ajouter').value, 10) || 0;
+  const msg = document.getElementById('ajoutSiegesMsg');
+  msg.style.display = 'none';
+  if(siegesAAjouter < 1){ msg.textContent = "Indique un nombre de sièges valide."; msg.style.display='block'; return; }
+
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display='block'; return; }
+
+  if(!confirm("Ajouter "+siegesAAjouter+" siège(s) ? Stripe facturera immédiatement le prorata du temps restant sur ta période en cours.")) return;
+
+  const btn = document.getElementById('btnAjouterSieges');
+  btn.disabled = true; btn.textContent = "Ajout en cours...";
+  try{
+    const res = await callBackend({ action:"add_sieges", email: session.email, token: session.token, siegesAAjouter });
+    if(!res.ok){ msg.textContent = res.error || "Ajout impossible."; msg.style.display='block'; return; }
+    msg.textContent = "Sièges ajoutés — total désormais : "+res.nbSieges+".";
+    msg.style.display = 'block';
+    document.getElementById('sieges-a-ajouter').value = 1;
+    await chargerEquipe();
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Ajouter →"; }
+});
 
 document.getElementById('btnInviterCollab').addEventListener('click', async ()=>{
   const collaborateurEmail = document.getElementById('eq-email').value.trim();
