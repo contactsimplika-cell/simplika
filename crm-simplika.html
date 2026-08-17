@@ -65,6 +65,8 @@
   .tabs{display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:26px; flex-wrap:wrap;}
   .tab-btn{font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; background:none; border:none; padding:12px 18px 12px 0; margin-right:22px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent;}
   .tab-btn.active{color:var(--ink); border-bottom-color:var(--accent);}
+  .tab-btn.tab-verrouille{color:var(--line); cursor:not-allowed;}
+  .tab-btn.tab-verrouille::after{content:" 🔒"; font-size:10px;}
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
 
@@ -300,17 +302,24 @@
 
     <div id="statusBox" style="display:none;"></div>
 
-    <div class="plan-cards" id="planCards" style="display:none;">
-      <div class="plan-card">
-        <h4>Mensuel</h4>
-        <p>Accès à l'ensemble des outils Simplika, résiliable à tout moment.</p>
-        <button class="btn" id="btnSubMensuel">S'abonner au mois</button>
+    <div id="planBuilder" style="display:none; margin-top:8px;">
+      <h4 style="font-size:16px; margin-bottom:10px;">Compose ton abonnement</h4>
+      <div class="service-tags" style="margin-bottom:16px;">
+        <label class="service-check" style="background:var(--accent); color:#fff; opacity:.85;">
+          <input type="checkbox" checked disabled> CRM (base) — clients, suivi commercial, découverte, devis, stocks, audit
+        </label>
+        <label class="service-check"><input type="checkbox" class="plan-service" value="agenda"> + Agenda Google</label>
+        <label class="service-check"><input type="checkbox" class="plan-service" value="mail"> + Boîte mail Gmail</label>
+        <label class="service-check"><input type="checkbox" class="plan-service" value="ik"> + Indemnités kilométriques</label>
       </div>
-      <div class="plan-card">
-        <h4>Annuel</h4>
-        <p>Le même accès, engagement 12 mois — tarif préférentiel.</p>
-        <button class="btn" id="btnSubAnnuel">S'abonner à l'année</button>
+      <div class="field-row">
+        <div class="field" style="max-width:140px;"><label>Nombre de sièges</label><input type="number" id="plan-sieges" value="1" min="1" step="1"></div>
+        <div class="field"><label>Période</label>
+          <select id="plan-periode"><option value="mensuel">Mensuel</option><option value="annuel">Annuel</option></select>
+        </div>
       </div>
+      <p class="hint" style="margin:10px 0 16px;">Chaque service sélectionné est facturé par siège. Le nombre de sièges détermine combien de collaborateurs tu pourras inviter dans l'onglet "Équipe" une fois abonné.</p>
+      <button class="btn" id="btnSouscrire">S'abonner →</button>
     </div>
 
     <div style="text-align:center; margin-top:22px; padding-top:18px; border-top:1px solid var(--line);">
@@ -332,9 +341,11 @@
       <button class="tab-btn" data-tab="decouverte">Fiche découverte</button>
       <button class="tab-btn" data-tab="agenda">Agenda</button>
       <button class="tab-btn" data-tab="mail">Boîte mail</button>
+      <button class="tab-btn" data-tab="ik">Indemnités km</button>
       <button class="tab-btn" data-tab="prestations">Prestations &amp; tarifs</button>
       <button class="tab-btn" data-tab="questions">Questions découverte</button>
       <button class="tab-btn" data-tab="personnalisation">Personnalisation</button>
+      <button class="tab-btn" data-tab="equipe">Équipe</button>
       <button class="tab-btn" data-tab="support">Support (admin)</button>
       <button class="tab-btn" data-tab="stocks">Stocks</button>
       <button class="tab-btn" data-tab="audit">Audit d'entreprise</button>
@@ -574,6 +585,109 @@
         <p class="hint" style="margin-top:8px;">Pas d'hébergement d'image intégré pour l'instant : héberge ton logo ailleurs (ton site, Google Drive en partage public...) et colle le lien ici.</p>
         <button class="btn" id="btnSaveBranding" style="margin-top:16px;">Enregistrer la personnalisation</button>
         <p class="hint" id="brandingMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Mon abonnement</h3>
+        <p class="hint" style="margin-bottom:14px;">Services actifs sur ton compte et nombre de sièges achetés.</p>
+        <div id="abonnementResume"></div>
+        <p class="hint" style="margin-top:14px;">Pour ajouter un service ou des sièges supplémentaires à un abonnement déjà actif, contacte <a href="mailto:contact.simplika@gmail.com" style="color:var(--accent);">contact.simplika@gmail.com</a> — la modification d'un abonnement en cours n'est pas encore en libre-service.</p>
+      </div>
+    </div>
+
+    <!-- INDEMNITÉS KILOMÉTRIQUES -->
+    <div class="tab-panel" id="tab-ik">
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Barème fiscal 2026</h3>
+        <p class="hint" style="margin-bottom:10px; color:var(--accent);">Taux officiels DGFiP, inchangés depuis 2024 — à revérifier chaque année sur impots.gouv.fr avant utilisation. Majoration de 20% appliquée automatiquement pour les véhicules électriques.</p>
+        <table class="devis-table">
+          <thead><tr><th>Puissance</th><th>Jusqu'à 5 000 km</th><th>De 5 001 à 20 000 km</th><th>Au-delà de 20 000 km</th></tr></thead>
+          <tbody>
+            <tr><td>3 CV et moins</td><td>0,529 €/km</td><td>(d × 0,316 + 1 065) / d</td><td>0,370 €/km</td></tr>
+            <tr><td>4 CV</td><td>0,606 €/km</td><td>(d × 0,340 + 1 330) / d</td><td>0,407 €/km</td></tr>
+            <tr><td>5 CV</td><td>0,636 €/km</td><td>(d × 0,357 + 1 382) / d</td><td>0,427 €/km</td></tr>
+            <tr><td>6 CV</td><td>0,665 €/km</td><td>(d × 0,374 + 1 435) / d</td><td>0,447 €/km</td></tr>
+            <tr><td>7 CV et plus</td><td>0,697 €/km</td><td>(d × 0,394 + 1 493) / d</td><td>0,470 €/km</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>Mon adresse de départ</h3>
+        <p class="hint" style="margin-bottom:14px;">Personnelle à toi — chacun dans l'équipe a sa propre adresse et son propre véhicule, même si les autres données du CRM sont partagées.</p>
+        <div class="field-row">
+          <div class="field" style="flex:2;"><label>Adresse de domicile</label><input id="ik-adresse-domicile" type="text" placeholder="Ex : 12 rue des Lilas, 56000 Vannes"></div>
+          <div class="field"><label>Véhicule par défaut</label>
+            <select id="ik-cv-defaut"><option value="3">3 CV et moins</option><option value="4">4 CV</option><option value="5" selected>5 CV</option><option value="6">6 CV</option><option value="7">7 CV et plus</option></select>
+          </div>
+          <div class="field"><label>Électrique ?</label>
+            <select id="ik-electrique-defaut"><option value="non">Non</option><option value="oui">Oui</option></select>
+          </div>
+        </div>
+        <button class="btn outline" id="btnSaveProfilIk" style="margin-top:14px;">Enregistrer mon adresse</button>
+        <p class="hint" id="profilIkMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Calculer automatiquement depuis mon agenda</h3>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Enchaîne domicile → premier rendez-vous → rendez-vous suivants → dernier rendez-vous → domicile, pour chaque jour de la période — à partir des lieux renseignés sur tes événements Google Agenda. Géolocalisation et calcul d'itinéraire gratuits (Base Adresse Nationale, OpenStreetMap), aucune clé à configurer. Nécessite d'avoir connecté ton agenda (onglet Agenda) et renseigné ton adresse ci-dessus.</p>
+        <div class="field-row">
+          <div class="field"><label>Du</label><input id="ik-periode-debut" type="date"></div>
+          <div class="field"><label>Au</label><input id="ik-periode-fin" type="date"></div>
+          <button class="btn" id="btnAnalyserAgenda">Analyser mon agenda</button>
+        </div>
+        <p class="hint" id="ikAgendaMsg" style="display:none; margin-top:10px;"></p>
+        <div id="ikApercuAgenda" style="display:none; margin-top:16px;"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Ajouter un trajet</h3>
+        <div class="field-row">
+          <div class="field"><label>Date</label><input id="ik-date" type="date"></div>
+          <div class="field"><label>Motif</label><input id="ik-motif" type="text" placeholder="Ex : RDV chantier Dupont"></div>
+          <div class="field"><label>Distance (km, aller-retour inclus)</label><input id="ik-distance" type="number" min="0" step="0.1"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Puissance fiscale</label>
+            <select id="ik-cv"><option value="3">3 CV et moins</option><option value="4">4 CV</option><option value="5" selected>5 CV</option><option value="6">6 CV</option><option value="7">7 CV et plus</option></select>
+          </div>
+          <div class="field"><label>Véhicule électrique ?</label>
+            <select id="ik-electrique"><option value="non">Non</option><option value="oui">Oui (+20%)</option></select>
+          </div>
+          <div class="field"><label>Client / chantier lié (facultatif)</label><select id="ik-client"><option value="">— Aucun —</option></select></div>
+        </div>
+        <button class="btn" id="btnAddTrajetIk" style="margin-top:16px;">Enregistrer ce trajet</button>
+        <p class="hint" id="ikMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Récapitulatif</h3>
+        <div class="stat-row" id="ikRecap"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Historique des trajets</h3>
+        <div id="ikTrajetsListe"></div>
+      </div>
+    </div>
+
+    <!-- ÉQUIPE (multi-utilisateurs) -->
+    <div class="tab-panel" id="tab-equipe">
+      <div class="panel">
+        <h3>Membres de l'équipe</h3>
+        <p class="hint" style="margin-bottom:14px;">Toute l'équipe partage les mêmes clients, le même agenda et la même configuration — chacun se connecte avec son propre email et mot de passe.</p>
+        <div id="equipeListe"></div>
+      </div>
+
+      <div class="panel" id="equipeInvitePanel">
+        <h3>Inviter un collaborateur</h3>
+        <p class="hint" style="margin-bottom:14px;">Réservé au compte principal. Communique ensuite ces identifiants à la personne concernée — elle pourra se connecter directement.</p>
+        <div class="field-row">
+          <div class="field"><label>Email du collaborateur</label><input id="eq-email" type="email" placeholder="collegue@email.com"></div>
+          <div class="field"><label>Mot de passe provisoire</label><input id="eq-password" type="text" placeholder="À communiquer au collaborateur"></div>
+          <button class="btn" id="btnInviterCollab">Inviter</button>
+        </div>
+        <p class="hint" id="equipeMsg" style="display:none; margin-top:10px;"></p>
       </div>
     </div>
 
@@ -949,21 +1063,29 @@ document.getElementById('btnAuth').addEventListener('click', async ()=>{
 });
 
 // Vérifie si le compte connecté a un abonnement CRM actif ; sinon affiche les formules.
+let servicesActifsCourants = { crm:true };
+let roleCourant = 'owner';
+
 async function verifierAbonnement(){
   const statusBox = document.getElementById('statusBox');
-  const cardsEl = document.getElementById('planCards');
+  const builderEl = document.getElementById('planBuilder');
   statusBox.style.display = 'block';
   try{
     const res = await callBackend({ action:"check_and_consume_audit", email: session.email, token: session.token });
     if(res.ok){
       statusBox.className = 'status-banner';
-      statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — abonnement actif.';
-      cardsEl.style.display = 'none';
+      statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — abonnement actif'+(res.role==='collaborateur' ? ' (compte collaborateur)' : '')+'.';
+      builderEl.style.display = 'none';
+      roleCourant = res.role || 'owner';
+      servicesActifsCourants = Object.assign({crm:true}, res.servicesActifs || {});
+      appliquerVerrouillageServices();
+      if(res.profilIk) remplirProfilIk(res.profilIk);
       unlockApp();
       await loadClients();
       await chargerSessionsGoogleEnCache();
       await chargerInfosLegales();
       await chargerMouvements();
+      await chargerTrajetsIk();
       renderEmbaucheSteps();
       // Ouvre directement un onglet précis si l'URL contient une ancre (ex. crm-simplika.html#audit) —
       // utile pour les liens externes qui redirigent vers une section spécifique du CRM.
@@ -976,8 +1098,8 @@ async function verifierAbonnement(){
       lockApp();
     } else {
       statusBox.className = 'status-banner denied';
-      statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — aucun abonnement actif. Choisis une formule pour débloquer le CRM.';
-      cardsEl.style.display = 'grid';
+      statusBox.innerHTML = 'Connecté : <strong>'+session.email+'</strong> — aucun abonnement actif. Compose ta formule pour débloquer le CRM.';
+      builderEl.style.display = 'block';
       lockApp();
     }
   }catch(e){
@@ -985,13 +1107,34 @@ async function verifierAbonnement(){
   }
 }
 
-document.getElementById('btnSubMensuel').addEventListener('click', ()=> startCheckout('mensuel'));
-document.getElementById('btnSubAnnuel').addEventListener('click', ()=> startCheckout('annuel'));
+// Verrouille visuellement les onglets correspondant à un service non souscrit (Agenda/Mail/IK) —
+// le CRM de base (clients, suivi, découverte, stocks, audit) reste toujours accessible une fois abonné.
+function appliquerVerrouillageServices(){
+  const correspondance = { agenda:'agenda', mail:'mail', ik:'ik' };
+  Object.keys(correspondance).forEach(service=>{
+    const btn = document.querySelector('.tab-btn[data-tab="'+correspondance[service]+'"]');
+    if(!btn) return;
+    if(servicesActifsCourants[service]){
+      btn.classList.remove('tab-verrouille');
+      btn.title = '';
+    } else {
+      btn.classList.add('tab-verrouille');
+      btn.title = "Service non souscrit — active-le depuis l'onglet Personnalisation.";
+    }
+  });
+}
 
-async function startCheckout(mode){
+document.getElementById('btnSouscrire').addEventListener('click', ()=>{
+  const services = ['crm', ...[...document.querySelectorAll('.plan-service:checked')].map(i=>i.value)];
+  const sieges = parseInt(document.getElementById('plan-sieges').value, 10) || 1;
+  const mode = document.getElementById('plan-periode').value;
+  startCheckout(mode, services, sieges);
+});
+
+async function startCheckout(mode, services, sieges){
   if(!session.email){ alert("Connecte-toi d'abord."); return; }
   try{
-    const res = await callBackend({ action:"create_checkout", email: session.email, mode });
+    const res = await callBackend({ action:"create_checkout", email: session.email, token: session.token, mode, services, sieges });
     if(!res.ok){ alert("Abonnement impossible : " + res.error); return; }
     window.location.href = res.url;
   }catch(e){
@@ -1036,6 +1179,8 @@ const CATALOGUE_DEMO = [
 
 document.getElementById('btnSimulation').addEventListener('click', ()=>{
   simulationMode = true;
+  servicesActifsCourants = { crm:true, agenda:true, mail:true, ik:true };
+  appliquerVerrouillageServices();
   clients = CLIENTS_DEMO.map(c=> ({...c}));
   document.getElementById('accessGate').style.display = 'none';
   document.getElementById('simulationBanner').style.display = 'flex';
@@ -1054,6 +1199,8 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   catalogue = CATALOGUE_DEMO.map(p=> ({...p}));
   renderCatalogue();
   renderEmbaucheSteps();
+  remplirSelectClientIk();
+  chargerTrajetsIk();
 });
 document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -1062,9 +1209,14 @@ document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>
 
 /* ---------- Onglets ---------- */
 function activerOnglet(nom){
+  const btn = document.querySelector('.tab-btn[data-tab="'+nom+'"]');
+  if(btn && btn.classList.contains('tab-verrouille')){
+    alert("Ce service n'est pas inclus dans ton abonnement actuel. Active-le depuis l'onglet \"Personnalisation\" (section Mon abonnement).");
+    return;
+  }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector('.tab-btn[data-tab="'+nom+'"]').classList.add('active');
+  btn.classList.add('active');
   document.getElementById('tab-'+nom).classList.add('active');
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -1082,6 +1234,7 @@ async function loadClients(){
       clients = res.clients || [];
       renderClients(); renderKanban(); renderDashboard(); renderSelecteurDecouverte();
       if(typeof remplirSelectClientMouvement === 'function') remplirSelectClientMouvement();
+      if(typeof remplirSelectClientIk === 'function') remplirSelectClientIk();
     }
   }catch(e){ console.error(e); }
 }
@@ -1427,8 +1580,80 @@ async function chargerInfosLegales(){
     if(res.branding){ remplirBranding(res.branding); appliquerBranding(res.branding); }
     if(res.catalogue){ catalogue = res.catalogue; renderCatalogue(); }
     if(res.questionsDecouverte){ questionsDecouverte = res.questionsDecouverte; renderQuestionsBuilder(); }
+    if(res.servicesActifs){ servicesActifsCourants = Object.assign({crm:true}, res.servicesActifs); appliquerVerrouillageServices(); }
+    if(res.role) roleCourant = res.role;
+  }catch(e){ /* silencieux */ }
+  await chargerEquipe();
+}
+
+/* ---------- Équipe (multi-utilisateurs) ---------- */
+async function chargerEquipe(){
+  const resumeEl = document.getElementById('abonnementResume');
+  const listeEl = document.getElementById('equipeListe');
+  const inviteEl = document.getElementById('equipeInvitePanel');
+  if(!resumeEl) return;
+
+  if(simulationMode){
+    resumeEl.innerHTML = '<div class="empty-note">Non disponible en mode démonstration.</div>';
+    listeEl.innerHTML = '<div class="empty-note">Non disponible en mode démonstration.</div>';
+    inviteEl.style.display = 'none';
+    return;
+  }
+
+  try{
+    const res = await callBackend({ action:"list_collaborateurs", email: session.email, token: session.token });
+    if(!res.ok){ return; }
+
+    const services = Object.keys(servicesActifsCourants).filter(s=> servicesActifsCourants[s]);
+    resumeEl.innerHTML =
+      '<div class="stat-row">' +
+      '<div class="stat-box"><div class="n">'+res.membres.length+'/'+res.nbSieges+'</div><div class="lbl">Sièges utilisés</div></div>' +
+      '<div class="stat-box"><div class="n" style="font-size:15px; padding-top:8px;">'+services.map(s=>({crm:'CRM',agenda:'Agenda',mail:'Mail',ik:'IK'}[s]||s)).join(' · ')+'</div><div class="lbl">Services actifs</div></div>' +
+      '</div>';
+
+    listeEl.innerHTML = res.membres.map(m=> `
+      <div class="client-card" style="cursor:default;">
+        <div class="top">
+          <div><h4>${m.email}</h4><div class="co">Membre depuis le ${m.dateCreation ? new Date(m.dateCreation).toLocaleDateString('fr-FR') : '—'}</div></div>
+          <span class="badge etape">${m.role === 'owner' ? 'Compte principal' : 'Collaborateur'}</span>
+        </div>
+        ${(roleCourant==='owner' && m.role!=='owner') ? '<button type="button" data-retirer="'+m.email.replace(/"/g,'&quot;')+'" class="btn danger btn-small" style="margin-top:10px;">Retirer</button>' : ''}
+      </div>`).join('');
+
+    listeEl.querySelectorAll('[data-retirer]').forEach(btn=> btn.addEventListener('click', async ()=>{
+      if(!confirm("Retirer "+btn.dataset.retirer+" de l'équipe ? Cette personne ne pourra plus se connecter.")) return;
+      try{
+        const r = await callBackend({ action:"remove_collaborateur", email: session.email, token: session.token, collaborateurEmail: btn.dataset.retirer });
+        if(!r.ok){ alert(r.error || "Suppression impossible."); return; }
+        await chargerEquipe();
+      }catch(e){ alert(e.message); }
+    }));
+
+    // Seul le compte principal peut inviter — et seulement s'il reste des sièges disponibles.
+    inviteEl.style.display = (roleCourant === 'owner') ? 'block' : 'none';
   }catch(e){ /* silencieux */ }
 }
+
+document.getElementById('btnInviterCollab').addEventListener('click', async ()=>{
+  const collaborateurEmail = document.getElementById('eq-email').value.trim();
+  const collaborateurPassword = document.getElementById('eq-password').value;
+  const msg = document.getElementById('equipeMsg');
+  msg.style.display = 'none';
+  if(!collaborateurEmail || !collaborateurPassword){ msg.textContent = "Email et mot de passe requis."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnInviterCollab');
+  btn.disabled = true; btn.textContent = "Invitation...";
+  try{
+    const res = await callBackend({ action:"invite_collaborateur", email: session.email, token: session.token, collaborateurEmail, collaborateurPassword });
+    if(!res.ok){ msg.textContent = res.error || "Invitation impossible."; msg.style.display='block'; return; }
+    document.getElementById('eq-email').value = '';
+    document.getElementById('eq-password').value = '';
+    msg.textContent = "Collaborateur ajouté — communique-lui ses identifiants pour qu'il se connecte.";
+    msg.style.display = 'block';
+    await chargerEquipe();
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Inviter"; }
+});
 
 function remplirInfosLegales(infos){
   document.getElementById('li-nom').value = infos.nomEntreprise || '';
@@ -2200,6 +2425,369 @@ async function chargerSessionsGoogleEnCache(){
   const mailToken = getValidGoogleToken('gmail');
   if(mailToken) await afficherMail(mailToken);
 }
+
+/* ---------- Indemnités kilométriques (barème sur cumul annuel par véhicule) ---------- */
+// Barème fiscal 2026 (DGFiP), inchangé depuis 2024 — à revérifier chaque année.
+const BAREME_IK = {
+  3: { taux1: 0.529, taux2: 0.316, forfait: 1065, taux3: 0.370 },
+  4: { taux1: 0.606, taux2: 0.340, forfait: 1330, taux3: 0.407 },
+  5: { taux1: 0.636, taux2: 0.357, forfait: 1382, taux3: 0.427 },
+  6: { taux1: 0.665, taux2: 0.374, forfait: 1435, taux3: 0.447 },
+  7: { taux1: 0.697, taux2: 0.394, forfait: 1493, taux3: 0.470 }
+};
+// Calcule l'indemnité totale pour une distance annuelle cumulée donnée (le barème n'est pas
+// linéaire trajet par trajet : c'est le cumul sur l'année qui détermine le taux applicable).
+function calculerIndemniteAnnuelle(distanceCumulee, cv, electrique){
+  const b = BAREME_IK[cv] || BAREME_IK[5];
+  let montant;
+  if(distanceCumulee <= 5000) montant = distanceCumulee * b.taux1;
+  else if(distanceCumulee <= 20000) montant = distanceCumulee * b.taux2 + b.forfait;
+  else montant = distanceCumulee * b.taux3;
+  return electrique ? montant * 1.2 : montant;
+}
+
+const TRAJETS_IK_DEMO = [
+  { id:'demo-ik-1', date:new Date(Date.now()-20*86400000).toISOString(), motif:'RDV chantier Marchand', distance:64, cv:5, electrique:false, clientId:'demo-1', clientNom:'Julien Marchand' },
+  { id:'demo-ik-2', date:new Date(Date.now()-12*86400000).toISOString(), motif:'Visite découverte Renard', distance:38, cv:5, electrique:false, clientId:'demo-2', clientNom:'Sophie Renard' },
+  { id:'demo-ik-3', date:new Date(Date.now()-3*86400000).toISOString(), motif:'Livraison matériel', distance:112, cv:6, electrique:false, clientId:'', clientNom:'' }
+];
+
+let trajetsIk = [];
+
+/* ---------- Profil IK personnel (adresse, véhicule) ---------- */
+function remplirProfilIk(profil){
+  if(!profil) return;
+  document.getElementById('ik-adresse-domicile').value = profil.adresseDomicile || '';
+  if(profil.cvDefaut) document.getElementById('ik-cv-defaut').value = String(profil.cvDefaut);
+  document.getElementById('ik-electrique-defaut').value = profil.electriqueDefaut ? 'oui' : 'non';
+  // Préremplit aussi le formulaire d'ajout manuel avec ces valeurs par défaut.
+  const cvManuel = document.getElementById('ik-cv');
+  if(cvManuel && profil.cvDefaut) cvManuel.value = String(profil.cvDefaut);
+  const elecManuel = document.getElementById('ik-electrique');
+  if(elecManuel) elecManuel.value = profil.electriqueDefaut ? 'oui' : 'non';
+}
+
+document.getElementById('btnSaveProfilIk').addEventListener('click', async ()=>{
+  const adresseDomicile = document.getElementById('ik-adresse-domicile').value.trim();
+  const cvDefaut = parseInt(document.getElementById('ik-cv-defaut').value, 10);
+  const electriqueDefaut = document.getElementById('ik-electrique-defaut').value === 'oui';
+  const msg = document.getElementById('profilIkMsg');
+
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnSaveProfilIk');
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"save_profil_ik", email: session.email, token: session.token, adresseDomicile, cvDefaut, electriqueDefaut });
+    if(!res.ok){ msg.textContent = res.error || "Enregistrement impossible."; msg.style.display='block'; return; }
+    msg.textContent = "Adresse enregistrée."; msg.style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer mon adresse"; }
+});
+
+(function initPeriodeIk(){
+  const debut = document.getElementById('ik-periode-debut');
+  const fin = document.getElementById('ik-periode-fin');
+  if(!debut || !fin) return;
+  const aujourdhui = new Date();
+  const premierDuMois = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), 1);
+  debut.value = premierDuMois.toISOString().slice(0,10);
+  fin.value = aujourdhui.toISOString().slice(0,10);
+})();
+
+/* ---------- Calcul automatique des trajets depuis l'agenda Google connecté ----------
+   Géocodage et calcul d'itinéraire entièrement gratuits, sans clé API à créer :
+   1) Base Adresse Nationale (BAN, adresse.data.gouv.fr) — base officielle française, en priorité
+   2) Nominatim/OpenStreetMap — repli si la BAN ne trouve rien (utile pour les lieux-dits ruraux)
+   3) OSRM (router.project-osrm.org) — calcul de l'itinéraire routier réel une fois les points géocodés
+   Si un point ne peut vraiment pas être géocodé, on l'ignore plutôt que d'inventer une distance. */
+let resultatsAgendaEnAttente = [];
+let geocodeCacheIk = {};
+
+async function banSearch_(adresse){
+  const url = 'https://api-adresse.data.gouv.fr/search/?q='+encodeURIComponent(adresse)+'&limit=1';
+  const resp = await fetch(url);
+  if(!resp.ok) return null;
+  const data = await resp.json();
+  if(!data.features || !data.features.length) return null;
+  const [lon, lat] = data.features[0].geometry.coordinates;
+  return { lat, lon };
+}
+async function nominatimSearch_(adresse){
+  const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(adresse);
+  const resp = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+  if(!resp.ok) return null;
+  const data = await resp.json();
+  if(!data.length) return null;
+  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+}
+async function geocodeIk_(adresse){
+  if(geocodeCacheIk[adresse]) return geocodeCacheIk[adresse];
+  let point = null;
+  try{ point = await banSearch_(adresse); }catch(e){ point = null; }
+  if(!point){ try{ point = await nominatimSearch_(adresse); }catch(e){ point = null; } }
+  if(!point){
+    // Repli : uniquement code postal + ville, pour les adresses rurales (lieux-dits) non reconnues telles quelles.
+    const m = adresse.match(/(\d{5})\s+([^,]+?)\s*$/);
+    if(m){
+      const cp = m[1]+' '+m[2];
+      try{ point = await banSearch_(cp); }catch(e){ point = null; }
+      if(!point){ try{ point = await nominatimSearch_(cp); }catch(e){ point = null; } }
+    }
+  }
+  if(point) geocodeCacheIk[adresse] = point;
+  return point;
+}
+async function routeLegsOsrm_(points){
+  const coordStr = points.map(p=> p.lon+','+p.lat).join(';');
+  const url = 'https://router.project-osrm.org/route/v1/driving/'+coordStr+'?overview=false';
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error('itinéraire indisponible');
+  const data = await resp.json();
+  if(!data.routes || !data.routes.length) throw new Error('aucun itinéraire trouvé');
+  return data.routes[0].legs.reduce((total, leg)=> total + leg.distance, 0) / 1000; // km
+}
+const pauseIk_ = (ms)=> new Promise(r=> setTimeout(r, ms));
+
+document.getElementById('btnAnalyserAgenda').addEventListener('click', async ()=>{
+  const msg = document.getElementById('ikAgendaMsg');
+  const apercuEl = document.getElementById('ikApercuAgenda');
+  msg.style.display = 'none';
+  apercuEl.style.display = 'none';
+
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration — utilise la saisie manuelle."; msg.style.display='block'; return; }
+
+  const adresseDomicile = document.getElementById('ik-adresse-domicile').value.trim();
+  if(!adresseDomicile){ msg.textContent = "Renseigne d'abord ton adresse de domicile ci-dessus."; msg.style.display='block'; return; }
+
+  const calToken = getValidGoogleToken('calendar');
+  if(!calToken){ msg.textContent = "Connecte d'abord ton agenda Google (onglet Agenda) avant d'analyser."; msg.style.display='block'; return; }
+
+  const debut = document.getElementById('ik-periode-debut').value;
+  const fin = document.getElementById('ik-periode-fin').value;
+  if(!debut || !fin){ msg.textContent = "Choisis une période."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnAnalyserAgenda');
+  btn.disabled = true; btn.textContent = "Lecture de l'agenda...";
+  try{
+    // 1. Récupère tous les événements de la période depuis Google Calendar.
+    const timeMin = new Date(debut+'T00:00:00').toISOString();
+    const timeMax = new Date(fin+'T23:59:59').toISOString();
+    const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin='+encodeURIComponent(timeMin)+'&timeMax='+encodeURIComponent(timeMax)+'&maxResults=250&orderBy=startTime&singleEvents=true';
+    const resp = await fetch(url, { headers: { Authorization: 'Bearer '+calToken } });
+    const data = await resp.json();
+    const events = (data.items || []).filter(ev=> ev.location && ev.location.trim() !== '');
+
+    if(events.length === 0){
+      msg.textContent = "Aucun événement avec une adresse renseignée sur cette période.";
+      msg.style.display = 'block';
+      return;
+    }
+
+    // 2. Regroupe les événements par jour, dans l'ordre chronologique de la journée.
+    const parJour = {};
+    events.forEach(ev=>{
+      const dateStr = (ev.start.dateTime || ev.start.date).slice(0,10);
+      parJour[dateStr] = parJour[dateStr] || [];
+      parJour[dateStr].push({ titre: ev.summary || '(Sans titre)', lieu: ev.location });
+    });
+    const jours = Object.keys(parJour).sort().map(date=> ({ date, evenements: parJour[date] }));
+
+    // 3. Géocode le domicile une seule fois.
+    btn.textContent = "Géolocalisation...";
+    const pointDomicile = await geocodeIk_(adresseDomicile);
+    if(!pointDomicile){
+      msg.textContent = "Ton adresse de domicile n'a pas pu être localisée — vérifie-la.";
+      msg.style.display = 'block';
+      return;
+    }
+
+    // 4. Pour chaque jour : géocode chaque RDV, puis calcule l'itinéraire domicile→RDV1→...→domicile.
+    resultatsAgendaEnAttente = [];
+    const erreurs = [];
+    for(const jour of jours){
+      btn.textContent = "Calcul — "+new Date(jour.date).toLocaleDateString('fr-FR')+"...";
+      const points = [pointDomicile];
+      const evenementsValides = [];
+      for(const ev of jour.evenements){
+        const p = await geocodeIk_(ev.lieu);
+        if(p){ points.push(p); evenementsValides.push(ev); }
+        await pauseIk_(200); // courtoisie envers les services publics gratuits
+      }
+      if(evenementsValides.length === 0) continue;
+      points.push(pointDomicile);
+
+      try{
+        const distanceKm = await routeLegsOsrm_(points);
+        resultatsAgendaEnAttente.push({
+          date: jour.date,
+          motif: evenementsValides.map(e=> e.titre).join(', '),
+          distance: Math.round(distanceKm * 10) / 10
+        });
+      }catch(e){
+        erreurs.push(jour.date);
+      }
+      await pauseIk_(300);
+    }
+
+    if(resultatsAgendaEnAttente.length === 0){
+      msg.textContent = "Aucun trajet n'a pu être calculé avec précision" + (erreurs.length ? " ("+erreurs.length+" jour(s) sans itinéraire trouvé)" : "") + " — aucune estimation n'est faite, ajoute-les manuellement si besoin.";
+      msg.style.display = 'block';
+      return;
+    }
+
+    renderApercuAgenda(erreurs.length);
+  }catch(e){
+    msg.textContent = "Erreur : " + e.message;
+    msg.style.display = 'block';
+  }finally{
+    btn.disabled = false; btn.textContent = "Analyser mon agenda";
+  }
+});
+
+function renderApercuAgenda(nbErreurs){
+  const apercuEl = document.getElementById('ikApercuAgenda');
+  apercuEl.style.display = 'block';
+  apercuEl.innerHTML =
+    '<h4 style="font-size:14px; margin-bottom:10px;">'+resultatsAgendaEnAttente.length+' jour(s) calculé(s) avec un itinéraire réel'+(nbErreurs ? ' — '+nbErreurs+' jour(s) sans itinéraire trouvé (ignorés, aucune estimation faite — à ajouter manuellement si besoin)' : '')+'</h4>' +
+    resultatsAgendaEnAttente.map((r,i)=> `
+      <div class="import-mapping-row">
+        <input type="checkbox" class="apercu-ik-check" data-i="${i}" checked style="flex:0;">
+        <div class="col-name" style="flex:1;">${new Date(r.date).toLocaleDateString('fr-FR')}</div>
+        <div style="flex:3; font-size:13px;">${r.motif}</div>
+        <div style="flex:1; text-align:right; font-family:'IBM Plex Mono',monospace;">${r.distance} km</div>
+      </div>`).join('') +
+    '<button class="btn" id="btnImporterApercuIk" style="margin-top:14px;">Importer la sélection</button>';
+
+  document.getElementById('btnImporterApercuIk').addEventListener('click', async ()=>{
+    const cv = parseInt(document.getElementById('ik-cv-defaut').value, 10);
+    const electrique = document.getElementById('ik-electrique-defaut').value === 'oui';
+    const selection = [...document.querySelectorAll('.apercu-ik-check:checked')].map(chk=>{
+      const r = resultatsAgendaEnAttente[+chk.dataset.i];
+      return { date: r.date, motif: r.motif, distance: r.distance, cv, electrique };
+    });
+    if(selection.length === 0){ alert("Sélectionne au moins un jour à importer."); return; }
+
+    const btn = document.getElementById('btnImporterApercuIk');
+    btn.disabled = true; btn.textContent = "Import...";
+    try{
+      const res = await callBackend({ action:"ik_import_batch", email: session.email, token: session.token, trajets: selection });
+      if(!res.ok){ alert(res.error || "Import impossible."); return; }
+      document.getElementById('ikApercuAgenda').style.display = 'none';
+      document.getElementById('ikAgendaMsg').textContent = res.importes + " trajet(s) importé(s).";
+      document.getElementById('ikAgendaMsg').style.display = 'block';
+      await chargerTrajetsIk();
+    }catch(e){ alert(e.message); }
+    finally{ btn.disabled = false; btn.textContent = "Importer la sélection"; }
+  });
+}
+
+
+
+async function chargerTrajetsIk(){
+  if(simulationMode){ trajetsIk = TRAJETS_IK_DEMO.map(t=>({...t})); renderIk(); return; }
+  try{
+    const res = await callBackend({ action:"ik_list_trajets", email: session.email, token: session.token });
+    if(res.ok){ trajetsIk = res.trajets || []; renderIk(); }
+  }catch(e){ /* silencieux */ }
+}
+
+function remplirSelectClientIk(){
+  const sel = document.getElementById('ik-client');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">— Aucun —</option>' +
+    clients.map(c=> '<option value="'+c.id+'">'+(c.nom||c.entreprise||'Sans nom')+(c.entreprise&&c.nom?' — '+c.entreprise:'')+'</option>').join('');
+}
+
+function renderIk(){
+  const anneeCourante = new Date().getFullYear();
+  const trajetsAnnee = trajetsIk.filter(t=> t.date && new Date(t.date).getFullYear() === anneeCourante);
+
+  const groupes = {};
+  trajetsAnnee.forEach(t=>{
+    const cle = t.cv + (t.electrique ? '-elec' : '');
+    if(!groupes[cle]) groupes[cle] = { cv: t.cv, electrique: t.electrique, distance: 0 };
+    groupes[cle].distance += (t.distance||0);
+  });
+  const recapEl = document.getElementById('ikRecap');
+  const lignes = Object.values(groupes);
+  if(lignes.length === 0){
+    recapEl.innerHTML = '<div class="empty-note">Aucun trajet enregistré pour '+anneeCourante+'.</div>';
+  } else {
+    let totalGeneral = 0;
+    recapEl.innerHTML = lignes.map(g=>{
+      const montant = calculerIndemniteAnnuelle(g.distance, g.cv, g.electrique);
+      totalGeneral += montant;
+      return '<div class="stat-box"><div class="n" style="font-size:20px;">'+montant.toLocaleString('fr-FR',{maximumFractionDigits:2})+' €</div><div class="lbl">'+g.cv+' CV'+(g.electrique?' élec.':'')+' — '+g.distance.toLocaleString('fr-FR')+' km</div></div>';
+    }).join('') + '<div class="stat-box" style="background:var(--ink); color:#fff;"><div class="n" style="font-size:20px; color:#fff;">'+totalGeneral.toLocaleString('fr-FR',{maximumFractionDigits:2})+' €</div><div class="lbl" style="color:#9fb3b0;">Total '+anneeCourante+'</div></div>';
+  }
+
+  const listeEl = document.getElementById('ikTrajetsListe');
+  if(trajetsIk.length === 0){ listeEl.innerHTML = '<div class="empty-note">Aucun trajet pour le moment.</div>'; return; }
+  const tries = [...trajetsIk].sort((a,b)=> new Date(b.date||0) - new Date(a.date||0));
+  listeEl.innerHTML = tries.map(t=> '<div class="mouvement-item"><div><div class="when">'+(t.date ? new Date(t.date).toLocaleDateString('fr-FR') : '—')+'</div><div><strong>'+(t.motif || '(sans motif)')+'</strong> — '+t.distance+' km · '+t.cv+' CV'+(t.electrique?' élec.':'')+' '+(t.clientNom ? '· '+t.clientNom : '')+'</div></div><button type="button" data-id="'+t.id+'" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button></div>').join('');
+  listeEl.querySelectorAll('button[data-id]').forEach(btn=> btn.addEventListener('click', async ()=>{
+    if(!confirm("Supprimer ce trajet ?")) return;
+    if(simulationMode){
+      trajetsIk = trajetsIk.filter(t=> t.id !== btn.dataset.id);
+      renderIk();
+      return;
+    }
+    try{
+      const res = await callBackend({ action:"ik_delete_trajet", email: session.email, token: session.token, id: btn.dataset.id });
+      if(!res.ok){ alert(res.error || "Suppression impossible."); return; }
+      await chargerTrajetsIk();
+    }catch(e){ alert(e.message); }
+  }));
+}
+
+document.getElementById('btnAddTrajetIk').addEventListener('click', async ()=>{
+  const date = document.getElementById('ik-date').value;
+  const distance = parseFloat(document.getElementById('ik-distance').value);
+  const msg = document.getElementById('ikMsg');
+  msg.style.display = 'none';
+  if(!date || !distance || distance <= 0){ msg.textContent = "Date et distance requises."; msg.style.display='block'; return; }
+
+  const clientSel = document.getElementById('ik-client');
+  const clientOpt = clientSel.options[clientSel.selectedIndex];
+  const trajet = {
+    date, distance,
+    motif: document.getElementById('ik-motif').value.trim(),
+    cv: parseInt(document.getElementById('ik-cv').value, 10),
+    electrique: document.getElementById('ik-electrique').value === 'oui',
+    clientId: clientSel.value,
+    clientNom: clientSel.value ? clientOpt.textContent : ''
+  };
+
+  function resetFormIk(){
+    document.getElementById('ik-motif').value = '';
+    document.getElementById('ik-distance').value = '';
+  }
+
+  if(simulationMode){
+    trajetsIk.push(Object.assign({ id:'demo-ik-'+Date.now() }, trajet));
+    resetFormIk();
+    renderIk();
+    msg.textContent = "Trajet enregistré (démonstration)."; msg.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btnAddTrajetIk');
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const res = await callBackend({ action:"ik_add_trajet", email: session.email, token: session.token, trajet });
+    if(!res.ok){ msg.textContent = res.error || "Enregistrement impossible."; msg.style.display='block'; return; }
+    resetFormIk();
+    await chargerTrajetsIk();
+    msg.textContent = "Trajet enregistré."; msg.style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer ce trajet"; }
+});
+
+(function initDateIk(){
+  const champ = document.getElementById('ik-date');
+  if(champ) champ.value = new Date().toISOString().slice(0,10);
+})();
 
 /* ---------- Stocks : mouvements, état calculé, import fichier ---------- */
 let mouvementsStock = [];
