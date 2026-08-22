@@ -670,7 +670,7 @@
 
       <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
         <h3 style="color:var(--accent);">Calculer automatiquement depuis mon agenda</h3>
-        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Enchaîne domicile → premier rendez-vous → rendez-vous suivants → dernier rendez-vous → domicile, pour chaque jour de la période — à partir des lieux renseignés sur tes événements Google Agenda. Géolocalisation et calcul d'itinéraire gratuits (Base Adresse Nationale, OpenStreetMap), aucune clé à configurer. Nécessite d'avoir connecté ton agenda (onglet Agenda) et renseigné ton adresse ci-dessus.</p>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Enchaîne domicile → premier rendez-vous → rendez-vous suivants → dernier rendez-vous → domicile, pour chaque jour de la période — à partir des lieux renseignés sur tes événements Google Agenda. Géolocalisation et calcul d'itinéraire gratuits (Base Adresse Nationale, OpenStreetMap), aucune clé à configurer. Nécessite d'avoir connecté ton agenda (onglet Agenda) et renseigné ton adresse ci-dessus. Chaque rendez-vous est inclus par défaut — décoche "Inclure dans les indemnités km" sur un événement précis (onglet Agenda) pour l'exclure du calcul.</p>
         <div class="field-row">
           <div class="field"><label>Du</label><input id="ik-periode-debut" type="date"></div>
           <div class="field"><label>Au</label><input id="ik-periode-fin" type="date"></div>
@@ -2483,8 +2483,13 @@ async function afficherAgenda(token){
     panel.innerHTML = events.map(ev=>{
       const start = ev.start.dateTime || ev.start.date;
       const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
+      // Coché par défaut : seule une valeur explicitement "false" (déjà décochée une fois) exclut l'événement.
+      const inclusIk = !(ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.simplikaIk === 'false');
       return '<div class="event-item" style="display:flex; justify-content:space-between; align-items:center;">'+
-        '<div><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>'+
+        '<div><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div>'+
+        '<label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px; margin-top:4px; cursor:pointer;">'+
+        '<input type="checkbox" class="chk-inclure-ik" data-evid="'+ev.id+'" '+(inclusIk?'checked':'')+' style="margin:0;"> Inclure dans les indemnités km'+
+        '</label></div>'+
         '<button type="button" data-evid="'+ev.id+'" class="btn-suppr-evenement" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button>'+
         '</div>';
     }).join('');
@@ -2504,6 +2509,21 @@ async function afficherAgenda(token){
         if(!r.ok && r.status !== 204){ alert("Suppression impossible."); return; }
         await afficherAgenda(tok);
       }catch(e){ alert(e.message); }
+    }));
+
+    // La case est mémorisée directement sur l'événement Google Agenda (propriété étendue privée) —
+    // ça persiste peu importe l'appareil ou le navigateur utilisé pour se reconnecter ensuite.
+    panel.querySelectorAll('.chk-inclure-ik').forEach(chk=> chk.addEventListener('change', async ()=>{
+      const tok = getValidGoogleToken('calendar');
+      if(!tok){ alert("Session Google expirée, reconnecte-toi."); chk.checked = !chk.checked; return; }
+      try{
+        const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/'+chk.dataset.evid, {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer '+tok, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ extendedProperties: { private: { simplikaIk: chk.checked ? 'true' : 'false' } } })
+        });
+        if(!r.ok){ alert("Mise à jour impossible."); chk.checked = !chk.checked; }
+      }catch(e){ alert(e.message); chk.checked = !chk.checked; }
     }));
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger l\'agenda pour le moment.</div>';
@@ -2839,7 +2859,10 @@ document.getElementById('btnAnalyserAgenda').addEventListener('click', async ()=
     const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin='+encodeURIComponent(timeMin)+'&timeMax='+encodeURIComponent(timeMax)+'&maxResults=250&orderBy=startTime&singleEvents=true';
     const resp = await fetch(url, { headers: { Authorization: 'Bearer '+calToken } });
     const data = await resp.json();
-    const events = (data.items || []).filter(ev=> ev.location && ev.location.trim() !== '');
+    const events = (data.items || []).filter(ev=>
+      ev.location && ev.location.trim() !== '' &&
+      !(ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.simplikaIk === 'false')
+    );
 
     if(events.length === 0){
       msg.textContent = "Aucun événement avec une adresse renseignée sur cette période.";
