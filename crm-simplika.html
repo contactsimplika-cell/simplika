@@ -478,22 +478,54 @@
 
     <!-- AGENDA -->
     <div class="tab-panel" id="tab-agenda">
-      <div class="panel" id="agendaPanel">
+      <div class="panel" id="agendaConnectPanel">
         <div class="connect-box">
-          <p>Connecte ton agenda Google pour voir tes prochains rendez-vous ici. Simplika ne fait qu'afficher tes événements — rien n'est modifié sur ton compte Google.</p>
+          <p>Connecte ton agenda Google pour voir, ajouter, modifier et supprimer tes événements directement depuis le CRM.</p>
           <button class="btn" id="btnConnectAgenda">Connecter mon agenda Google</button>
         </div>
       </div>
+
+      <div class="panel" id="agendaAjoutPanel" style="display:none;">
+        <h3>Nouvel événement</h3>
+        <div class="field-row">
+          <div class="field" style="flex:2;"><label>Titre</label><input id="ag-titre" type="text" placeholder="Ex : RDV chantier Dupont"></div>
+          <div class="field"><label>Lieu (facultatif)</label><input id="ag-lieu" type="text" placeholder="Adresse du rendez-vous"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Date</label><input id="ag-date" type="date"></div>
+          <div class="field"><label>Heure de début</label><input id="ag-heure-debut" type="time"></div>
+          <div class="field"><label>Heure de fin</label><input id="ag-heure-fin" type="time"></div>
+        </div>
+        <button class="btn" id="btnAjouterEvenement" style="margin-top:14px;">Ajouter l'événement</button>
+        <p class="hint" id="agendaAjoutMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel" id="agendaPanel" style="display:none;"></div>
     </div>
 
     <!-- MAIL -->
     <div class="tab-panel" id="tab-mail">
-      <div class="panel" id="mailPanel">
+      <div class="panel" id="mailConnectPanel">
         <div class="connect-box">
-          <p>Connecte ta boîte mail Gmail pour voir tes messages récents ici. Lecture seule — Simplika ne peut ni envoyer, ni supprimer, ni modifier tes emails.</p>
+          <p>Connecte ta boîte mail Gmail pour lire, envoyer et gérer tes messages directement depuis le CRM.</p>
           <button class="btn" id="btnConnectMail">Connecter ma boîte mail Gmail</button>
         </div>
       </div>
+
+      <div class="panel" id="mailComposePanel" style="display:none;">
+        <h3>Nouveau message</h3>
+        <div class="field-row">
+          <div class="field" style="flex:2;"><label>À</label><input id="mail-a" type="email" placeholder="destinataire@email.com"></div>
+          <div class="field" style="flex:2;"><label>Objet</label><input id="mail-objet" type="text" placeholder="Objet du message"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field" style="flex:1;"><label>Message</label><textarea id="mail-corps" rows="5" placeholder="Votre message..."></textarea></div>
+        </div>
+        <button class="btn" id="btnEnvoyerMail" style="margin-top:14px;">Envoyer →</button>
+        <p class="hint" id="mailComposeMsg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <div class="panel" id="mailPanel" style="display:none;"></div>
     </div>
 
     <!-- PRESTATIONS & TARIFS -->
@@ -1195,7 +1227,13 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   document.getElementById('simulationBanner').style.alignItems = 'center';
   unlockApp();
   renderClients(); renderKanban(); renderSelecteurDecouverte();
+  document.getElementById('agendaConnectPanel').style.display = 'none';
+  document.getElementById('agendaAjoutPanel').style.display = 'block';
+  document.getElementById('agendaPanel').style.display = 'block';
   document.getElementById('agendaPanel').innerHTML = EVENTS_DEMO.map(ev=> '<div class="event-item"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
+  document.getElementById('mailConnectPanel').style.display = 'none';
+  document.getElementById('mailComposePanel').style.display = 'block';
+  document.getElementById('mailPanel').style.display = 'block';
   document.getElementById('mailPanel').innerHTML = MAIL_DEMO.map(m=> '<div class="mail-item"><div class="from">'+m.from+'</div><div class="subject">'+m.subject+'</div><div class="snippet">'+m.snippet+'</div></div>').join('');
   renderDashboard();
   document.getElementById('dashAgenda').innerHTML = EVENTS_DEMO.slice(0,3).map(ev=> '<div class="mini-event"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
@@ -2419,10 +2457,13 @@ document.getElementById('btnConnectAgenda').addEventListener('click', ()=>{
   }
   const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/calendar.readonly',
+    scope: 'https://www.googleapis.com/auth/calendar',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
       saveGoogleToken('calendar', resp.access_token, resp.expires_in);
+      document.getElementById('agendaConnectPanel').style.display = 'none';
+      document.getElementById('agendaAjoutPanel').style.display = 'block';
+      document.getElementById('agendaPanel').style.display = 'block';
       await afficherAgenda(resp.access_token);
     }
   });
@@ -2434,7 +2475,7 @@ async function afficherAgenda(token){
   panel.innerHTML = '<p class="hint">Chargement des événements...</p>';
   try{
     const timeMin = new Date().toISOString();
-    const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin='+encodeURIComponent(timeMin)+'&maxResults=10&orderBy=startTime&singleEvents=true';
+    const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin='+encodeURIComponent(timeMin)+'&maxResults=15&orderBy=startTime&singleEvents=true';
     const resp = await fetch(url, { headers: { Authorization: 'Bearer '+token } });
     const data = await resp.json();
     const events = data.items || [];
@@ -2442,7 +2483,10 @@ async function afficherAgenda(token){
     panel.innerHTML = events.map(ev=>{
       const start = ev.start.dateTime || ev.start.date;
       const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
-      return '<div class="event-item"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>';
+      return '<div class="event-item" style="display:flex; justify-content:space-between; align-items:center;">'+
+        '<div><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>'+
+        '<button type="button" data-evid="'+ev.id+'" class="btn-suppr-evenement" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button>'+
+        '</div>';
     }).join('');
     const dashEl = document.getElementById('dashAgenda');
     if(dashEl) dashEl.innerHTML = events.slice(0,3).map(ev=>{
@@ -2450,12 +2494,73 @@ async function afficherAgenda(token){
       const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
       return '<div class="mini-event"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>';
     }).join('');
+
+    panel.querySelectorAll('.btn-suppr-evenement').forEach(btn=> btn.addEventListener('click', async ()=>{
+      if(!confirm("Supprimer cet événement de ton agenda Google ?")) return;
+      const tok = getValidGoogleToken('calendar');
+      if(!tok){ alert("Session Google expirée, reconnecte-toi."); return; }
+      try{
+        const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/'+btn.dataset.evid, { method:'DELETE', headers:{ Authorization:'Bearer '+tok } });
+        if(!r.ok && r.status !== 204){ alert("Suppression impossible."); return; }
+        await afficherAgenda(tok);
+      }catch(e){ alert(e.message); }
+    }));
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger l\'agenda pour le moment.</div>';
   }
 }
 
-/* ---------- Boîte mail Gmail (OAuth2, lecture seule) ---------- */
+document.getElementById('btnAjouterEvenement').addEventListener('click', async ()=>{
+  const titre = document.getElementById('ag-titre').value.trim();
+  const date = document.getElementById('ag-date').value;
+  const heureDebut = document.getElementById('ag-heure-debut').value;
+  const heureFin = document.getElementById('ag-heure-fin').value;
+  const lieu = document.getElementById('ag-lieu').value.trim();
+  const msg = document.getElementById('agendaAjoutMsg');
+  msg.style.display = 'none';
+
+  if(!titre || !date || !heureDebut || !heureFin){ msg.textContent = "Titre, date et horaires requis."; msg.style.display='block'; return; }
+
+  if(simulationMode){
+    msg.textContent = "Non disponible en mode démonstration.";
+    msg.style.display = 'block';
+    return;
+  }
+
+  const token = getValidGoogleToken('calendar');
+  if(!token){ msg.textContent = "Connecte d'abord ton agenda Google."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnAjouterEvenement');
+  btn.disabled = true; btn.textContent = "Ajout...";
+  try{
+    const evenement = {
+      summary: titre,
+      location: lieu || undefined,
+      start: { dateTime: date+'T'+heureDebut+':00', timeZone: 'Europe/Paris' },
+      end: { dateTime: date+'T'+heureFin+':00', timeZone: 'Europe/Paris' }
+    };
+    const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer '+token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(evenement)
+    });
+    if(!resp.ok){ const err = await resp.json(); msg.textContent = "Erreur : " + (err.error ? err.error.message : "ajout impossible"); msg.style.display='block'; return; }
+    document.getElementById('ag-titre').value = '';
+    document.getElementById('ag-lieu').value = '';
+    document.getElementById('ag-heure-debut').value = '';
+    document.getElementById('ag-heure-fin').value = '';
+    msg.textContent = "Événement ajouté à ton agenda Google."; msg.style.display = 'block';
+    await afficherAgenda(token);
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Ajouter l'événement"; }
+});
+
+(function initDateAgenda(){
+  const champ = document.getElementById('ag-date');
+  if(champ) champ.value = new Date().toISOString().slice(0,10);
+})();
+
+/* ---------- Boîte mail Gmail (OAuth2, lecture + écriture) ---------- */
 document.getElementById('btnConnectMail').addEventListener('click', ()=>{
   if(!window.google || GOOGLE_CLIENT_ID.indexOf("COLLER_ICI") === 0){
     alert("La connexion à la boîte mail n'est pas encore configurée (identifiant Google manquant).");
@@ -2463,10 +2568,13 @@ document.getElementById('btnConnectMail').addEventListener('click', ()=>{
   }
   const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/gmail.readonly',
+    scope: 'https://www.googleapis.com/auth/gmail.modify',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
       saveGoogleToken('gmail', resp.access_token, resp.expires_in);
+      document.getElementById('mailConnectPanel').style.display = 'none';
+      document.getElementById('mailComposePanel').style.display = 'block';
+      document.getElementById('mailPanel').style.display = 'block';
       await afficherMail(resp.access_token);
     }
   });
@@ -2488,7 +2596,10 @@ async function afficherMail(token){
       const headers = (m.payload && m.payload.headers) || [];
       const from = (headers.find(h=>h.name==='From')||{}).value || '';
       const subject = (headers.find(h=>h.name==='Subject')||{}).value || '(Sans objet)';
-      return '<div class="mail-item"><div class="from">'+from+'</div><div class="subject">'+subject+'</div><div class="snippet">'+(m.snippet||'')+'</div></div>';
+      return '<div class="mail-item" style="display:flex; justify-content:space-between; align-items:flex-start;">'+
+        '<div><div class="from">'+from+'</div><div class="subject">'+subject+'</div><div class="snippet">'+(m.snippet||'')+'</div></div>'+
+        '<button type="button" data-msgid="'+m.id+'" class="btn-suppr-mail" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px; flex-shrink:0;">✕</button>'+
+        '</div>';
     }).join('');
     const dashEl = document.getElementById('dashMail');
     if(dashEl) dashEl.innerHTML = messages.slice(0,3).map(m=>{
@@ -2497,18 +2608,85 @@ async function afficherMail(token){
       const subject = (headers.find(h=>h.name==='Subject')||{}).value || '(Sans objet)';
       return '<div class="mini-mail"><div class="from">'+from+'</div><div>'+subject+'</div></div>';
     }).join('');
+
+    panel.querySelectorAll('.btn-suppr-mail').forEach(btn=> btn.addEventListener('click', async ()=>{
+      if(!confirm("Mettre ce message à la corbeille ?")) return;
+      const tok = getValidGoogleToken('gmail');
+      if(!tok){ alert("Session Google expirée, reconnecte-toi."); return; }
+      try{
+        const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+btn.dataset.msgid+'/trash', { method:'POST', headers:{ Authorization:'Bearer '+tok } });
+        if(!r.ok){ alert("Suppression impossible."); return; }
+        await afficherMail(tok);
+      }catch(e){ alert(e.message); }
+    }));
   }catch(e){
     panel.innerHTML = '<div class="empty-note">Impossible de charger la boîte mail pour le moment.</div>';
   }
 }
 
+// Encode un email au format que Gmail attend (RFC 2822, en base64url) pour l'envoi.
+function encoderMessageGmail_(destinataire, objet, corps){
+  const message =
+    'To: ' + destinataire + '\r\n' +
+    'Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(objet))) + '?=\r\n' +
+    'Content-Type: text/plain; charset="UTF-8"\r\n\r\n' +
+    corps;
+  return btoa(unescape(encodeURIComponent(message))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+document.getElementById('btnEnvoyerMail').addEventListener('click', async ()=>{
+  const destinataire = document.getElementById('mail-a').value.trim();
+  const objet = document.getElementById('mail-objet').value.trim();
+  const corps = document.getElementById('mail-corps').value.trim();
+  const msg = document.getElementById('mailComposeMsg');
+  msg.style.display = 'none';
+
+  if(!destinataire || !objet){ msg.textContent = "Destinataire et objet requis."; msg.style.display='block'; return; }
+
+  if(simulationMode){
+    msg.textContent = "Non disponible en mode démonstration.";
+    msg.style.display = 'block';
+    return;
+  }
+
+  const token = getValidGoogleToken('gmail');
+  if(!token){ msg.textContent = "Connecte d'abord ta boîte mail Gmail."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnEnvoyerMail');
+  btn.disabled = true; btn.textContent = "Envoi...";
+  try{
+    const raw = encoderMessageGmail_(destinataire, objet, corps);
+    const resp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer '+token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw })
+    });
+    if(!resp.ok){ const err = await resp.json(); msg.textContent = "Erreur : " + (err.error ? err.error.message : "envoi impossible"); msg.style.display='block'; return; }
+    document.getElementById('mail-a').value = '';
+    document.getElementById('mail-objet').value = '';
+    document.getElementById('mail-corps').value = '';
+    msg.textContent = "Message envoyé."; msg.style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Envoyer →"; }
+});
+
 // Si un jeton valide (non expiré) est encore en mémoire de session, on affiche directement
 // l'agenda/le mail sans redemander la connexion — appelé une fois le CRM débloqué.
 async function chargerSessionsGoogleEnCache(){
   const calToken = getValidGoogleToken('calendar');
-  if(calToken) await afficherAgenda(calToken);
+  if(calToken){
+    document.getElementById('agendaConnectPanel').style.display = 'none';
+    document.getElementById('agendaAjoutPanel').style.display = 'block';
+    document.getElementById('agendaPanel').style.display = 'block';
+    await afficherAgenda(calToken);
+  }
   const mailToken = getValidGoogleToken('gmail');
-  if(mailToken) await afficherMail(mailToken);
+  if(mailToken){
+    document.getElementById('mailConnectPanel').style.display = 'none';
+    document.getElementById('mailComposePanel').style.display = 'block';
+    document.getElementById('mailPanel').style.display = 'block';
+    await afficherMail(mailToken);
+  }
 }
 
 /* ---------- Indemnités kilométriques (barème sur cumul annuel par véhicule) ---------- */
