@@ -378,6 +378,9 @@
           <div class="field"><label>Email</label><input id="c-email" type="email" placeholder="jean@dupont-renovation.fr"></div>
           <div class="field"><label>Téléphone</label><input id="c-telephone" type="text" placeholder="06 00 00 00 00"></div>
         </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field" style="flex:2;"><label>Adresse (contact / chantier)</label><input id="c-adresse" type="text" placeholder="12 rue des Lilas, 56000 Vannes"></div>
+        </div>
         <div style="margin-top:14px;">
           <label style="display:block; font-size:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:6px;">Services souscrits</label>
           <div class="service-tags" id="c-services">
@@ -488,13 +491,19 @@
       <div class="panel" id="agendaAjoutPanel" style="display:none;">
         <h3>Nouvel événement</h3>
         <div class="field-row">
-          <div class="field" style="flex:2;"><label>Titre</label><input id="ag-titre" type="text" placeholder="Ex : RDV chantier Dupont"></div>
+          <div class="field" style="flex:2;"><label>Titre / objet du rendez-vous</label><input id="ag-titre" type="text" placeholder="Ex : RDV découverte Dupont"></div>
           <div class="field"><label>Lieu (facultatif)</label><input id="ag-lieu" type="text" placeholder="Adresse du rendez-vous"></div>
         </div>
         <div class="field-row" style="margin-top:12px;">
           <div class="field"><label>Date</label><input id="ag-date" type="date"></div>
           <div class="field"><label>Heure de début</label><input id="ag-heure-debut" type="time"></div>
           <div class="field"><label>Heure de fin</label><input id="ag-heure-fin" type="time"></div>
+        </div>
+        <div class="sync-note" style="margin-top:16px;">📋 Si ce rendez-vous est avec un prospect, renseigne son nom ci-dessous : une fiche client sera automatiquement créée dans le CRM, prête à être complétée dans "Fiche découverte" si le rendez-vous mène à un devis.</div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field"><label>Nom du prospect (facultatif)</label><input id="ag-nom-prospect" type="text" placeholder="Nom Prénom"></div>
+          <div class="field"><label>Email</label><input id="ag-email-prospect" type="email" placeholder="email@exemple.com"></div>
+          <div class="field"><label>Téléphone</label><input id="ag-tel-prospect" type="tel" placeholder="06 12 34 56 78"></div>
         </div>
         <button class="btn" id="btnAjouterEvenement" style="margin-top:14px;">Ajouter l'événement</button>
         <p class="hint" id="agendaAjoutMsg" style="display:none; margin-top:8px;"></p>
@@ -978,6 +987,7 @@
     <div class="field-row"><div class="field"><label>Entreprise</label><input id="m-entreprise" type="text"></div></div>
     <div class="field-row"><div class="field"><label>Email</label><input id="m-email" type="email"></div></div>
     <div class="field-row"><div class="field"><label>Téléphone</label><input id="m-telephone" type="text"></div></div>
+    <div class="field-row"><div class="field"><label>Adresse (contact / chantier)</label><input id="m-adresse" type="text"></div></div>
     <div class="field-row">
       <div class="field">
         <label>Services souscrits</label>
@@ -1349,6 +1359,7 @@ document.getElementById('btnAddClient').addEventListener('click', async ()=>{
     nom, entreprise,
     email: document.getElementById('c-email').value.trim(),
     telephone: document.getElementById('c-telephone').value.trim(),
+    adresse: document.getElementById('c-adresse').value.trim(),
     services: getServicesChecked('c-services'),
     etape: "Prospect"
   };
@@ -1358,6 +1369,7 @@ document.getElementById('btnAddClient').addEventListener('click', async ()=>{
     document.getElementById('c-entreprise').value = '';
     document.getElementById('c-email').value = '';
     document.getElementById('c-telephone').value = '';
+    document.getElementById('c-adresse').value = '';
     document.querySelectorAll('#c-services input').forEach(i=> i.checked = false);
   }
 
@@ -1389,6 +1401,7 @@ function renderClients(){
         <div>
           <h4>${c.nom || 'Sans nom'}</h4>
           <div class="co">${c.entreprise || ''}${c.email ? ' · '+c.email : ''}${c.telephone ? ' · '+c.telephone : ''}</div>
+          ${c.adresse ? '<div class="co" style="font-size:12px; opacity:.8;">📍 '+c.adresse+'</div>' : ''}
         </div>
         <span class="badge etape">${c.etape}</span>
       </div>
@@ -2337,6 +2350,7 @@ function openModal(id, sourceClients){
   document.getElementById('m-entreprise').value = c.entreprise || '';
   document.getElementById('m-email').value = c.email || '';
   document.getElementById('m-telephone').value = c.telephone || '';
+  document.getElementById('m-adresse').value = c.adresse || '';
   document.getElementById('m-etape').value = c.etape || 'Prospect';
   document.getElementById('m-action').value = c.prochaineAction || '';
   document.getElementById('m-date-action').value = c.dateProchaineAction ? c.dateProchaineAction.slice(0,10) : '';
@@ -2359,6 +2373,7 @@ document.getElementById('btnSaveClient').addEventListener('click', async ()=>{
     entreprise: document.getElementById('m-entreprise').value.trim(),
     email: document.getElementById('m-email').value.trim(),
     telephone: document.getElementById('m-telephone').value.trim(),
+    adresse: document.getElementById('m-adresse').value.trim(),
     services: getServicesChecked('m-services'),
     etape: document.getElementById('m-etape').value,
     prochaineAction: document.getElementById('m-action').value.trim(),
@@ -2536,6 +2551,9 @@ document.getElementById('btnAjouterEvenement').addEventListener('click', async (
   const heureDebut = document.getElementById('ag-heure-debut').value;
   const heureFin = document.getElementById('ag-heure-fin').value;
   const lieu = document.getElementById('ag-lieu').value.trim();
+  const nomProspect = document.getElementById('ag-nom-prospect').value.trim();
+  const emailProspect = document.getElementById('ag-email-prospect').value.trim();
+  const telProspect = document.getElementById('ag-tel-prospect').value.trim();
   const msg = document.getElementById('agendaAjoutMsg');
   msg.style.display = 'none';
 
@@ -2565,11 +2583,34 @@ document.getElementById('btnAjouterEvenement').addEventListener('click', async (
       body: JSON.stringify(evenement)
     });
     if(!resp.ok){ const err = await resp.json(); msg.textContent = "Erreur : " + (err.error ? err.error.message : "ajout impossible"); msg.style.display='block'; return; }
+
+    let messageFinal = "Événement ajouté à ton agenda Google.";
+
+    // Si un nom de prospect est renseigné, crée aussi sa fiche dans le CRM (étape "Prospect"),
+    // prête à être complétée dans "Fiche découverte" si le rendez-vous mène à un devis.
+    if(nomProspect){
+      const client = {
+        nom: nomProspect, entreprise: '', email: emailProspect, telephone: telProspect,
+        adresse: lieu, services: [], etape: 'Prospect', prochaineAction: titre,
+        dateProchaineAction: date
+      };
+      const resClient = await callBackend({ action:"crm_save_client", compte: session.email, token: session.token, client });
+      if(resClient.ok){
+        messageFinal += " Fiche prospect créée dans le CRM (onglet Clients & services).";
+        await loadClients();
+      } else {
+        messageFinal += " (La fiche prospect n'a pas pu être créée : " + (resClient.error||'erreur inconnue') + ")";
+      }
+    }
+
     document.getElementById('ag-titre').value = '';
     document.getElementById('ag-lieu').value = '';
     document.getElementById('ag-heure-debut').value = '';
     document.getElementById('ag-heure-fin').value = '';
-    msg.textContent = "Événement ajouté à ton agenda Google."; msg.style.display = 'block';
+    document.getElementById('ag-nom-prospect').value = '';
+    document.getElementById('ag-email-prospect').value = '';
+    document.getElementById('ag-tel-prospect').value = '';
+    msg.textContent = messageFinal; msg.style.display = 'block';
     await afficherAgenda(token);
   }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
   finally{ btn.disabled = false; btn.textContent = "Ajouter l'événement"; }
