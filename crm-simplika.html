@@ -218,6 +218,26 @@
   /* TABLEAU DE BORD — mosaïque */
   .mosaic{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   @media (max-width:760px){ .mosaic{grid-template-columns:1fr;} }
+
+  /* TABLEAU DE BORD — actions rapides | fenêtres personnalisables | raccourcis réglages */
+  .dashboard-layout{display:grid; grid-template-columns:180px 1fr 56px; gap:20px; align-items:start;}
+  @media (max-width:900px){ .dashboard-layout{grid-template-columns:1fr; } }
+  .dashboard-col-actions{display:flex; flex-direction:column; gap:8px;}
+  .quick-action-btn{text-align:left; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:10px 12px; font-size:13px; color:var(--ink); cursor:pointer; transition:background .15s, transform .15s;}
+  .quick-action-btn:hover{background:var(--accent-soft); transform:translateX(2px);}
+  .dashboard-col-widgets{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start;}
+  @media (max-width:640px){ .dashboard-col-widgets{grid-template-columns:1fr;} }
+  .dashboard-col-raccourcis{display:flex; flex-direction:row; justify-content:flex-end; gap:8px;}
+  @media (max-width:900px){ .dashboard-col-raccourcis{flex-direction:row; justify-content:flex-start; order:-1;} }
+  .raccourci-btn{background:var(--card); border:1px solid var(--line); border-radius:8px; width:44px; height:44px; font-size:18px; cursor:pointer; transition:transform .15s, background .15s;}
+  .raccourci-btn:hover{background:var(--accent-soft); transform:scale(1.06);}
+  .widget-card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:18px; display:flex; flex-direction:column; position:relative;}
+  .widget-card .widget-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  .widget-card .widget-head h3{font-size:15px;}
+  .widget-card .widget-head a{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); text-decoration:none; cursor:pointer;}
+  .widget-card .widget-retirer{position:absolute; top:10px; right:10px; background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:13px; opacity:.5;}
+  .widget-card .widget-retirer:hover{opacity:1; color:var(--warn);}
+  .widget-card.wide{grid-column:1 / -1;}
   .tile{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:20px; display:flex; flex-direction:column;}
   .tile.wide{grid-column:1 / -1;}
   .tile-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
@@ -361,23 +381,31 @@
 
     <!-- TABLEAU DE BORD -->
     <div class="tab-panel active" id="tab-dashboard">
-      <div class="mosaic">
-        <div class="tile wide">
-          <div class="tile-head"><h3>Suivi commercial en un coup d'œil</h3></div>
-          <div class="stat-row" id="dashStats"></div>
+      <div class="dashboard-layout">
+
+        <div class="dashboard-col-actions">
+          <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:12px;">Actions rapides</h4>
+          <button type="button" class="quick-action-btn" data-goto="clients">+ Nouveau client</button>
+          <button type="button" class="quick-action-btn" data-goto="agenda">+ Nouveau rendez-vous</button>
+          <button type="button" class="quick-action-btn" data-goto="decouverte">+ Nouveau devis</button>
+          <button type="button" class="quick-action-btn" id="btnAjouterWidget">+ Ajouter une fenêtre</button>
+          <button type="button" class="quick-action-btn" id="btnExportRapideDashboard">⬇ Exporter mes données</button>
         </div>
-        <div class="tile">
-          <div class="tile-head"><h3>Derniers clients enregistrés</h3><a href="#" data-goto="clients">Voir tout →</a></div>
-          <div id="dashClients"></div>
+
+        <div class="dashboard-col-widgets" id="dashboardWidgetsGrid"></div>
+
+        <div class="dashboard-col-raccourcis">
+          <button type="button" class="raccourci-btn" data-goto="reglages" title="Réglages">⚙️</button>
+          <button type="button" class="raccourci-btn" data-goto="audit" title="Audit d'entreprise">🔍</button>
         </div>
-        <div class="tile">
-          <div class="tile-head"><h3>Agenda</h3><a href="#" data-goto="agenda">Voir tout →</a></div>
-          <div id="dashAgenda"></div>
-        </div>
-        <div class="tile wide">
-          <div class="tile-head"><h3>Boîte mail</h3><a href="#" data-goto="mail">Voir tout →</a></div>
-          <div id="dashMail"></div>
-        </div>
+
+      </div>
+
+      <div class="panel" id="widgetPickerPanel" style="display:none; margin-top:20px;">
+        <h3>Ajouter une fenêtre</h3>
+        <p class="hint" style="margin-bottom:12px;">Coche les fenêtres à afficher sur ton tableau de bord.</p>
+        <div class="service-tags" id="widgetPickerListe"></div>
+        <button class="btn" id="btnEnregistrerWidgets" style="margin-top:14px;">Enregistrer</button>
       </div>
     </div>
 
@@ -798,8 +826,15 @@
           <div id="sup-acces-etape-demande">
             <div class="field-row">
               <div class="field" style="flex:2;"><label>Motif (facultatif, indiqué au client)</label><input id="sup-acces-motif" type="text" placeholder="Ex : vérifier un souci de synchronisation agenda"></div>
+              <div class="field"><label>Type d'accès</label>
+                <select id="sup-acces-type">
+                  <option value="temporaire">Temporaire (2h)</option>
+                  <option value="illimite">Illimité (problème conséquent)</option>
+                </select>
+              </div>
               <button class="btn" id="btnSupportDemanderAcces" style="align-self:flex-end;">Envoyer la demande au client</button>
             </div>
+            <p class="hint" style="margin-top:8px;">L'accès illimité reste actif jusqu'à révocation — à réserver aux situations qui demandent un accompagnement prolongé, l'email au client le précise clairement.</p>
           </div>
 
           <div id="sup-acces-etape-attente" style="display:none;">
@@ -807,6 +842,11 @@
             <button class="btn outline btn-small" id="btnSupportVerifierAcces">Vérifier si le client a validé</button>
           </div>
           <p class="hint" id="sup-acces-msg" style="display:none; margin-top:10px;"></p>
+        </div>
+
+        <div id="supportAccesActifBanniere" style="display:none; margin-bottom:16px; padding:10px 14px; background:var(--accent-soft); border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="hint" id="supportAccesActifTexte" style="margin:0;"></span>
+          <button class="btn danger btn-small" id="btnSupportRevoquerAcces">Révoquer l'accès</button>
         </div>
 
         <div id="supportDetailContenu" style="display:none;">
@@ -1229,6 +1269,8 @@ async function verifierAbonnement(){
       appliquerVerrouillageServices();
       appliquerPermissionsOnglets(res.permissionsOnglets);
       if(res.profilIk) remplirProfilIk(res.profilIk);
+      widgetsActifsCourants = Array.isArray(res.widgetsActifs) ? res.widgetsActifs : WIDGETS_BASE.slice();
+      renderWidgetsGrid();
       unlockApp();
       document.getElementById('btnDeconnexion').style.display = 'inline-block';
       await loadClients();
@@ -1374,8 +1416,12 @@ document.getElementById('btnSimulation').addEventListener('click', ()=>{
   document.getElementById('mailPanel').style.display = 'block';
   document.getElementById('mailPanel').innerHTML = MAIL_DEMO.map(m=> '<div class="mail-item"><div class="from">'+m.from+'</div><div class="subject">'+m.subject+'</div><div class="snippet">'+m.snippet+'</div></div>').join('');
   renderDashboard();
-  document.getElementById('dashAgenda').innerHTML = EVENTS_DEMO.slice(0,3).map(ev=> '<div class="mini-event"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
-  document.getElementById('dashMail').innerHTML = MAIL_DEMO.slice(0,3).map(m=> '<div class="mini-mail"><div class="from">'+m.from+'</div><div>'+m.subject+'</div></div>').join('');
+  widgetsActifsCourants = WIDGETS_BASE.slice();
+  renderWidgetsGrid();
+  const elDashAgenda = document.getElementById('dashAgenda');
+  if(elDashAgenda) elDashAgenda.innerHTML = EVENTS_DEMO.slice(0,3).map(ev=> '<div class="mini-event"><div class="when">'+ev.when+'</div><div>'+ev.titre+'</div></div>').join('');
+  const elDashMail = document.getElementById('dashMail');
+  if(elDashMail) elDashMail.innerHTML = MAIL_DEMO.slice(0,3).map(m=> '<div class="mini-mail"><div class="from">'+m.from+'</div><div>'+m.subject+'</div></div>').join('');
   mouvementsStock = MOUVEMENTS_STOCK_DEMO.map(m=> ({...m}));
   remplirSelectClientMouvement();
   renderEtatStocks(); renderMouvementsList();
@@ -1407,6 +1453,90 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 document.querySelectorAll('[data-goto]').forEach(link=>{
   link.addEventListener('click', (e)=>{ e.preventDefault(); activerOnglet(link.dataset.goto); });
+});
+
+/* ---------- Tableau de bord : fenêtres personnalisables ---------- */
+// "agenda", "mail" et "suivi" sont les fenêtres de base (proposées par défaut) — le reste est
+// facultatif, chacun compose son propre tableau de bord. Contenu riche et déjà connecté pour les
+// 3 fenêtres de base (réutilise les mêmes zones que remplissent déjà afficherAgenda/afficherMail/
+// renderDashboard) ; aperçu simple pour les autres.
+const TOUS_LES_WIDGETS = [
+  { cle:'agenda', label:'Agenda', icone:'📅' },
+  { cle:'mail', label:'Boîte mail', icone:'✉️' },
+  { cle:'suivi', label:'Suivi commercial', icone:'📈' },
+  { cle:'clients', label:'Derniers clients', icone:'👥' },
+  { cle:'decouverte', label:'Fiche découverte', icone:'📝' },
+  { cle:'ik', label:'Indemnités km', icone:'🚗' },
+  { cle:'stocks', label:'Stocks', icone:'📦' },
+  { cle:'prestations', label:'Prestations & tarifs', icone:'🏷️' },
+  { cle:'questions', label:'Questions découverte', icone:'❓' },
+  { cle:'equipe', label:'Équipe', icone:'🧑‍🤝‍🧑' }
+];
+const WIDGETS_BASE = ['agenda', 'mail', 'suivi'];
+let widgetsActifsCourants = WIDGETS_BASE.slice();
+
+function renderWidgetsGrid(){
+  const grid = document.getElementById('dashboardWidgetsGrid');
+  grid.innerHTML = widgetsActifsCourants.map(cle=>{
+    const w = TOUS_LES_WIDGETS.find(x=> x.cle===cle);
+    if(!w) return '';
+    const retirerBtn = '<button type="button" class="widget-retirer" data-retirer-widget="'+cle+'" title="Retirer cette fenêtre">✕</button>';
+
+    if(cle === 'agenda') return '<div class="widget-card">'+retirerBtn+'<div class="widget-head"><h3>📅 Agenda</h3><a data-goto="agenda">Voir tout →</a></div><div id="dashAgenda"></div></div>';
+    if(cle === 'mail') return '<div class="widget-card wide">'+retirerBtn+'<div class="widget-head"><h3>✉️ Boîte mail</h3><a data-goto="mail">Voir tout →</a></div><div id="dashMail"></div></div>';
+    if(cle === 'suivi') return '<div class="widget-card wide">'+retirerBtn+'<div class="widget-head"><h3>📈 Suivi commercial en un coup d\'œil</h3><a data-goto="suivi">Voir tout →</a></div><div class="stat-row" id="dashStats"></div></div>';
+    if(cle === 'clients') return '<div class="widget-card">'+retirerBtn+'<div class="widget-head"><h3>👥 Derniers clients</h3><a data-goto="clients">Voir tout →</a></div><div id="dashClients"></div></div>';
+
+    // Fenêtres simples (aperçu générique + lien vers la page complète)
+    return '<div class="widget-card">'+retirerBtn+'<div class="widget-head"><h3>'+w.icone+' '+w.label+'</h3></div>'+
+      '<p class="hint" style="margin-bottom:10px;">Ouvre cette page pour voir le détail.</p>'+
+      '<a data-goto="'+cle+'" class="btn outline btn-small" style="align-self:flex-start;">Ouvrir →</a></div>';
+  }).join('');
+
+  // Réattache les gestionnaires data-goto (nouveaux éléments injectés après coup) et de retrait.
+  grid.querySelectorAll('[data-goto]').forEach(link=> link.addEventListener('click', (e)=>{ e.preventDefault(); activerOnglet(link.dataset.goto); }));
+  grid.querySelectorAll('[data-retirer-widget]').forEach(btn=> btn.addEventListener('click', ()=>{
+    sauvegarderWidgetsActifs(widgetsActifsCourants.filter(c=> c !== btn.dataset.retirerWidget));
+  }));
+
+  // Recharge le contenu des fenêtres de base tout juste réinjectées dans le DOM.
+  if(widgetsActifsCourants.includes('suivi') && typeof renderDashboard === 'function') renderDashboard();
+  if(widgetsActifsCourants.includes('clients') && typeof renderDashboard === 'function') renderDashboard();
+  const calToken = getValidGoogleToken('calendar');
+  if(widgetsActifsCourants.includes('agenda') && calToken) afficherAgenda(calToken);
+  const mailToken = getValidGoogleToken('gmail');
+  if(widgetsActifsCourants.includes('mail') && mailToken) afficherMail(mailToken);
+}
+
+async function sauvegarderWidgetsActifs(nouvelleListe){
+  widgetsActifsCourants = nouvelleListe.length ? nouvelleListe : WIDGETS_BASE.slice();
+  renderWidgetsGrid();
+  if(simulationMode) return; // préférence non persistée en mode démonstration
+  try{
+    await callBackend({ action:"save_widgets_actifs", email: session.email, token: session.token, widgets: widgetsActifsCourants });
+  }catch(e){ /* silencieux — la grille reste à jour localement même si l'enregistrement échoue */ }
+}
+
+document.getElementById('btnAjouterWidget').addEventListener('click', ()=>{
+  const panel = document.getElementById('widgetPickerPanel');
+  const liste = document.getElementById('widgetPickerListe');
+  liste.innerHTML = TOUS_LES_WIDGETS.map(w=> `
+    <label class="service-check">
+      <input type="checkbox" class="chk-widget-picker" data-widget="${w.cle}" ${widgetsActifsCourants.includes(w.cle) ? 'checked' : ''}>
+      ${w.icone} ${w.label}
+    </label>`).join('');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('btnEnregistrerWidgets').addEventListener('click', ()=>{
+  const cochees = [...document.querySelectorAll('.chk-widget-picker:checked')].map(c=> c.dataset.widget);
+  document.getElementById('widgetPickerPanel').style.display = 'none';
+  sauvegarderWidgetsActifs(cochees);
+});
+
+document.getElementById('btnExportRapideDashboard').addEventListener('click', ()=>{
+  activerOnglet('reglages');
+  document.querySelector('.reglages-tab-btn[data-reglages-tab="personnalisation"]').click();
 });
 
 /* ---------- Clients : chargement, ajout, affichage ---------- */
@@ -1558,24 +1688,30 @@ function renderKanban(){
 /* ---------- Tableau de bord (mosaïque) ---------- */
 function renderDashboard(){
   const etapes = ["Prospect","Contacté","Proposition envoyée","Client actif","Perdu"];
-  document.getElementById('dashStats').innerHTML = etapes.map(etape=>{
+  const elStats = document.getElementById('dashStats');
+  if(elStats) elStats.innerHTML = etapes.map(etape=>{
     const n = clients.filter(c=> c.etape === etape).length;
     return '<div class="stat-box"><div class="n">'+n+'</div><div class="lbl">'+etape+'</div></div>';
   }).join('');
 
-  const dernierClients = [...clients].sort((a,b)=> new Date(b.dateCreation||0) - new Date(a.dateCreation||0)).slice(0,5);
   const elC = document.getElementById('dashClients');
-  elC.innerHTML = dernierClients.length ? dernierClients.map(c=>
-    '<div class="mini-client"><div><div class="nom">'+(c.nom||c.entreprise||'Sans nom')+'</div><div class="co">'+(c.entreprise||'')+'</div></div><span class="badge etape">'+c.etape+'</span></div>'
-  ).join('') : '<div class="tile-empty">Aucun client pour le moment.</div>';
+  if(elC){
+    const dernierClients = [...clients].sort((a,b)=> new Date(b.dateCreation||0) - new Date(a.dateCreation||0)).slice(0,5);
+    elC.innerHTML = dernierClients.length ? dernierClients.map(c=>
+      '<div class="mini-client"><div><div class="nom">'+(c.nom||c.entreprise||'Sans nom')+'</div><div class="co">'+(c.entreprise||'')+'</div></div><span class="badge etape">'+c.etape+'</span></div>'
+    ).join('') : '<div class="tile-empty">Aucun client pour le moment.</div>';
+  }
 
   // Agenda / mail : si un jeton valide est déjà en cache, on affiche un mini-aperçu ; sinon message.
+  // (Ces fenêtres n'existent que si l'utilisateur les a gardées sur son tableau de bord.)
   const calToken = typeof getValidGoogleToken === 'function' ? getValidGoogleToken('calendar') : null;
   const mailToken = typeof getValidGoogleToken === 'function' ? getValidGoogleToken('gmail') : null;
-  document.getElementById('dashAgenda').innerHTML = calToken
+  const elAgenda = document.getElementById('dashAgenda');
+  if(elAgenda) elAgenda.innerHTML = calToken
     ? '<div class="tile-empty">Voir l\'onglet Agenda pour le détail.</div>'
     : '<div class="tile-empty">Agenda non connecté — rends-toi sur l\'onglet Agenda.</div>';
-  document.getElementById('dashMail').innerHTML = mailToken
+  const elMail = document.getElementById('dashMail');
+  if(elMail) elMail.innerHTML = mailToken
     ? '<div class="tile-empty">Voir l\'onglet Boîte mail pour le détail.</div>'
     : '<div class="tile-empty">Boîte mail non connectée — rends-toi sur l\'onglet Boîte mail.</div>';
 }
@@ -1810,6 +1946,20 @@ async function tenterChargementCompteSupport(){
     document.getElementById('supportDetailContenu').style.display = 'block';
     renderClientsSupport();
 
+    // Bannière d'accès actif — précise si l'accès est illimité ou temporaire, avec la révocation.
+    const banniere = document.getElementById('supportAccesActifBanniere');
+    const texteBanniere = document.getElementById('supportAccesActifTexte');
+    if(res.compte.accesSupportJusqua){
+      const dateJusqua = new Date(res.compte.accesSupportJusqua);
+      const estIllimite = dateJusqua.getFullYear() >= 2099;
+      texteBanniere.textContent = estIllimite
+        ? '✓ Accès illimité actif sur ce compte.'
+        : '✓ Accès actif jusqu\'à ' + dateJusqua.toLocaleString('fr-FR', {dateStyle:'short', timeStyle:'short'}) + '.';
+      banniere.style.display = 'flex';
+    } else {
+      banniere.style.display = 'none';
+    }
+
     document.getElementById('sup-nouveau-mdp').value = '';
     document.getElementById('sup-reset-msg').style.display = 'none';
 
@@ -1838,10 +1988,11 @@ async function tenterChargementCompteSupport(){
 document.getElementById('btnSupportDemanderAcces').addEventListener('click', async ()=>{
   if(!adminTargetCompte) return;
   const motif = document.getElementById('sup-acces-motif').value.trim();
+  const typeAcces = document.getElementById('sup-acces-type').value;
   const msg = document.getElementById('sup-acces-msg');
   msg.style.display = 'none';
   try{
-    const res = await callBackend({ action:"admin_demander_acces_support", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, motif });
+    const res = await callBackend({ action:"admin_demander_acces_support", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, motif, typeAcces });
     if(!res.ok){ msg.textContent = res.error || "Envoi de la demande impossible."; msg.style.display='block'; return; }
     document.getElementById('sup-acces-etape-demande').style.display = 'none';
     document.getElementById('sup-acces-etape-attente').style.display = 'block';
@@ -1856,6 +2007,20 @@ document.getElementById('btnSupportVerifierAcces').addEventListener('click', asy
     msg.textContent = "Toujours en attente — le client n'a pas encore cliqué sur le lien reçu par email.";
     msg.style.display = 'block';
   }
+});
+
+document.getElementById('btnSupportRevoquerAcces').addEventListener('click', async ()=>{
+  if(!adminTargetCompte) return;
+  if(!confirm("Refermer l'accès support à ce compte maintenant ?")) return;
+  try{
+    const res = await callBackend({ action:"admin_revoquer_acces_support", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte });
+    if(!res.ok){ alert(res.error || "Révocation impossible."); return; }
+    document.getElementById('supportAccesActifBanniere').style.display = 'none';
+    document.getElementById('supportDetailContenu').style.display = 'none';
+    document.getElementById('supportAccesGate').style.display = 'block';
+    document.getElementById('sup-acces-etape-demande').style.display = 'block';
+    document.getElementById('sup-acces-etape-attente').style.display = 'none';
+  }catch(e){ alert(e.message); }
 });
 
 function renderClientsSupport(){
