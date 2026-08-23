@@ -273,6 +273,7 @@
 <header>
   <nav>
     <a href="index.html" class="logo">Simpl<span>ika</span><small>CRM</small></a>
+    <button id="btnDeconnexion" style="display:none; background:none; border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); cursor:pointer;">Se déconnecter</button>
   </nav>
 </header>
 
@@ -1086,7 +1087,18 @@ function effacerSession(){
   session = { email: "", token: "" };
   localStorage.removeItem('simplikaAccountEmail');
   localStorage.removeItem('simplikaSessionToken');
+  // Essentiel sur un poste partagé : sans ça, les jetons Agenda/Mail resteraient en mémoire
+  // de session et pourraient s'afficher pour la prochaine personne qui se connecte sur ce même
+  // onglet, sans qu'elle ait rien connecté elle-même.
+  sessionStorage.removeItem('simplikaGoogleToken_calendar');
+  sessionStorage.removeItem('simplikaGoogleToken_gmail');
 }
+
+document.getElementById('btnDeconnexion').addEventListener('click', ()=>{
+  if(!confirm("Se déconnecter ? Si cet ordinateur est partagé, pense à bien fermer cet onglet ensuite.")) return;
+  effacerSession();
+  window.location.reload();
+});
 
 /* ---------- Connexion / création de compte ---------- */
 document.getElementById('authConsent').addEventListener('change', function(){
@@ -1140,8 +1152,10 @@ async function verifierAbonnement(){
       roleCourant = res.role || 'owner';
       servicesActifsCourants = Object.assign({crm:true}, res.servicesActifs || {});
       appliquerVerrouillageServices();
+      appliquerPermissionsOnglets(res.permissionsOnglets);
       if(res.profilIk) remplirProfilIk(res.profilIk);
       unlockApp();
+      document.getElementById('btnDeconnexion').style.display = 'inline-block';
       await loadClients();
       await chargerSessionsGoogleEnCache();
       await chargerInfosLegales();
@@ -1181,6 +1195,35 @@ function appliquerVerrouillageServices(){
     } else {
       btn.classList.add('tab-verrouille');
       btn.title = "Service non souscrit — active-le depuis l'onglet Personnalisation.";
+    }
+  });
+}
+
+// Liste des onglets configurables individuellement par le compte principal, par collaborateur.
+const TOUS_LES_ONGLETS = [
+  { cle:'dashboard', label:'Tableau de bord' }, { cle:'clients', label:'Clients & services' },
+  { cle:'suivi', label:'Suivi commercial' }, { cle:'decouverte', label:'Fiche découverte' },
+  { cle:'agenda', label:'Agenda' }, { cle:'mail', label:'Boîte mail' },
+  { cle:'ik', label:'Indemnités km' }, { cle:'stocks', label:'Stocks' },
+  { cle:'prestations', label:'Prestations & tarifs' }, { cle:'questions', label:'Questions découverte' },
+  { cle:'personnalisation', label:'Personnalisation' }, { cle:'equipe', label:'Équipe' },
+  { cle:'audit', label:"Audit d'entreprise" }, { cle:'support', label:'Support (admin)' }
+];
+
+// Contrairement aux services (souscrits au niveau de toute l'entreprise), les permissions
+// d'onglets sont PERSONNELLES à chaque utilisateur — définies par le compte principal, dans
+// l'onglet Équipe. "null" (valeur par défaut) = aucune restriction, tout est autorisé.
+function appliquerPermissionsOnglets(permissions){
+  if(!Array.isArray(permissions)) return; // null/absent = pas de restriction, on ne touche à rien
+  TOUS_LES_ONGLETS.forEach(o=>{
+    const btn = document.querySelector('.tab-btn[data-tab="'+o.cle+'"]');
+    if(!btn) return;
+    if(permissions.includes(o.cle)){
+      btn.classList.remove('tab-verrouille');
+      btn.title = '';
+    } else {
+      btn.classList.add('tab-verrouille');
+      btn.title = "Accès non autorisé par le compte principal.";
     }
   });
 }
@@ -1277,7 +1320,7 @@ document.getElementById('linkQuitterSimulation').addEventListener('click', (e)=>
 function activerOnglet(nom){
   const btn = document.querySelector('.tab-btn[data-tab="'+nom+'"]');
   if(btn && btn.classList.contains('tab-verrouille')){
-    alert("Ce service n'est pas inclus dans ton abonnement actuel. Active-le depuis l'onglet \"Personnalisation\" (section Mon abonnement).");
+    alert(btn.title || "Accès non disponible pour ce compte.");
     return;
   }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1739,8 +1782,37 @@ async function chargerEquipe(){
           <div><h4>${m.email}</h4><div class="co">Membre depuis le ${m.dateCreation ? new Date(m.dateCreation).toLocaleDateString('fr-FR') : '—'}</div></div>
           <span class="badge etape">${m.role === 'owner' ? 'Compte principal' : 'Collaborateur'}</span>
         </div>
-        ${(roleCourant==='owner' && m.role!=='owner') ? '<button type="button" data-retirer="'+m.email.replace(/"/g,'&quot;')+'" class="btn danger btn-small" style="margin-top:10px;">Retirer</button>' : ''}
+        ${(roleCourant==='owner' && m.role!=='owner') ? `
+          <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">
+            <p class="hint" style="margin-bottom:8px;">Onglets accessibles à cette personne (tout est autorisé par défaut) :</p>
+            <div class="service-tags">
+              ${TOUS_LES_ONGLETS.map(o=> `
+                <label class="service-check">
+                  <input type="checkbox" class="chk-permission-onglet" data-email="${m.email.replace(/"/g,'&quot;')}" data-onglet="${o.cle}" ${(!Array.isArray(m.permissionsOnglets) || m.permissionsOnglets.includes(o.cle)) ? 'checked' : ''}>
+                  ${o.label}
+                </label>`).join('')}
+            </div>
+            <button type="button" class="btn outline btn-small" data-save-permissions="${m.email.replace(/"/g,'&quot;')}" style="margin-top:10px;">Enregistrer les autorisations</button>
+            <button type="button" data-retirer="${m.email.replace(/"/g,'&quot;')}" class="btn danger btn-small" style="margin-top:10px; margin-left:8px;">Retirer</button>
+          </div>` : ''}
       </div>`).join('');
+
+    listeEl.querySelectorAll('[data-save-permissions]').forEach(btn=> btn.addEventListener('click', async ()=>{
+      const email = btn.dataset.savePermissions;
+      const cases = listeEl.querySelectorAll('.chk-permission-onglet[data-email="'+CSS.escape(email)+'"]');
+      const cochees = [...cases].filter(c=>c.checked).map(c=>c.dataset.onglet);
+      // Si tout est coché, on enregistre "aucune restriction" (null) plutôt qu'une liste complète —
+      // évite qu'un nouvel onglet ajouté plus tard soit bloqué par erreur pour ce collaborateur.
+      const onglets = (cochees.length === TOUS_LES_ONGLETS.length) ? null : cochees;
+      btn.disabled = true; btn.textContent = "Enregistrement...";
+      try{
+        const r = await callBackend({ action:"save_permissions_collaborateur", email: session.email, token: session.token, collaborateurEmail: email, onglets });
+        if(!r.ok){ alert(r.error || "Enregistrement impossible."); return; }
+        btn.textContent = "Enregistré ✓";
+        setTimeout(()=> btn.textContent = "Enregistrer les autorisations", 1800);
+      }catch(e){ alert(e.message); }
+      finally{ btn.disabled = false; }
+    }));
 
     listeEl.querySelectorAll('[data-retirer]').forEach(btn=> btn.addEventListener('click', async ()=>{
       if(!confirm("Retirer "+btn.dataset.retirer+" de l'équipe ? Cette personne ne pourra plus se connecter.")) return;
