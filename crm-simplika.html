@@ -790,7 +790,61 @@
       <div class="panel" id="supportCompteDetail" style="display:none;">
         <h3 id="supportCompteTitre">Compte client</h3>
         <button class="btn outline btn-small" id="btnSupportRetour" style="margin-bottom:14px;">← Retour à la liste des comptes</button>
+
+        <div class="panel" id="supportAccesGate" style="background:var(--warn-soft); border-color:#e3c9c2;">
+          <h4 style="font-size:14px; margin-bottom:8px; color:var(--warn);">🔒 Accès non autorisé</h4>
+          <p class="hint" style="margin-bottom:12px;">Aucune donnée de ce compte n'est accessible sans que le client ait lui-même validé une demande d'accès, reçue par email (lien sécurisé, à usage unique) — jamais par un simple code relayé.</p>
+
+          <div id="sup-acces-etape-demande">
+            <div class="field-row">
+              <div class="field" style="flex:2;"><label>Motif (facultatif, indiqué au client)</label><input id="sup-acces-motif" type="text" placeholder="Ex : vérifier un souci de synchronisation agenda"></div>
+              <button class="btn" id="btnSupportDemanderAcces" style="align-self:flex-end;">Envoyer la demande au client</button>
+            </div>
+          </div>
+
+          <div id="sup-acces-etape-attente" style="display:none;">
+            <p class="hint" style="margin-bottom:10px;">✉️ Demande envoyée — en attente que le client clique sur le lien reçu par email.</p>
+            <button class="btn outline btn-small" id="btnSupportVerifierAcces">Vérifier si le client a validé</button>
+          </div>
+          <p class="hint" id="sup-acces-msg" style="display:none; margin-top:10px;"></p>
+        </div>
+
+        <div id="supportDetailContenu" style="display:none;">
+
+        <div style="padding:14px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin-bottom:16px;">
+          <h4 style="font-size:14px; margin-bottom:10px;">Abonnement de l'entreprise</h4>
+          <div class="field-row">
+            <div class="field"><label>Plan</label>
+              <select id="sup-plan"><option value="aucun">Aucun</option><option value="essai">Essai</option><option value="abonnement">Abonnement</option></select>
+            </div>
+            <div class="field"><label>Date de fin</label><input id="sup-datefin" type="date"></div>
+            <div class="field" style="max-width:110px;"><label>Sièges</label><input id="sup-nbsieges" type="number" min="1"></div>
+          </div>
+          <button class="btn outline btn-small" id="btnSupportSaveAbonnement" style="margin-top:10px;">Enregistrer l'abonnement</button>
+        </div>
+
+        <div style="padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:16px;">
+          <h4 style="font-size:14px; margin-bottom:6px;">Personnel à ce compte (<span id="sup-role-badge"></span>)</h4>
+          <p class="hint" id="sup-profil-ik" style="margin-bottom:10px;"></p>
+          <p class="hint" style="margin-bottom:8px;">Onglets accessibles à cette personne :</p>
+          <div class="service-tags" id="sup-permissions-onglets"></div>
+          <button class="btn outline btn-small" id="btnSupportSavePermissions" style="margin-top:10px;">Enregistrer les autorisations</button>
+        </div>
+
+        <div style="padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:16px;">
+          <h4 style="font-size:14px; margin-bottom:8px;">Réinitialiser le mot de passe</h4>
+          <p class="hint" style="margin-bottom:10px;">L'accès ayant déjà été validé par le client (voir ci-dessus), la réinitialisation est directe.</p>
+          <div class="field-row">
+            <div class="field"><label>Nouveau mot de passe</label><input id="sup-nouveau-mdp" type="text" placeholder="À communiquer au client"></div>
+            <button class="btn danger btn-small" id="btnSupportResetPassword" style="align-self:flex-end;">Réinitialiser</button>
+          </div>
+          <p class="hint" id="sup-reset-msg" style="display:none; margin-top:8px;"></p>
+        </div>
+
+        <h4 style="font-size:14px; margin-bottom:10px;">Clients de cette entreprise</h4>
         <div id="supportClientsList"></div>
+
+        </div><!-- /supportDetailContenu -->
       </div>
     </div>
 
@@ -1723,17 +1777,86 @@ function renderListeComptesSupport(comptes){
 
 let supportClients = [];
 async function ouvrirCompteSupport(compteCible){
+  adminTargetCompte = compteCible;
+  document.getElementById('supportCompteTitre').textContent = 'Compte : ' + compteCible;
+  document.getElementById('supportCompteDetail').style.display = 'block';
+  document.getElementById('supportComptesList').style.display = 'none';
+
+  // Repart de zéro sur la porte d'accès à chaque changement de compte support.
+  document.getElementById('sup-acces-etape-demande').style.display = 'block';
+  document.getElementById('sup-acces-etape-attente').style.display = 'none';
+  document.getElementById('sup-acces-msg').style.display = 'none';
+  document.getElementById('sup-acces-motif').value = '';
+  document.getElementById('supportAccesGate').style.display = 'block';
+  document.getElementById('supportDetailContenu').style.display = 'none';
+
+  await tenterChargementCompteSupport();
+}
+
+// Tente de charger les données du compte — si le client n'a pas encore validé l'accès, affiche
+// la porte d'accès à la place (jamais de donnée montrée sans validation).
+async function tenterChargementCompteSupport(){
   try{
-    const res = await callBackend({ action:"admin_get_compte", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible });
-    if(!res.ok){ alert(res.error || "Impossible de charger ce compte."); return; }
-    adminTargetCompte = compteCible;
+    const res = await callBackend({ action:"admin_get_compte", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte });
+    if(!res.ok){
+      if(res.reason === 'acces_non_autorise') return false; // la porte d'accès reste affichée, rien d'anormal
+      alert(res.error || "Impossible de charger ce compte.");
+      return false;
+    }
+
     supportClients = res.clients || [];
     document.getElementById('supportCompteTitre').textContent = 'Compte : ' + res.compte.email + ' (' + res.compte.plan + ')';
-    document.getElementById('supportCompteDetail').style.display = 'block';
-    document.getElementById('supportComptesList').style.display = 'none';
+    document.getElementById('supportAccesGate').style.display = 'none';
+    document.getElementById('supportDetailContenu').style.display = 'block';
     renderClientsSupport();
-  }catch(e){ alert(e.message); }
+
+    document.getElementById('sup-nouveau-mdp').value = '';
+    document.getElementById('sup-reset-msg').style.display = 'none';
+
+    // Abonnement (au niveau de l'entreprise, quel que soit le compte individuel choisi)
+    document.getElementById('sup-plan').value = res.compte.plan || 'aucun';
+    document.getElementById('sup-datefin').value = res.compte.dateFin ? res.compte.dateFin.slice(0,10) : '';
+    document.getElementById('sup-nbsieges').value = res.compte.nbSieges || 1;
+
+    // Personnel à CETTE personne précise
+    document.getElementById('sup-role-badge').textContent = res.compte.role === 'owner' ? 'Compte principal' : 'Collaborateur';
+    const ik = res.compte.profilIk || {};
+    document.getElementById('sup-profil-ik').textContent = ik.adresseDomicile
+      ? ('IK : '+ik.adresseDomicile+' — '+(ik.cvDefaut||5)+' CV'+(ik.electriqueDefaut?' (électrique)':''))
+      : 'IK : aucune adresse renseignée par cette personne.';
+    const permOnglets = document.getElementById('sup-permissions-onglets');
+    const permissionsActuelles = res.compte.permissionsOnglets;
+    permOnglets.innerHTML = TOUS_LES_ONGLETS.map(o=> `
+      <label class="service-check">
+        <input type="checkbox" class="sup-chk-onglet" data-onglet="${o.cle}" ${(!Array.isArray(permissionsActuelles) || permissionsActuelles.includes(o.cle)) ? 'checked' : ''}>
+        ${o.label}
+      </label>`).join('');
+    return true;
+  }catch(e){ alert(e.message); return false; }
 }
+
+document.getElementById('btnSupportDemanderAcces').addEventListener('click', async ()=>{
+  if(!adminTargetCompte) return;
+  const motif = document.getElementById('sup-acces-motif').value.trim();
+  const msg = document.getElementById('sup-acces-msg');
+  msg.style.display = 'none';
+  try{
+    const res = await callBackend({ action:"admin_demander_acces_support", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, motif });
+    if(!res.ok){ msg.textContent = res.error || "Envoi de la demande impossible."; msg.style.display='block'; return; }
+    document.getElementById('sup-acces-etape-demande').style.display = 'none';
+    document.getElementById('sup-acces-etape-attente').style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+});
+
+document.getElementById('btnSupportVerifierAcces').addEventListener('click', async ()=>{
+  const msg = document.getElementById('sup-acces-msg');
+  msg.style.display = 'none';
+  const chargee = await tenterChargementCompteSupport();
+  if(!chargee){
+    msg.textContent = "Toujours en attente — le client n'a pas encore cliqué sur le lien reçu par email.";
+    msg.style.display = 'block';
+  }
+});
 
 function renderClientsSupport(){
   const el = document.getElementById('supportClientsList');
@@ -1755,6 +1878,49 @@ function renderClientsSupport(){
 document.getElementById('btnSupportRetour').addEventListener('click', ()=>{
   document.getElementById('supportCompteDetail').style.display = 'none';
   document.getElementById('supportComptesList').style.display = 'block';
+});
+
+document.getElementById('btnSupportSaveAbonnement').addEventListener('click', async ()=>{
+  if(!adminTargetCompte) return;
+  try{
+    const res = await callBackend({
+      action:"admin_update_abonnement", adminEmail: adminCreds.email, adminPassword: adminCreds.password,
+      compteCible: adminTargetCompte,
+      plan: document.getElementById('sup-plan').value,
+      dateFin: document.getElementById('sup-datefin').value,
+      nbSieges: document.getElementById('sup-nbsieges').value
+    });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    alert("Abonnement mis à jour.");
+  }catch(e){ alert(e.message); }
+});
+
+document.getElementById('btnSupportSavePermissions').addEventListener('click', async ()=>{
+  if(!adminTargetCompte) return;
+  const cases = document.querySelectorAll('.sup-chk-onglet');
+  const cochees = [...cases].filter(c=>c.checked).map(c=>c.dataset.onglet);
+  const onglets = (cochees.length === TOUS_LES_ONGLETS.length) ? null : cochees;
+  try{
+    const res = await callBackend({ action:"admin_save_permissions", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, onglets });
+    if(!res.ok){ alert(res.error || "Enregistrement impossible."); return; }
+    alert("Autorisations mises à jour.");
+  }catch(e){ alert(e.message); }
+});
+
+document.getElementById('btnSupportResetPassword').addEventListener('click', async ()=>{
+  if(!adminTargetCompte) return;
+  const nouveauMotDePasse = document.getElementById('sup-nouveau-mdp').value;
+  const msg = document.getElementById('sup-reset-msg');
+  msg.style.display = 'none';
+  if(!nouveauMotDePasse){ msg.textContent = "Indique un nouveau mot de passe."; msg.style.display='block'; return; }
+  if(!confirm("Réinitialiser le mot de passe de "+adminTargetCompte+" ?")) return;
+  try{
+    const res = await callBackend({ action:"admin_reset_password", adminEmail: adminCreds.email, adminPassword: adminCreds.password, compteCible: adminTargetCompte, nouveauMotDePasse });
+    if(!res.ok){ msg.textContent = res.error || "Réinitialisation impossible."; msg.style.display='block'; return; }
+    document.getElementById('sup-nouveau-mdp').value = '';
+    msg.textContent = "Mot de passe réinitialisé — communique-le au client.";
+    msg.style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
 });
 
 async function chargerInfosLegales(){
