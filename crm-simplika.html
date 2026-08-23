@@ -1106,6 +1106,36 @@
   </div>
 </div>
 
+<!-- MODALE DÉTAIL/ÉDITION ÉVÉNEMENT AGENDA -->
+<div id="modalEvenementBg" style="display:none; position:fixed; inset:0; background:rgba(23,36,46,0.5); z-index:100; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto;">
+  <div style="background:var(--paper); border-radius:8px; padding:28px; max-width:520px; width:100%;">
+    <h3 style="margin-bottom:16px;">Détail de l'événement</h3>
+    <input type="hidden" id="modal-ev-id">
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>Titre</label><input id="modal-ev-titre" type="text"></div>
+    </div>
+    <div class="field-row" style="margin-top:12px;">
+      <div class="field"><label>Date</label><input id="modal-ev-date" type="date"></div>
+      <div class="field"><label>Heure de début</label><input id="modal-ev-heure-debut" type="time"></div>
+      <div class="field"><label>Heure de fin</label><input id="modal-ev-heure-fin" type="time"></div>
+    </div>
+    <div class="field-row" style="margin-top:12px;">
+      <div class="field" style="flex:2;"><label>Lieu</label><input id="modal-ev-lieu" type="text"></div>
+    </div>
+    <div class="field-row" style="margin-top:12px;">
+      <div class="field" style="flex:1;"><label>Description</label><textarea id="modal-ev-description" rows="4"></textarea></div>
+    </div>
+    <p class="hint" id="modal-ev-msg" style="display:none; margin-top:8px;"></p>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+      <a id="modal-ev-lien-google" href="#" target="_blank" rel="noopener" style="font-size:12px; color:var(--accent);">Ouvrir dans Google Agenda ↗</a>
+      <div>
+        <button class="btn outline" id="btnFermerModalEvenement">Fermer</button>
+        <button class="btn" id="btnEnregistrerModalEvenement" style="margin-left:8px;">Enregistrer les modifications</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODALE ÉDITION CLIENT -->
 <div id="clientModalBg">
   <div id="clientModal">
@@ -2956,6 +2986,8 @@ document.getElementById('btnConnectAgenda').addEventListener('click', ()=>{
   codeClient.requestCode();
 });
 
+let evenementsAgendaCourants = {}; // par id, pour retrouver le détail complet au clic
+
 async function afficherAgenda(token){
   const panel = document.getElementById('agendaPanel');
   panel.innerHTML = '<p class="hint">Chargement des événements...</p>';
@@ -2966,16 +2998,18 @@ async function afficherAgenda(token){
     const data = await resp.json();
     const events = data.items || [];
     if(events.length === 0){ panel.innerHTML = '<div class="empty-note">Aucun événement à venir.</div>'; return; }
+    evenementsAgendaCourants = {};
+    events.forEach(ev=> evenementsAgendaCourants[ev.id] = ev);
     panel.innerHTML = events.map(ev=>{
       const start = ev.start.dateTime || ev.start.date;
       const when = new Date(start).toLocaleString('fr-FR', { dateStyle:'medium', timeStyle: ev.start.dateTime ? 'short' : undefined });
       // Coché par défaut : seule une valeur explicitement "false" (déjà décochée une fois) exclut l'événement.
       const inclusIk = !(ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.simplikaIk === 'false');
       return '<div class="event-item" style="display:flex; justify-content:space-between; align-items:center;">'+
-        '<div><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div>'+
-        '<label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px; margin-top:4px; cursor:pointer;">'+
-        '<input type="checkbox" class="chk-inclure-ik" data-evid="'+ev.id+'" '+(inclusIk?'checked':'')+' style="margin:0;"> Inclure dans les indemnités km'+
-        '</label></div>'+
+        '<div class="event-item-cliquable" data-evid="'+ev.id+'" style="cursor:pointer; flex:1;"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+(ev.location ? ' <span style="color:var(--ink-soft); font-size:12px;">— 📍 '+ev.location+'</span>' : '')+'</div></div>'+
+        '<label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px; margin:0 12px; cursor:pointer;">'+
+        '<input type="checkbox" class="chk-inclure-ik" data-evid="'+ev.id+'" '+(inclusIk?'checked':'')+' style="margin:0;"> IK'+
+        '</label>'+
         '<button type="button" data-evid="'+ev.id+'" class="btn-suppr-evenement" style="background:none; border:none; color:var(--warn); cursor:pointer; font-size:13px;">✕</button>'+
         '</div>';
     }).join('');
@@ -2986,7 +3020,10 @@ async function afficherAgenda(token){
       return '<div class="mini-event"><div class="when">'+when+'</div><div>'+(ev.summary || '(Sans titre)')+'</div></div>';
     }).join('');
 
-    panel.querySelectorAll('.btn-suppr-evenement').forEach(btn=> btn.addEventListener('click', async ()=>{
+    panel.querySelectorAll('.event-item-cliquable').forEach(el=> el.addEventListener('click', ()=> ouvrirDetailEvenement(el.dataset.evid)));
+
+    panel.querySelectorAll('.btn-suppr-evenement').forEach(btn=> btn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
       if(!confirm("Supprimer cet événement de ton agenda Google ?")) return;
       const tok = getValidGoogleToken('calendar');
       if(!tok){ alert("Session Google expirée, reconnecte-toi."); return; }
@@ -2999,6 +3036,7 @@ async function afficherAgenda(token){
 
     // La case est mémorisée directement sur l'événement Google Agenda (propriété étendue privée) —
     // ça persiste peu importe l'appareil ou le navigateur utilisé pour se reconnecter ensuite.
+    panel.querySelectorAll('.chk-inclure-ik').forEach(chk=> chk.addEventListener('click', e=> e.stopPropagation()));
     panel.querySelectorAll('.chk-inclure-ik').forEach(chk=> chk.addEventListener('change', async ()=>{
       const tok = getValidGoogleToken('calendar');
       if(!tok){ alert("Session Google expirée, reconnecte-toi."); chk.checked = !chk.checked; return; }
@@ -3015,6 +3053,62 @@ async function afficherAgenda(token){
     panel.innerHTML = '<div class="empty-note">Impossible de charger l\'agenda pour le moment.</div>';
   }
 }
+
+// Ouvre la fiche complète d'un événement — mêmes informations que sur Google Agenda lui-même
+// (titre, lieu, horaires, description), modifiables directement, plus un lien vers l'événement
+// réel sur Google Agenda si besoin de la vue complète native.
+function ouvrirDetailEvenement(evId){
+  const ev = evenementsAgendaCourants[evId];
+  if(!ev) return;
+  document.getElementById('modal-ev-id').value = ev.id;
+  document.getElementById('modal-ev-titre').value = ev.summary || '';
+  document.getElementById('modal-ev-lieu').value = ev.location || '';
+  document.getElementById('modal-ev-description').value = ev.description || '';
+  const debut = new Date(ev.start.dateTime || ev.start.date);
+  const fin = new Date(ev.end.dateTime || ev.end.date);
+  document.getElementById('modal-ev-date').value = debut.toISOString().slice(0,10);
+  document.getElementById('modal-ev-heure-debut').value = ev.start.dateTime ? debut.toTimeString().slice(0,5) : '';
+  document.getElementById('modal-ev-heure-fin').value = ev.end.dateTime ? fin.toTimeString().slice(0,5) : '';
+  document.getElementById('modal-ev-lien-google').href = ev.htmlLink || '#';
+  document.getElementById('modal-ev-msg').style.display = 'none';
+  document.getElementById('modalEvenementBg').style.display = 'flex';
+}
+document.getElementById('btnFermerModalEvenement').addEventListener('click', ()=> document.getElementById('modalEvenementBg').style.display = 'none');
+
+document.getElementById('btnEnregistrerModalEvenement').addEventListener('click', async ()=>{
+  const evId = document.getElementById('modal-ev-id').value;
+  const titre = document.getElementById('modal-ev-titre').value.trim();
+  const lieu = document.getElementById('modal-ev-lieu').value.trim();
+  const description = document.getElementById('modal-ev-description').value.trim();
+  const date = document.getElementById('modal-ev-date').value;
+  const heureDebut = document.getElementById('modal-ev-heure-debut').value;
+  const heureFin = document.getElementById('modal-ev-heure-fin').value;
+  const msg = document.getElementById('modal-ev-msg');
+  msg.style.display = 'none';
+
+  if(!titre || !date){ msg.textContent = "Titre et date requis."; msg.style.display='block'; return; }
+  const tok = getValidGoogleToken('calendar');
+  if(!tok){ msg.textContent = "Session Google expirée, reconnecte-toi."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnEnregistrerModalEvenement');
+  btn.disabled = true; btn.textContent = "Enregistrement...";
+  try{
+    const evenement = { summary: titre, location: lieu || undefined, description: description || undefined };
+    if(heureDebut && heureFin){
+      evenement.start = { dateTime: date+'T'+heureDebut+':00', timeZone: 'Europe/Paris' };
+      evenement.end = { dateTime: date+'T'+heureFin+':00', timeZone: 'Europe/Paris' };
+    }
+    const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/'+evId, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer '+tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify(evenement)
+    });
+    if(!resp.ok){ const err = await resp.json(); msg.textContent = "Erreur : " + (err.error ? err.error.message : "modification impossible"); msg.style.display='block'; return; }
+    document.getElementById('modalEvenementBg').style.display = 'none';
+    await afficherAgenda(tok);
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Enregistrer les modifications"; }
+});
 
 document.getElementById('btnAjouterEvenement').addEventListener('click', async ()=>{
   const titre = document.getElementById('ag-titre').value.trim();
