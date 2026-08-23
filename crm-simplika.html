@@ -139,6 +139,13 @@
 
   #auditDashboard{display:none;}
   #auditDashboard.show{display:block;}
+
+  /* Sous-onglets Réglages (Prestations/Questions/Personnalisation/Équipe/Support) */
+  .reglages-tabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .reglages-tab-btn{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; background:none; border:none; padding:10px 4px; margin-right:20px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; transition:color .15s;}
+  .reglages-tab-btn.active{color:var(--ink); border-bottom-color:var(--brass);}
+  .reglages-subpanel{display:none;}
+  .reglages-subpanel.active{display:block; animation:tabFadeIn .28s ease;}
   .id-card{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; background:var(--ink); color:var(--paper); border-radius:6px; padding:22px 26px; margin-bottom:24px;}
   .id-card .co{font-family:'Newsreader',serif; font-size:22px;}
   .id-card .co-meta{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#9fb3b0; margin-top:4px;}
@@ -347,13 +354,9 @@
       <button class="tab-btn" data-tab="ik"><span class="tab-ic">🚗</span> Indemnités km</button>
       <button class="tab-btn" data-tab="stocks"><span class="tab-ic">📦</span> Stocks</button>
       <span class="tab-sep"></span>
-      <button class="tab-btn" data-tab="prestations"><span class="tab-ic">🏷️</span> Prestations &amp; tarifs</button>
-      <button class="tab-btn" data-tab="questions"><span class="tab-ic">❓</span> Questions découverte</button>
-      <button class="tab-btn" data-tab="personnalisation"><span class="tab-ic">🎨</span> Personnalisation</button>
-      <button class="tab-btn" data-tab="equipe"><span class="tab-ic">🧑‍🤝‍🧑</span> Équipe</button>
+      <button class="tab-btn" data-tab="reglages"><span class="tab-ic">⚙️</span> Réglages</button>
       <span class="tab-sep"></span>
       <button class="tab-btn" data-tab="audit"><span class="tab-ic">🔍</span> Audit d'entreprise</button>
-      <button class="tab-btn" data-tab="support"><span class="tab-ic">🛠️</span> Support (admin)</button>
     </div>
 
     <!-- TABLEAU DE BORD -->
@@ -550,7 +553,16 @@
     </div>
 
     <!-- PRESTATIONS & TARIFS -->
-    <div class="tab-panel" id="tab-prestations">
+    <div class="tab-panel" id="tab-reglages">
+      <div class="reglages-tabs">
+        <button class="reglages-tab-btn active" data-reglages-tab="prestations">🏷️ Prestations &amp; tarifs</button>
+        <button class="reglages-tab-btn" data-reglages-tab="questions">❓ Questions découverte</button>
+        <button class="reglages-tab-btn" data-reglages-tab="personnalisation">🎨 Personnalisation</button>
+        <button class="reglages-tab-btn" data-reglages-tab="equipe">🧑‍🤝‍🧑 Équipe</button>
+        <button class="reglages-tab-btn" data-reglages-tab="support">🛠️ Support (admin)</button>
+      </div>
+
+    <div class="reglages-subpanel active" id="tab-prestations">
       <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
         <h3 style="color:var(--accent);">Importer un catalogue fournisseur</h3>
         <p class="hint" style="margin-bottom:14px; color:var(--accent);">Glisse le fichier de tarifs préférentiels envoyé par ton fournisseur (Excel/CSV) — pas de connexion directe possible à leur plateforme (chaque fournisseur a son propre système fermé), mais leur export de prix s'importe normalement. Applique ta marge : le prix de vente se calcule automatiquement pour chaque ligne.</p>
@@ -590,7 +602,7 @@
     </div>
 
     <!-- QUESTIONS DÉCOUVERTE -->
-    <div class="tab-panel" id="tab-questions">
+    <div class="reglages-subpanel" id="tab-questions">
       <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
         <h3 style="color:var(--accent);">Vous avez déjà un document de découverte ?</h3>
         <p class="hint" style="margin-bottom:14px; color:var(--accent);">Si vous remplissez déjà une fiche papier, un PDF ou un fichier Excel lors de vos rendez-vous, envoyez-le-nous : on le transforme en questions et catalogue prêts à l'emploi dans cet onglet, comme on l'a fait pour d'autres métiers.</p>
@@ -621,7 +633,7 @@
     </div>
 
     <!-- PERSONNALISATION (marque blanche) -->
-    <div class="tab-panel" id="tab-personnalisation">
+    <div class="reglages-subpanel" id="tab-personnalisation">
       <div class="panel">
         <h3>Personnalisation</h3>
         <p class="hint" style="margin-bottom:14px;">Adapte ce CRM aux couleurs de ton entreprise. S'applique uniquement pour toi (et tes futurs utilisateurs connectés sur ce même compte) — chaque compte a sa propre personnalisation.</p>
@@ -653,6 +665,13 @@
           </div>
           <p class="hint" id="ajoutSiegesMsg" style="display:none; margin-top:10px;"></p>
         </div>
+      </div>
+
+      <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
+        <h3 style="color:var(--accent);">Sauvegarde personnelle de mes données</h3>
+        <p class="hint" style="margin-bottom:14px; color:var(--accent);">Télécharge l'intégralité de tes données (clients, stocks, catalogue, configuration, tes trajets IK personnels) dans un seul fichier — à garder sur ton propre espace (Drive, Dropbox, ordinateur...). Totalement indépendant de Simplika une fois téléchargé : en cas d'évolution majeure de l'outil, tes données restent en sécurité chez toi.</p>
+        <button class="btn" id="btnExporterToutesDonnees">⬇ Exporter toutes mes données</button>
+        <p class="hint" id="exportDonneesMsg" style="display:none; margin-top:10px;"></p>
       </div>
     </div>
 
@@ -733,7 +752,7 @@
     </div>
 
     <!-- ÉQUIPE (multi-utilisateurs) -->
-    <div class="tab-panel" id="tab-equipe">
+    <div class="reglages-subpanel" id="tab-equipe">
       <div class="panel">
         <h3>Membres de l'équipe</h3>
         <p class="hint" style="margin-bottom:14px;">Toute l'équipe partage les mêmes clients, le même agenda et la même configuration — chacun se connecte avec son propre email et mot de passe.</p>
@@ -753,7 +772,7 @@
     </div>
 
     <!-- SUPPORT (ADMIN) -->
-    <div class="tab-panel" id="tab-support">
+    <div class="reglages-subpanel" id="tab-support">
       <div class="panel">
         <h3>Accès support</h3>
         <p class="hint" style="margin-bottom:14px;">Réservé à l'équipe Simplika, pour dépanner un client à distance en cas de bug. Vérification par email + mot de passe à chaque connexion.</p>
@@ -774,6 +793,8 @@
         <div id="supportClientsList"></div>
       </div>
     </div>
+
+    </div><!-- /tab-reglages -->
 
     <!-- STOCKS -->
     <div class="tab-panel" id="tab-stocks">
@@ -1205,9 +1226,8 @@ const TOUS_LES_ONGLETS = [
   { cle:'suivi', label:'Suivi commercial' }, { cle:'decouverte', label:'Fiche découverte' },
   { cle:'agenda', label:'Agenda' }, { cle:'mail', label:'Boîte mail' },
   { cle:'ik', label:'Indemnités km' }, { cle:'stocks', label:'Stocks' },
-  { cle:'prestations', label:'Prestations & tarifs' }, { cle:'questions', label:'Questions découverte' },
-  { cle:'personnalisation', label:'Personnalisation' }, { cle:'equipe', label:'Équipe' },
-  { cle:'audit', label:"Audit d'entreprise" }, { cle:'support', label:'Support (admin)' }
+  { cle:'reglages', label:'Réglages (prestations, questions, personnalisation, équipe, support)' },
+  { cle:'audit', label:"Audit d'entreprise" }
 ];
 
 // Contrairement aux services (souscrits au niveau de toute l'entreprise), les permissions
@@ -1851,6 +1871,34 @@ document.getElementById('btnAjouterSieges').addEventListener('click', async ()=>
     await chargerEquipe();
   }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
   finally{ btn.disabled = false; btn.textContent = "Ajouter →"; }
+});
+
+document.getElementById('btnExporterToutesDonnees').addEventListener('click', async ()=>{
+  const msg = document.getElementById('exportDonneesMsg');
+  msg.style.display = 'none';
+
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display='block'; return; }
+
+  const btn = document.getElementById('btnExporterToutesDonnees');
+  btn.disabled = true; btn.textContent = "Préparation...";
+  try{
+    const res = await callBackend({ action:"export_toutes_donnees", email: session.email, token: session.token });
+    if(!res.ok){ msg.textContent = res.error || "Export impossible."; msg.style.display='block'; return; }
+
+    const blob = new Blob([JSON.stringify(res, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'simplika-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=> URL.revokeObjectURL(url), 1000);
+
+    msg.textContent = "Fichier téléchargé — enregistre-le sur ton propre espace (Drive, Dropbox, ordinateur...).";
+    msg.style.display = 'block';
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "⬇ Exporter toutes mes données"; }
 });
 
 document.getElementById('btnInviterCollab').addEventListener('click', async ()=>{
@@ -2553,19 +2601,28 @@ document.getElementById('btnConnectAgenda').addEventListener('click', ()=>{
     alert("La connexion à l'agenda n'est pas encore configurée (identifiant Google manquant).");
     return;
   }
-  const tokenClient = google.accounts.oauth2.initTokenClient({
+  const codeClient = google.accounts.oauth2.initCodeClient({
     client_id: GOOGLE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/calendar',
+    ux_mode: 'popup',
+    // prompt:'consent' force Google à redonner un jeton de rafraîchissement à chaque connexion —
+    // sans ça, une personne qui a déjà autorisé l'appli une fois n'en recevrait pas de nouveau,
+    // et la reconnexion automatique ne pourrait jamais démarrer pour elle.
+    prompt: 'consent',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
-      saveGoogleToken('calendar', resp.access_token, resp.expires_in);
-      document.getElementById('agendaConnectPanel').style.display = 'none';
-      document.getElementById('agendaAjoutPanel').style.display = 'block';
-      document.getElementById('agendaPanel').style.display = 'block';
-      await afficherAgenda(resp.access_token);
+      try{
+        const res = await callBackend({ action:"google_exchange_code", email: session.email, token: session.token, code: resp.code, scope: "calendar" });
+        if(!res.ok){ alert("Connexion à l'agenda impossible : " + (res.error || "erreur inconnue")); return; }
+        saveGoogleToken('calendar', res.access_token, res.expires_in);
+        document.getElementById('agendaConnectPanel').style.display = 'none';
+        document.getElementById('agendaAjoutPanel').style.display = 'block';
+        document.getElementById('agendaPanel').style.display = 'block';
+        await afficherAgenda(res.access_token);
+      }catch(e){ alert(e.message); }
     }
   });
-  tokenClient.requestAccessToken();
+  codeClient.requestCode();
 });
 
 async function afficherAgenda(token){
@@ -2710,19 +2767,25 @@ document.getElementById('btnConnectMail').addEventListener('click', ()=>{
     alert("La connexion à la boîte mail n'est pas encore configurée (identifiant Google manquant).");
     return;
   }
-  const tokenClient = google.accounts.oauth2.initTokenClient({
+  const codeClient = google.accounts.oauth2.initCodeClient({
     client_id: GOOGLE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/gmail.modify',
+    ux_mode: 'popup',
+    prompt: 'consent',
     callback: async (resp)=>{
       if(resp.error){ alert("Connexion refusée."); return; }
-      saveGoogleToken('gmail', resp.access_token, resp.expires_in);
-      document.getElementById('mailConnectPanel').style.display = 'none';
-      document.getElementById('mailComposePanel').style.display = 'block';
-      document.getElementById('mailPanel').style.display = 'block';
-      await afficherMail(resp.access_token);
+      try{
+        const res = await callBackend({ action:"google_exchange_code", email: session.email, token: session.token, code: resp.code, scope: "gmail" });
+        if(!res.ok){ alert("Connexion à la boîte mail impossible : " + (res.error || "erreur inconnue")); return; }
+        saveGoogleToken('gmail', res.access_token, res.expires_in);
+        document.getElementById('mailConnectPanel').style.display = 'none';
+        document.getElementById('mailComposePanel').style.display = 'block';
+        document.getElementById('mailPanel').style.display = 'block';
+        await afficherMail(res.access_token);
+      }catch(e){ alert(e.message); }
     }
   });
-  tokenClient.requestAccessToken();
+  codeClient.requestCode();
 });
 
 async function afficherMail(token){
@@ -2816,15 +2879,31 @@ document.getElementById('btnEnvoyerMail').addEventListener('click', async ()=>{
 
 // Si un jeton valide (non expiré) est encore en mémoire de session, on affiche directement
 // l'agenda/le mail sans redemander la connexion — appelé une fois le CRM débloqué.
+// Essaie d'abord le cache de session (rapide, pas d'appel réseau). S'il n'y en a pas (nouvel
+// onglet, nouvelle session), tente un renouvellement SILENCIEUX via le jeton de rafraîchissement
+// stocké côté serveur — c'est ce qui évite d'avoir à recliquer sur "Connecter" à chaque fois.
 async function chargerSessionsGoogleEnCache(){
-  const calToken = getValidGoogleToken('calendar');
+  let calToken = getValidGoogleToken('calendar');
+  if(!calToken && !simulationMode){
+    try{
+      const r = await callBackend({ action:"google_refresh_access_token", email: session.email, token: session.token, scope: "calendar" });
+      if(r.ok){ saveGoogleToken('calendar', r.access_token, r.expires_in); calToken = r.access_token; }
+    }catch(e){ /* silencieux — l'utilisateur reconnectera manuellement si besoin */ }
+  }
   if(calToken){
     document.getElementById('agendaConnectPanel').style.display = 'none';
     document.getElementById('agendaAjoutPanel').style.display = 'block';
     document.getElementById('agendaPanel').style.display = 'block';
     await afficherAgenda(calToken);
   }
-  const mailToken = getValidGoogleToken('gmail');
+
+  let mailToken = getValidGoogleToken('gmail');
+  if(!mailToken && !simulationMode){
+    try{
+      const r = await callBackend({ action:"google_refresh_access_token", email: session.email, token: session.token, scope: "gmail" });
+      if(r.ok){ saveGoogleToken('gmail', r.access_token, r.expires_in); mailToken = r.access_token; }
+    }catch(e){ /* silencieux */ }
+  }
   if(mailToken){
     document.getElementById('mailConnectPanel').style.display = 'none';
     document.getElementById('mailComposePanel').style.display = 'block';
@@ -3848,6 +3927,15 @@ document.querySelectorAll('.audit-tab-btn').forEach(btn=>{
     document.querySelectorAll('.audit-tab-panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('audit-tab-'+btn.dataset.auditTab).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.reglages-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.reglages-tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.reglages-subpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.reglagesTab).classList.add('active');
   });
 });
 
