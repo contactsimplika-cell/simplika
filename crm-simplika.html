@@ -62,13 +62,21 @@
   .gatedContent.locked{filter:blur(3px); opacity:.5; pointer-events:none; user-select:none;}
 
   /* TABS */
-  .tabs{display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:26px; flex-wrap:wrap;}
-  .tab-btn{font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; background:none; border:none; padding:12px 18px 12px 0; margin-right:22px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent;}
+  .tabs{display:flex; gap:0; align-items:center; border-bottom:1px solid var(--line); margin-bottom:26px; flex-wrap:wrap;}
+  .tab-btn{font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; background:none; border:none; padding:12px 18px 12px 0; margin-right:22px; color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; transition:color .18s ease, border-color .18s ease, transform .15s ease;}
+  .tab-btn:hover{color:var(--ink); transform:translateY(-1px);}
+  .tab-btn:hover .tab-ic{transform:scale(1.18) rotate(-4deg);}
+  .tab-ic{display:inline-block; margin-right:2px; transition:transform .18s ease; font-size:13px;}
   .tab-btn.active{color:var(--ink); border-bottom-color:var(--accent);}
   .tab-btn.tab-verrouille{color:var(--line); cursor:not-allowed;}
+  .tab-btn.tab-verrouille:hover{transform:none;}
+  .tab-btn.tab-verrouille:hover .tab-ic{transform:none;}
   .tab-btn.tab-verrouille::after{content:" 🔒"; font-size:10px;}
+  .tab-sep{width:1px; height:18px; background:var(--line); margin:0 14px 12px; align-self:center;}
   .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
+  .tab-panel.active{display:block; animation:tabFadeIn .28s ease;}
+  @keyframes tabFadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){ .tab-panel.active{animation:none;} .tab-btn, .tab-ic{transition:none;} }
 
   /* CLIENTS */
   .panel{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:22px; margin-bottom:22px;}
@@ -264,7 +272,7 @@
 
 <header>
   <nav>
-    <a href="simplika.html" class="logo">Simpl<span>ika</span><small>CRM</small></a>
+    <a href="index.html" class="logo">Simpl<span>ika</span><small>CRM</small></a>
   </nav>
 </header>
 
@@ -328,20 +336,23 @@
   <div id="crmApp" class="gatedContent locked">
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="dashboard">Tableau de bord</button>
-      <button class="tab-btn" data-tab="clients">Clients &amp; services</button>
-      <button class="tab-btn" data-tab="suivi">Suivi commercial</button>
-      <button class="tab-btn" data-tab="decouverte">Fiche découverte</button>
-      <button class="tab-btn" data-tab="agenda">Agenda</button>
-      <button class="tab-btn" data-tab="mail">Boîte mail</button>
-      <button class="tab-btn" data-tab="ik">Indemnités km</button>
-      <button class="tab-btn" data-tab="prestations">Prestations &amp; tarifs</button>
-      <button class="tab-btn" data-tab="questions">Questions découverte</button>
-      <button class="tab-btn" data-tab="personnalisation">Personnalisation</button>
-      <button class="tab-btn" data-tab="equipe">Équipe</button>
-      <button class="tab-btn" data-tab="support">Support (admin)</button>
-      <button class="tab-btn" data-tab="stocks">Stocks</button>
-      <button class="tab-btn" data-tab="audit">Audit d'entreprise</button>
+      <button class="tab-btn active" data-tab="dashboard"><span class="tab-ic">📊</span> Tableau de bord</button>
+      <button class="tab-btn" data-tab="clients"><span class="tab-ic">👥</span> Clients &amp; services</button>
+      <button class="tab-btn" data-tab="suivi"><span class="tab-ic">📈</span> Suivi commercial</button>
+      <button class="tab-btn" data-tab="decouverte"><span class="tab-ic">📝</span> Fiche découverte</button>
+      <span class="tab-sep"></span>
+      <button class="tab-btn" data-tab="agenda"><span class="tab-ic">📅</span> Agenda</button>
+      <button class="tab-btn" data-tab="mail"><span class="tab-ic">✉️</span> Boîte mail</button>
+      <button class="tab-btn" data-tab="ik"><span class="tab-ic">🚗</span> Indemnités km</button>
+      <button class="tab-btn" data-tab="stocks"><span class="tab-ic">📦</span> Stocks</button>
+      <span class="tab-sep"></span>
+      <button class="tab-btn" data-tab="prestations"><span class="tab-ic">🏷️</span> Prestations &amp; tarifs</button>
+      <button class="tab-btn" data-tab="questions"><span class="tab-ic">❓</span> Questions découverte</button>
+      <button class="tab-btn" data-tab="personnalisation"><span class="tab-ic">🎨</span> Personnalisation</button>
+      <button class="tab-btn" data-tab="equipe"><span class="tab-ic">🧑‍🤝‍🧑</span> Équipe</button>
+      <span class="tab-sep"></span>
+      <button class="tab-btn" data-tab="audit"><span class="tab-ic">🔍</span> Audit d'entreprise</button>
+      <button class="tab-btn" data-tab="support"><span class="tab-ic">🛠️</span> Support (admin)</button>
     </div>
 
     <!-- TABLEAU DE BORD -->
