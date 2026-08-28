@@ -3734,6 +3734,34 @@ document.getElementById('btnChargerProspectOutil').addEventListener('click', ()=
   }, '*');
 });
 
+// Reçoit les clients déjà enregistrés dans l'outil personnalisé (bouton "Envoyer mes clients
+// vers le CRM" côté outil) — crée une fiche pour chacun, en ignorant ceux déjà présents dans le
+// CRM (même nom + même email) pour ne jamais dupliquer un import déjà fait.
+window.addEventListener('message', async (e)=>{
+  const d = e.data;
+  if(!d || d.type !== 'simplika-export-clients' || !Array.isArray(d.clients)) return;
+  if(simulationMode){ alert("Import de clients non disponible en mode démonstration."); return; }
+
+  const dejaPresent = (nom, email) => clients.some(c=>
+    (c.nom||'').trim().toLowerCase() === (nom||'').trim().toLowerCase() &&
+    (c.email||'').trim().toLowerCase() === (email||'').trim().toLowerCase()
+  );
+
+  let importes = 0, ignores = 0;
+  for(const c of d.clients){
+    if(dejaPresent(c.nom, c.email)){ ignores++; continue; }
+    try{
+      await callBackend({
+        action:"crm_save_client", compte: session.email, token: session.token,
+        client: { nom: c.nom, entreprise:'', email: c.email, telephone: c.telephone, adresse: c.adresse, services:[], etape:'Prospect' }
+      });
+      importes++;
+    }catch(err){ /* on continue avec les suivants même si l'un échoue */ }
+  }
+  await loadClients();
+  alert(importes + " client(s) importé(s) depuis l'outil personnalisé" + (ignores ? " ("+ignores+" déjà présent(s), ignoré(s))" : "") + ".");
+});
+
 function renderIk(){
   const anneeCourante = new Date().getFullYear();
   const trajetsAnnee = trajetsIk.filter(t=> t.date && new Date(t.date).getFullYear() === anneeCourante);
