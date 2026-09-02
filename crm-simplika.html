@@ -2184,7 +2184,9 @@ async function chargerInfosLegales(){
     document.getElementById('decouverteOutilPersonnalise').style.display = res.outilDevisPersonnaliseActif ? 'block' : 'none';
     document.getElementById('decouverteGenerique').style.display = res.outilDevisPersonnaliseActif ? 'none' : 'block';
     if(res.outilDevisPersonnaliseActif){
-      document.getElementById('iframeOutilDevis').src = WEBAPP_URL + '?voir_outil_devis=' + encodeURIComponent(session.email);
+      // Anti-cache : sans ce paramètre variable, le navigateur peut resservir une ancienne version
+      // de l'outil déjà mise en cache pour cette adresse, même après un retéléversement récent.
+      document.getElementById('iframeOutilDevis').src = WEBAPP_URL + '?voir_outil_devis=' + encodeURIComponent(session.email) + '&_v=' + Date.now();
     }
     afficherEtatOutilDevisReglages(res.outilDevisPersonnaliseActif);
   }catch(e){ /* silencieux */ }
