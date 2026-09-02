@@ -733,6 +733,16 @@
           </div>
           <p class="hint" id="ajoutSiegesMsg" style="display:none; margin-top:10px;"></p>
         </div>
+
+        <div id="retraitSiegesPanel" style="display:none; margin-top:18px; padding-top:18px; border-top:1px solid var(--line);">
+          <h4 style="font-size:15px; margin-bottom:8px;">Retirer des sièges</h4>
+          <p class="hint" style="margin-bottom:12px;">Réduit le nombre de sièges payés — impossible si des collaborateurs occupent encore ces sièges (retire-les d'abord dans l'onglet "Équipe").</p>
+          <div class="field-row">
+            <div class="field" style="max-width:140px;"><label>Sièges à retirer</label><input type="number" id="sieges-a-retirer" value="1" min="1" step="1"></div>
+            <button class="btn outline" id="btnRetirerSieges">Retirer →</button>
+          </div>
+          <p class="hint" id="retraitSiegesMsg" style="display:none; margin-top:10px;"></p>
+        </div>
       </div>
 
       <div class="panel" style="background:var(--accent-soft); border-color:#bcd6d1;">
@@ -2308,6 +2318,8 @@ async function chargerEquipe(){
     inviteEl.style.display = (roleCourant === 'owner') ? 'block' : 'none';
     const siegesPanel = document.getElementById('ajoutSiegesPanel');
     if(siegesPanel) siegesPanel.style.display = (roleCourant === 'owner') ? 'block' : 'none';
+    const retraitPanel = document.getElementById('retraitSiegesPanel');
+    if(retraitPanel) retraitPanel.style.display = (roleCourant === 'owner') ? 'block' : 'none';
   }catch(e){ /* silencieux */ }
 }
 
@@ -2332,6 +2344,29 @@ document.getElementById('btnAjouterSieges').addEventListener('click', async ()=>
     await chargerEquipe();
   }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
   finally{ btn.disabled = false; btn.textContent = "Ajouter →"; }
+});
+
+document.getElementById('btnRetirerSieges').addEventListener('click', async ()=>{
+  const siegesARetirer = parseInt(document.getElementById('sieges-a-retirer').value, 10) || 0;
+  const msg = document.getElementById('retraitSiegesMsg');
+  msg.style.display = 'none';
+  if(siegesARetirer < 1){ msg.textContent = "Indique un nombre de sièges valide."; msg.style.display='block'; return; }
+
+  if(simulationMode){ msg.textContent = "Non disponible en mode démonstration."; msg.style.display='block'; return; }
+
+  if(!confirm("Retirer "+siegesARetirer+" siège(s) ? Le changement s'applique immédiatement sur Stripe.")) return;
+
+  const btn = document.getElementById('btnRetirerSieges');
+  btn.disabled = true; btn.textContent = "Retrait en cours...";
+  try{
+    const res = await callBackend({ action:"remove_sieges", email: session.email, token: session.token, siegesARetirer });
+    if(!res.ok){ msg.textContent = res.error || "Retrait impossible."; msg.style.display='block'; return; }
+    msg.textContent = "Sièges retirés — total désormais : "+res.nbSieges+".";
+    msg.style.display = 'block';
+    document.getElementById('sieges-a-retirer').value = 1;
+    await chargerEquipe();
+  }catch(e){ msg.textContent = e.message; msg.style.display='block'; }
+  finally{ btn.disabled = false; btn.textContent = "Retirer →"; }
 });
 
 document.getElementById('btnExporterToutesDonnees').addEventListener('click', async ()=>{
